@@ -20,7 +20,8 @@ public enum MachineStatus {
     NO_AIR("no_air", 0xFF8899AA),
     MISSING_PART("missing_part", 0xFFAA88CC),
     SCRAPPED("scrapped", 0xFFAA3333),
-    CERTIFIED("certified", 0xFFE8F4FF);
+    CERTIFIED("certified", 0xFFE8F4FF),
+    PAUSED("paused", 0xFFD0A050);
 
     public final String id;
     public final int color;

@@ -1,8 +1,18 @@
 {
   "type": "workingmedium:window",
   "machine": "critical_kettle",
-  "fluids": [{"fluid": "workingmedium:liquid_co2", "amount": 250}],
-  "item_outputs": [{"item": "workingmedium:critical_core", "count": 1}],
+  "fluids": [
+    {
+      "fluid": "workingmedium:liquid_co2",
+      "amount": 250
+    }
+  ],
+  "item_outputs": [
+    {
+      "item": "workingmedium:critical_core",
+      "count": 1
+    }
+  ],
   "pressure_min": 70.0,
   "pressure_max": 80.0,
   "temp_min": 25,
@@ -11,5 +21,13 @@
   "time": 300,
   "lube": 8,
   "heat": 4.0,
-  "void_outside": true
+  "void_outside": true,
+  "items": [
+    {
+      "item": "workingmedium:microfluidic_chip"
+    }
+  ],
+  "item_counts": [
+    0
+  ]
 }

@@ -22,15 +22,22 @@ import dev.pncwm.recipe.SlotPlan;
 import dev.pncwm.recipe.WindowRecipe;
 import dev.pncwm.item.GradeItem;
 import dev.pncwm.registry.WMBlockEntities;
+import dev.pncwm.registry.WMData;
 import dev.pncwm.registry.WMItems;
 import dev.pncwm.registry.WMRecipes;
 import dev.pncwm.registry.WMSounds;
+import me.desht.pneumaticcraft.api.PNCCapabilities;
+import me.desht.pneumaticcraft.api.heat.IHeatExchangerLogic;
 import me.desht.pneumaticcraft.api.tileentity.IAirHandlerMachine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -40,6 +47,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -50,6 +58,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
@@ -75,6 +84,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     /** Recipe the current batch belongs to. Not saved: after a reload the first match keeps the saved progress. */
     @Nullable
     private WindowRecipe active;
+    @Nullable
+    private String activeId;
 
     public ApparatusBlockEntity(BlockPos pos, BlockState state) {
         super(WMBlockEntities.APPARATUS.get(), pos, state);
@@ -254,6 +265,16 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             progress = 0;
             workTime = 0;
             active = null;
+            activeId = null;
+            return;
+        }
+        autoApplyCertificate();
+        if (level.hasNeighborSignal(worldPosition)) {
+            setStatus(MachineStatus.PAUSED);
+            notifyComparators();
+            if (level.getGameTime() % 10 == 0) {
+                sync();
+            }
             return;
         }
         switch (kind().family) {
@@ -278,6 +299,16 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     }
 
     public void clientTick() {
+        if (kind() == ApparatusKind.FLARE_STACK && (status == MachineStatus.RUNNING || status == MachineStatus.WINDOW)
+                && level.random.nextFloat() < 0.45f) {
+            double x = worldPosition.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.35;
+            double y = worldPosition.getY() + 0.9 + level.random.nextDouble() * 0.4;
+            double z = worldPosition.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.35;
+            level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0.04, 0);
+            if (level.random.nextFloat() < 0.5f) {
+                level.addParticle(ParticleTypes.SMOKE, x, y + 0.2, z, 0, 0.06, 0);
+            }
+        }
     }
 
     public void shiftUse(Player player) {
@@ -398,19 +429,26 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             }
             return;
         }
-        WindowRecipe recipe = findRecipe();
-        if (recipe == null) {
+        RecipeHolder<WindowRecipe> holder = findRecipe();
+        if (holder == null) {
             setStatus(MachineStatus.IDLE);
             progress = 0;
             workTime = 0;
             active = null;
+            activeId = null;
             return;
         }
+        WindowRecipe recipe = holder.value();
+        String id = holder.id().toString();
         if (active != null && active != recipe) {
             // A different recipe took over (inputs changed). Do not finish it with the old batch's progress.
             progress = 0;
+        } else if (active == null && activeId != null && !activeId.equals(id) && progress > 0) {
+            // After a reload the first match must not finish a batch started under a different recipe.
+            progress = 0;
         }
         active = recipe;
+        activeId = id;
         workTime = recipe.time;
         if (formed.size() < recipe.minSize || formed.coils() < recipe.requiredCoils()) {
             setStatus(MachineStatus.MISSING_PART);
@@ -477,12 +515,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setStatus(MachineStatus.CLOGGED);
             return;
         }
-        int airCost = Tuning.certifiedCost((int) (recipe.airPerTick * formed.parallel() * WMConfig.airMultiplier()), certified);
-        if (air.getAir() < airCost) {
+        int airChange = Tuning.airChange(recipe.airPerTick, formed.parallel(), WMConfig.airMultiplier(), certified);
+        if (airChange < 0 && air.getAir() < -airChange) {
             setStatus(MachineStatus.NO_AIR);
             return;
         }
-        air.addAir(-airCost);
+        air.addAir(airChange);
         heat.addHeat(recipe.heatPerTick * formed.parallel());
         if (!wearSeal()) {
             setStatus(MachineStatus.LEAK);
@@ -518,7 +556,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return;
         }
         if (kind() == ApparatusKind.COMPRESSOR_COLUMN) {
-            int produced = Tuning.certifiedCost(40 * stages, certified);
+            int produced = Tuning.certifiedCost(40 * stages * upgradeMultiplier("_cylinder"), certified);
             int take = produced * 3;
             if (neighborAir.getAir() < take) {
                 setStatus(MachineStatus.NO_AIR);
@@ -529,7 +567,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             heat.addHeat(produced * 0.15);
             setStatus(MachineStatus.RUNNING);
         } else {
-            int take = Tuning.certifiedCost(80 * stages, certified);
+            int take = Tuning.certifiedCost(80 * stages * upgradeMultiplier("_cylinder"), certified);
             if (air.getAir() < take) {
                 setStatus(MachineStatus.NO_AIR);
                 return;
@@ -553,7 +591,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         if (air.getPressure() < target && source.getPressure() > target + 0.3f) {
             int move = Math.min(500, source.getAir() / 8);
             source.addAir(-move);
-            air.addAir((int) (move * 0.8f));
+            air.addAir((int) (move * Tuning.regulatorEfficiency(upgradeMultiplier("_diaphragm"))));
             heat.addHeat(move * 0.05);
         }
         int bleed = Tuning.regulatorBleed(air.getPressure(), target, air.getVolume());
@@ -568,9 +606,10 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     }
 
     private void tickFlare() {
-        int rate = 20 * formed.size();
+        int rate = 20 * formed.size() * upgradeMultiplier("_nozzle");
         boolean burned = false;
         boolean blocked = false;
+        int consumed = 0;
         for (int i = 0; i < MachineIo.INPUTS; i++) {
             FluidStack fluid = io.tanks[i].getFluid();
             if (fluid.isEmpty()) {
@@ -580,8 +619,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 blocked = true;
                 continue;
             }
-            io.tanks[i].drain(rate, IFluidHandler.FluidAction.EXECUTE);
+            FluidStack drained = io.tanks[i].drain(rate, IFluidHandler.FluidAction.EXECUTE);
+            consumed += drained.getAmount();
             burned = true;
+        }
+        if (consumed > 0) {
+            heat.addHeat(Tuning.flareHeat(consumed));
         }
         setStatus(blocked && !burned ? MachineStatus.CLOGGED : burned ? MachineStatus.RUNNING : MachineStatus.IDLE);
     }
@@ -593,31 +636,56 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         ItemStack filter = io.items.getStackInSlot(MachineIo.FILTER);
         int moved = 0;
         int limit = Math.max(1, formed.size() * upgradeMultiplier("_slide"));
+        boolean blocked = false;
         for (int i = 0; i < MachineIo.INPUTS && moved < limit; i++) {
             ItemStack stack = io.items.getStackInSlot(i);
             if (stack.isEmpty() || (!filter.isEmpty() && !ItemStack.isSameItem(filter, stack))) {
                 continue;
             }
-            ItemStack one = stack.copyWithCount(1);
-            for (int out = 0; out < MachineIo.INPUTS; out++) {
-                ItemStack leftover = io.items.insertItem(MachineIo.INPUTS + out, one, false);
-                if (leftover.isEmpty()) {
-                    stack.shrink(1);
-                    moved++;
+            int want = Math.min(limit - moved, stack.getCount());
+            int placed = 0;
+            ItemStack batch = io.items.extractItem(i, want, false);
+            ItemStack remain = batch;
+            for (int out = 0; out < MachineIo.INPUTS && !remain.isEmpty(); out++) {
+                remain = io.items.insertItem(MachineIo.INPUTS + out, remain, false);
+            }
+            placed = batch.getCount() - remain.getCount();
+            moved += placed;
+            if (!remain.isEmpty()) {
+                io.items.insertItem(i, remain, false);
+                blocked = true;
+            }
+        }
+        if (moved == 0 && !blocked) {
+            for (int i = 0; i < MachineIo.INPUTS; i++) {
+                ItemStack stack = io.items.getStackInSlot(i);
+                if (!stack.isEmpty() && (filter.isEmpty() || ItemStack.isSameItem(filter, stack))) {
+                    blocked = true;
                     break;
                 }
             }
         }
-        setStatus(moved > 0 ? MachineStatus.RUNNING : MachineStatus.IDLE);
+        setStatus(moved > 0 ? MachineStatus.RUNNING : blocked ? MachineStatus.CLOGGED : MachineStatus.IDLE);
     }
 
     private void tickHeatLine() {
-        heat.setThermalResistance(2.0 + formed.size() * 2.5);
-        setStatus(MachineStatus.RUNNING);
+        heat.setThermalResistance(4.0);
+        double fraction = Tuning.galleryFraction(formed.size());
+        double cap = 40 + formed.size() * 4;
+        IHeatExchangerLogic back = heatNeighbor(worldPosition.relative(facing().getOpposite()), facing());
+        IHeatExchangerLogic front = heatNeighbor(formed.farEnd().relative(facing()), facing().getOpposite());
+        boolean linked = false;
+        if (exchangeHeat(back, fraction, cap)) {
+            linked = true;
+        }
+        if (exchangeHeat(front, fraction, cap)) {
+            linked = true;
+        }
+        setStatus(linked ? MachineStatus.RUNNING : MachineStatus.IDLE);
     }
 
     private void tickCharge() {
-        int budget = Tuning.certifiedCost(200, certified);
+        int budget = Tuning.certifiedCost(200 * upgradeMultiplier("_gripper"), certified);
         boolean charged = false;
         for (int i = 0; i < MachineIo.INPUTS && budget > 0; i++) {
             ItemStack stack = io.items.getStackInSlot(i);
@@ -644,6 +712,21 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                     if (heatLevel > 0) {
                         stack.set(dev.pncwm.registry.WMData.HEAT, heatLevel - 1);
                     }
+                    charged = true;
+                }
+            }
+        }
+        if (kind() == ApparatusKind.DRONE_NEST && hasProgramSheet() && budget > 0) {
+            AABB box = new AABB(worldPosition).inflate(4);
+            for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, box)) {
+                if (budget <= 0) {
+                    break;
+                }
+                ItemStack stack = entity.getItem();
+                int before = budget;
+                budget = chargeStack(stack, budget);
+                if (budget < before) {
+                    entity.setItem(stack);
                     charged = true;
                 }
             }
@@ -709,11 +792,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
     }
 
-    private WindowRecipe findRecipe() {
+    @Nullable
+    private RecipeHolder<WindowRecipe> findRecipe() {
         if (level == null) {
             return null;
         }
-        WindowRecipe fallback = null;
+        RecipeHolder<WindowRecipe> fallback = null;
         for (RecipeHolder<WindowRecipe> holder : level.getRecipeManager().getAllRecipesFor(WMRecipes.WINDOW.get())) {
             WindowRecipe recipe = holder.value();
             if (!recipe.machine.equals(kind().id)) {
@@ -725,8 +809,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             if (!hasItems(recipe) || !hasFluids(recipe)) {
                 continue;
             }
-            if (fallback == null || moreSpecific(recipe, fallback)) {
-                fallback = recipe;
+            if (fallback == null || moreSpecific(recipe, fallback.value())) {
+                fallback = holder;
             }
         }
         return fallback;
@@ -746,7 +830,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                     continue;
                 }
                 ItemStack stack = io.items.getStackInSlot(slot);
-                if (!stack.isEmpty() && test.test(stack) && stack.getCount() >= need) {
+                if (!stack.isEmpty() && test.test(stack) && stack.getCount() >= need && chipMatches(stack)) {
                     used[slot] = true;
                     found = true;
                     break;
@@ -840,7 +924,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                     continue;
                 }
                 ItemStack stack = io.items.getStackInSlot(slot);
-                if (!stack.isEmpty() && test.test(stack) && stack.getCount() >= need) {
+                if (!stack.isEmpty() && test.test(stack) && stack.getCount() >= need && chipMatches(stack)) {
                     stack.shrink(need);
                     used[slot] = true;
                     break;
@@ -859,8 +943,13 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
         if (kind() == ApparatusKind.ELECTROLYZER) {
             ItemStack electrode = io.items.getStackInSlot(MachineIo.SPECIAL);
-            if (!electrode.isEmpty()) {
-                electrode.shrink(1);
+            if (!electrode.isEmpty() && level instanceof ServerLevel server) {
+                if (electrode.isDamageableItem()) {
+                    electrode.hurtAndBreak(1, server, null, item -> {
+                    });
+                } else {
+                    electrode.shrink(1);
+                }
             }
         }
     }
@@ -881,7 +970,11 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             if (formed.size() < out.minSize()) {
                 continue;
             }
-            insertOutput(out.stack(formed.parallel()));
+            ItemStack stack = out.stack(formed.parallel());
+            if (kind() == ApparatusKind.CLEAN_ROOM && stack.is(WMItems.MICROFLUIDIC_CHIP.get())) {
+                stack.set(WMData.CLEANED, true);
+            }
+            insertOutput(stack);
         }
         for (FluidSpec spec : recipe.fluidOutputs) {
             if (formed.size() < spec.minSize()) {
@@ -1027,6 +1120,96 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
     }
 
+    private void autoApplyCertificate() {
+        if (certified) {
+            return;
+        }
+        for (int i = 0; i < MachineIo.INPUTS; i++) {
+            ItemStack stack = io.items.getStackInSlot(i);
+            if (stack.is(WMItems.CERTIFICATE.get()) && applyCertificate()) {
+                stack.shrink(1);
+                return;
+            }
+        }
+    }
+
+    /** Clean room only accepts a dirty chip; the critical kettle only accepts a cleaned one. */
+    private boolean chipMatches(ItemStack stack) {
+        if (!stack.is(WMItems.MICROFLUIDIC_CHIP.get())) {
+            return true;
+        }
+        boolean cleaned = Boolean.TRUE.equals(stack.get(WMData.CLEANED));
+        if (kind() == ApparatusKind.CLEAN_ROOM) {
+            return !cleaned;
+        }
+        if (kind() == ApparatusKind.CRITICAL_KETTLE) {
+            return cleaned;
+        }
+        return true;
+    }
+
+    private boolean hasProgramSheet() {
+        ItemStack stack = io.items.getStackInSlot(MachineIo.SPECIAL);
+        if (stack.isEmpty()) {
+            return false;
+        }
+        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().equals("program_sheet");
+    }
+
+    /**
+     * Push air (or drill charge) into one stack, spending at most {@code budget}. Returns the leftover budget.
+     */
+    private int chargeStack(ItemStack stack, int budget) {
+        if (stack.isEmpty() || budget <= 0) {
+            return budget;
+        }
+        var handler = stack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM);
+        if (handler != null) {
+            if (air.getAir() > 500 && handler.getPressure() < handler.maxPressure() - 0.05f) {
+                int give = Math.min(budget, 100);
+                handler.addAir(give);
+                air.addAir(-give);
+                return budget - give;
+            }
+            return budget;
+        }
+        if (stack.is(WMItems.DRILL.get())) {
+            int charge = stack.getOrDefault(WMData.CHARGE, 0);
+            int heatLevel = stack.getOrDefault(WMData.HEAT, 0);
+            int cost = Tuning.certifiedCost(800, certified);
+            if (charge < 100 && air.getAir() > cost && budget >= cost) {
+                stack.set(WMData.CHARGE, charge + 1);
+                air.addAir(-cost);
+                if (heatLevel > 0) {
+                    stack.set(WMData.HEAT, heatLevel - 1);
+                }
+                return budget - cost;
+            }
+        }
+        return budget;
+    }
+
+    @Nullable
+    private IHeatExchangerLogic heatNeighbor(BlockPos pos, Direction side) {
+        if (level == null) {
+            return null;
+        }
+        return level.getCapability(PNCCapabilities.HEAT_EXCHANGER_BLOCK, pos, side);
+    }
+
+    private boolean exchangeHeat(IHeatExchangerLogic other, double fraction, double cap) {
+        if (other == null || heat == null) {
+            return false;
+        }
+        double move = Tuning.heatMove(heat.getTemperature(), other.getTemperature(), fraction, cap);
+        if (move == 0) {
+            return false;
+        }
+        heat.addHeat(-move);
+        other.addHeat(move);
+        return true;
+    }
+
     private static boolean moreSpecific(WindowRecipe recipe, WindowRecipe fallback) {
         if (recipe.minSize != fallback.minSize) {
             return recipe.minSize > fallback.minSize;
@@ -1064,6 +1247,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         tag.putInt("Steady", steady);
         tag.putBoolean("Certified", certified);
         tag.putInt("Setpoint", setpoint);
+        if (activeId != null) {
+            tag.putString("ActiveRecipe", activeId);
+        }
         for (int i = 0; i < watched.length; i++) {
             if (watched[i] != null) {
                 tag.putLong("Watch" + i, watched[i].asLong());
@@ -1133,6 +1319,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         steady = tag.getInt("Steady");
         certified = tag.getBoolean("Certified");
         setpoint = Math.floorMod(tag.getInt("Setpoint"), SETPOINTS.length);
+        activeId = tag.contains("ActiveRecipe") ? tag.getString("ActiveRecipe") : null;
         for (int i = 0; i < watched.length; i++) {
             if (tag.contains("Watch" + i)) {
                 watched[i] = BlockPos.of(tag.getLong("Watch" + i));

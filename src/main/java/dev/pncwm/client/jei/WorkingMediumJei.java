@@ -93,6 +93,34 @@ public class WorkingMediumJei implements IModPlugin {
                 registration.addIngredientInfo(new ItemStack(part.get()), VanillaTypes.ITEM_STACK,
                         Component.translatable("jei.workingmedium.info.slide"));
             }
+            if (path.endsWith("_nozzle")) {
+                registration.addIngredientInfo(new ItemStack(part.get()), VanillaTypes.ITEM_STACK,
+                        Component.translatable("jei.workingmedium.info.nozzle"));
+            }
+            if (path.endsWith("_cylinder")) {
+                registration.addIngredientInfo(new ItemStack(part.get()), VanillaTypes.ITEM_STACK,
+                        Component.translatable("jei.workingmedium.info.cylinder"));
+            }
+            if (path.endsWith("_diaphragm")) {
+                registration.addIngredientInfo(new ItemStack(part.get()), VanillaTypes.ITEM_STACK,
+                        Component.translatable("jei.workingmedium.info.diaphragm"));
+            }
+            if (path.endsWith("_gripper")) {
+                registration.addIngredientInfo(new ItemStack(part.get()), VanillaTypes.ITEM_STACK,
+                        Component.translatable("jei.workingmedium.info.gripper"));
+            }
+        }
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMItems.ELECTRODE.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.electrode"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMItems.MICROFLUIDIC_CHIP.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.chip"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMItems.PROGRAM_SHEET.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.program_sheet"));
+        for (var fluid : dev.pncwm.registry.WMFluids.ALL) {
+            if (dev.pncwm.pressure.Tuning.fluidHarm(fluid.name) > 0) {
+                registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
+                        NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.hazard_fluid"));
+            }
         }
     }
 
@@ -144,6 +172,11 @@ public class WorkingMediumJei implements IModPlugin {
         }
         if (recipe.lubeMb > 0) {
             lines.add(Component.translatable("jei.workingmedium.lube", recipe.lubeMb));
+        }
+        if (recipe.airPerTick < 0) {
+            lines.add(Component.translatable("jei.workingmedium.air_produce", -recipe.airPerTick));
+        } else if (recipe.airPerTick > 0) {
+            lines.add(Component.translatable("jei.workingmedium.air_cost", recipe.airPerTick));
         }
         return lines;
     }
@@ -207,6 +240,9 @@ public class WorkingMediumJei implements IModPlugin {
                 for (ItemStack stack : ingredient.getItems()) {
                     ItemStack copy = stack.copy();
                     copy.setCount(count);
+                    if ("critical_kettle".equals(recipe.machine) && copy.is(dev.pncwm.registry.WMItems.MICROFLUIDIC_CHIP.get())) {
+                        copy.set(dev.pncwm.registry.WMData.CLEANED, true);
+                    }
                     stacks.add(copy);
                 }
                 var slot = builder.addSlot(role, inputX, 4).addItemStacks(stacks);
@@ -218,6 +254,9 @@ public class WorkingMediumJei implements IModPlugin {
             int outputX = 96;
             for (ItemOut out : recipe.itemOutputs) {
                 ItemStack stack = out.stack(1);
+                if ("clean_room".equals(recipe.machine) && stack.is(dev.pncwm.registry.WMItems.MICROFLUIDIC_CHIP.get())) {
+                    stack.set(dev.pncwm.registry.WMData.CLEANED, true);
+                }
                 if (!stack.isEmpty()) {
                     var slot = builder.addSlot(RecipeIngredientRole.OUTPUT, outputX, 4).addItemStack(stack);
                     if (out.minSize() > recipe.minSize) {

@@ -124,4 +124,127 @@ public final class Tuning {
         }
         return milliBuckets / 1000;
     }
+
+    /**
+     * Air added to the shell this tick. A positive recipe {@code air} value is a cost (this returns a negative
+     * change). A negative recipe value, as used by the cycle island, produces air. Certified machines consume
+     * 25% less and produce about 33% more. A positive cost of 0 produces no change.
+     */
+    public static int airChange(int airPerTick, int parallel, double multiplier, boolean certified) {
+        int raw = (int) Math.round(airPerTick * Math.max(1, parallel) * multiplier);
+        if (raw > 0) {
+            return -certifiedCost(raw, certified);
+        }
+        if (raw < 0) {
+            int produced = -raw;
+            if (certified) {
+                produced = Math.max(produced, Math.round(produced / CERTIFIED_COST));
+            }
+            return produced;
+        }
+        return 0;
+    }
+
+    /**
+     * Heat moved from a hotter body to a colder one this tick. {@code fraction} is the share of the temperature
+     * gap (0-1). The move is capped, and a tiny gap is ignored so the two sides do not chatter.
+     */
+    public static double heatMove(double fromTemp, double toTemp, double fraction, double cap) {
+        if (cap <= 0 || fraction <= 0) {
+            return 0;
+        }
+        double gap = fromTemp - toTemp;
+        if (Math.abs(gap) < 0.25) {
+            return 0;
+        }
+        double move = gap * Math.min(1.0, fraction);
+        if (Math.abs(move) > cap) {
+            return Math.copySign(cap, move);
+        }
+        return move;
+    }
+
+    /**
+     * How much of the temperature gap a heat gallery transfers each tick. Longer galleries are slower.
+     * A 6-bay gallery is the baseline; shorter ones move heat faster.
+     */
+    public static double galleryFraction(int size) {
+        int length = Math.max(1, size);
+        return 0.22 / (1.0 + 0.1 * (length - 1));
+    }
+
+    /** Heat added to a flare stack from the millibuckets of gas it just burned. */
+    public static double flareHeat(int milliBuckets) {
+        if (milliBuckets <= 0) {
+            return 0;
+        }
+        return milliBuckets * 0.12;
+    }
+
+    /**
+     * Damage applied every 10 ticks to a living thing standing in this fluid (by registry path, no namespace).
+     * Zero means the fluid is harmless.
+     */
+    public static float fluidHarm(String path) {
+        if (path == null || path.isEmpty()) {
+            return 0f;
+        }
+        String name = path.startsWith("flowing_") ? path.substring("flowing_".length()) : path;
+        return switch (name) {
+            case "chlorine", "acid_mist" -> 2f;
+            case "hydrochloric", "caustic" -> 3f;
+            case "acid_feed" -> 2f;
+            case "flue_gas" -> 1f;
+            default -> 0f;
+        };
+    }
+
+    /** Poison duration in ticks for a hazardous gas or mist. Zero if it only deals damage. */
+    public static int fluidPoisonTicks(String path) {
+        if (path == null || path.isEmpty()) {
+            return 0;
+        }
+        String name = path.startsWith("flowing_") ? path.substring("flowing_".length()) : path;
+        return switch (name) {
+            case "chlorine", "acid_mist" -> 80;
+            default -> 0;
+        };
+    }
+
+    /**
+     * Dedicated machine slot for an item path (no namespace). Seals, catalyst, electrodes, program sheets and
+     * the upgrade parts (pump, slide, nozzle, cylinder, diaphragm, gripper) each have a home. Returns -1 otherwise.
+     */
+    public static int dedicatedSlotForPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return -1;
+        }
+        if (path.endsWith("_seal")) {
+            return 8;
+        }
+        if (path.equals("catalyst")) {
+            return 9;
+        }
+        if (path.equals("electrode") || path.equals("program_sheet")
+                || path.endsWith("_pump") || path.endsWith("_slide")
+                || path.endsWith("_nozzle") || path.endsWith("_cylinder")
+                || path.endsWith("_diaphragm") || path.endsWith("_gripper")) {
+            return 10;
+        }
+        return -1;
+    }
+
+    /**
+     * Share of regulator inlet air that arrives at the outlet. The base rate is 0.80. A diaphragm in the special
+     * slot raises it (G2 is 0.84, G5 is 0.96). A missing or wrong part leaves the base rate.
+     */
+    public static float regulatorEfficiency(int diaphragmMultiplier) {
+        int steps = Math.max(0, diaphragmMultiplier - 1);
+        return Math.min(0.96f, 0.80f + 0.04f * steps);
+    }
+
+    /** How many uses a fresh electrode has in the electrolyzer. */
+    public static int electrodeLife() {
+        return 64;
+    }
 }

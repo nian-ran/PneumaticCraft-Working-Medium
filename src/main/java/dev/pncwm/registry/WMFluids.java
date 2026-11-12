@@ -3,6 +3,7 @@ package dev.pncwm.registry;
 import java.util.ArrayList;
 import java.util.List;
 import dev.pncwm.WorkingMedium;
+import dev.pncwm.block.HazardLiquidBlock;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -70,7 +71,7 @@ public final class WMFluids {
                     .descriptionId("fluid_type.workingmedium." + name)));
             source = FLUIDS.register(name, () -> new BaseFlowingFluid.Source(properties()));
             flowing = FLUIDS.register("flowing_" + name, () -> new BaseFlowingFluid.Flowing(properties()));
-            block = WMBlocks.BLOCKS.register(name, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.of()
+            block = WMBlocks.BLOCKS.register(name, () -> new HazardLiquidBlock(source.get(), BlockBehaviour.Properties.of()
                     .mapColor(MapColor.WATER).noCollission().strength(100f).noLootTable().replaceable().liquid()));
             bucket = WMItems.ITEMS.register(name + "_bucket", () -> new BucketItem(source.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
             WMItems.ITEMS.registerSimpleBlockItem(block);

@@ -17,7 +17,8 @@ class WindowBoundsTest {
         assertTrue(json.contains("\"fluid\": \"workingmedium:liquid_co2\""), json);
         assertTrue(json.contains("\"item\": \"workingmedium:critical_core\""), json);
         assertTrue(json.contains("\"void_outside\": true"), json);
-        assertFalse(json.contains("\"items\""), json);
+        assertTrue(json.contains("workingmedium:microfluidic_chip"), json);
+        assertTrue(json.contains("\"item_counts\""), json);
 
         float pressureMin = field(json, "pressure_min");
         float pressureMax = field(json, "pressure_max");

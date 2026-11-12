@@ -111,4 +111,86 @@ class TuningTest {
         assertEquals(3, Tuning.distinct(List.of(1L, 2L, 3L)));
         assertEquals(0, Tuning.distinct(List.of()));
     }
+
+
+    @Test
+    void airChangeProducesWhenRecipeAirIsNegative() {
+        assertEquals(200, Tuning.airChange(-200, 1, 1.0, false));
+        assertEquals(267, Tuning.airChange(-200, 1, 1.0, true));
+        assertEquals(480, Tuning.airChange(-240, 2, 1.0, false));
+        assertEquals(-50, Tuning.airChange(50, 1, 1.0, false));
+        assertEquals(-38, Tuning.airChange(50, 1, 1.0, true));
+        assertEquals(0, Tuning.airChange(0, 1, 1.0, false));
+        assertEquals(0, Tuning.airChange(0, 1, 1.0, true));
+    }
+
+    @Test
+    void heatMovesFromHotToColdAndRespectsTheCap() {
+        assertEquals(20.0, Tuning.heatMove(400, 300, 0.2, 80), 1e-6);
+        assertEquals(10.0, Tuning.heatMove(400, 300, 0.2, 10), 1e-6);
+        assertEquals(0.0, Tuning.heatMove(300, 300, 0.2, 80), 1e-6);
+        assertEquals(0.0, Tuning.heatMove(300.1, 300.0, 0.2, 80), 1e-6);
+        assertEquals(-20.0, Tuning.heatMove(300, 400, 0.2, 80), 1e-6);
+        assertEquals(0.0, Tuning.heatMove(400, 300, 0, 80), 1e-6);
+    }
+
+    @Test
+    void longerGalleriesTransferHeatMoreSlowly() {
+        assertTrue(Tuning.galleryFraction(1) > Tuning.galleryFraction(6));
+        assertTrue(Tuning.galleryFraction(6) > Tuning.galleryFraction(12));
+        assertTrue(Tuning.galleryFraction(1) > 0);
+        assertEquals(0.22, Tuning.galleryFraction(1), 1e-6);
+    }
+
+    @Test
+    void flareHeatScalesWithGasBurned() {
+        assertEquals(0.0, Tuning.flareHeat(0), 1e-6);
+        assertEquals(2.4, Tuning.flareHeat(20), 1e-6);
+        assertEquals(0.0, Tuning.flareHeat(-5), 1e-6);
+    }
+
+    @Test
+    void hazardousFluidsHurtAndSomePoison() {
+        assertEquals(2f, Tuning.fluidHarm("chlorine"));
+        assertEquals(2f, Tuning.fluidHarm("flowing_acid_mist"));
+        assertEquals(3f, Tuning.fluidHarm("hydrochloric"));
+        assertEquals(3f, Tuning.fluidHarm("caustic"));
+        assertEquals(2f, Tuning.fluidHarm("acid_feed"));
+        assertEquals(1f, Tuning.fluidHarm("flue_gas"));
+        assertEquals(0f, Tuning.fluidHarm("brine"));
+        assertEquals(0f, Tuning.fluidHarm("lubricant"));
+        assertEquals(0f, Tuning.fluidHarm(null));
+        assertEquals(80, Tuning.fluidPoisonTicks("chlorine"));
+        assertEquals(80, Tuning.fluidPoisonTicks("acid_mist"));
+        assertEquals(0, Tuning.fluidPoisonTicks("caustic"));
+        assertEquals(0, Tuning.fluidPoisonTicks("water"));
+    }
+
+    @Test
+    void dedicatedSlotsCoverNewUpgradeParts() {
+        assertEquals(8, Tuning.dedicatedSlotForPath("g3_seal"));
+        assertEquals(9, Tuning.dedicatedSlotForPath("catalyst"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("electrode"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("program_sheet"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("g2_pump"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("g4_slide"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("g2_nozzle"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("g5_cylinder"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("g3_diaphragm"));
+        assertEquals(10, Tuning.dedicatedSlotForPath("g4_gripper"));
+        assertEquals(-1, Tuning.dedicatedSlotForPath("g2_plate"));
+        assertEquals(-1, Tuning.dedicatedSlotForPath("microfluidic_chip"));
+        assertEquals(-1, Tuning.dedicatedSlotForPath(null));
+    }
+
+    @Test
+    void diaphragmRaisesRegulatorEfficiency() {
+        assertEquals(0.80f, Tuning.regulatorEfficiency(1), 1e-5);
+        assertEquals(0.84f, Tuning.regulatorEfficiency(2), 1e-5);
+        assertEquals(0.96f, Tuning.regulatorEfficiency(5), 1e-5);
+        assertEquals(0.96f, Tuning.regulatorEfficiency(9), 1e-5);
+        assertEquals(0.80f, Tuning.regulatorEfficiency(0), 1e-5);
+        assertEquals(64, Tuning.electrodeLife());
+    }
+
 }

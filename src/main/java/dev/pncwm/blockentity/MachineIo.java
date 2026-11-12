@@ -68,7 +68,7 @@ public final class MachineIo {
     }
 
     /**
-     * Seal, catalyst, electrode, drone-sheet, vane-pump and slide items have a dedicated slot.
+     * Seal, catalyst, electrode, drone-sheet and upgrade parts (pump, slide, nozzle, cylinder, diaphragm, gripper) have a dedicated slot.
      * Returns -1 for everything else.
      */
     public static int dedicatedSlot(ItemStack stack) {
@@ -79,18 +79,7 @@ public final class MachineIo {
         if (!"workingmedium".equals(id.getNamespace())) {
             return -1;
         }
-        String path = id.getPath();
-        if (path.endsWith("_seal")) {
-            return SEAL;
-        }
-        if (path.equals("catalyst")) {
-            return CATALYST;
-        }
-        if (path.equals("electrode") || path.equals("program_sheet")
-                || path.endsWith("_pump") || path.endsWith("_slide")) {
-            return SPECIAL;
-        }
-        return -1;
+        return Tuning.dedicatedSlotForPath(id.getPath());
     }
 
     public void save(CompoundTag tag, HolderLookup.Provider registries) {

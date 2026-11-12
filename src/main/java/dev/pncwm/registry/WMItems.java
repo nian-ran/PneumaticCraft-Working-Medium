@@ -38,7 +38,14 @@ public final class WMItems {
     public static final DeferredItem<Item> FILTER_CAKE = item("filter_cake");
     public static final DeferredItem<Item> WASTE_CHIP = item("waste_chip");
     public static final DeferredItem<Item> ENGINEERING_PLASTIC = grade("engineering_plastic", PressureGrade.G3);
-    public static final DeferredItem<Item> ELECTRODE = item("electrode");
+    public static final DeferredItem<Item> ELECTRODE = ITEMS.register("electrode",
+            () -> new Item(new Item.Properties().durability(dev.pncwm.pressure.Tuning.electrodeLife())) {
+                @Override
+                public void appendHoverText(ItemStack stack, TooltipContext context, java.util.List<Component> tooltip, TooltipFlag flag) {
+                    tooltip.add(Component.translatable("tooltip.workingmedium.electrode",
+                            dev.pncwm.pressure.Tuning.electrodeLife()).withStyle(ChatFormatting.GRAY));
+                }
+            });
     public static final DeferredItem<Item> SUBSTRATE = item("substrate");
     public static final DeferredItem<Item> MICROFLUIDIC_CHIP = grade("microfluidic_chip", PressureGrade.G4);
     public static final DeferredItem<Item> CRUSHED_IRON = item("crushed_iron");
@@ -48,7 +55,13 @@ public final class WMItems {
     public static final DeferredItem<Item> PURIFIED_IRON = item("purified_iron");
     public static final DeferredItem<Item> PURIFIED_COPPER = item("purified_copper");
     public static final DeferredItem<Item> PURIFIED_GOLD = item("purified_gold");
-    public static final DeferredItem<Item> PROGRAM_SHEET = item("program_sheet");
+    public static final DeferredItem<Item> PROGRAM_SHEET = ITEMS.register("program_sheet",
+            () -> new Item(new Item.Properties()) {
+                @Override
+                public void appendHoverText(ItemStack stack, TooltipContext context, java.util.List<Component> tooltip, TooltipFlag flag) {
+                    tooltip.add(Component.translatable("tooltip.workingmedium.program_sheet").withStyle(ChatFormatting.GRAY));
+                }
+            });
     public static final DeferredItem<CertificateItem> CERTIFICATE = ITEMS.register("certificate",
             () -> new CertificateItem(new Item.Properties().stacksTo(16)));
     public static final DeferredItem<BlockItem> ASPHALT = ITEMS.register("asphalt",

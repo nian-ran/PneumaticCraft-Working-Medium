@@ -18,6 +18,8 @@ public final class WMData {
             () -> DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> PROBE_POS = TYPES.register("probe_pos",
             () -> DataComponentType.<Long>builder().persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG).build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> CLEANED = TYPES.register("cleaned",
+            () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
 
     private WMData() {
     }

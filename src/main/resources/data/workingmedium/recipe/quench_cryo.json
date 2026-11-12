@@ -1,0 +1,10 @@
+{
+  "type": "workingmedium:window",
+  "machine": "quench_well",
+  "items": [{"item": "workingmedium:ceramic_alloy"}],
+  "fluids": [{"fluid": "workingmedium:liquid_co2", "amount": 150}],
+  "item_outputs": [{"item": "workingmedium:cryo_alloy", "count": 1}],
+  "fluid_outputs": [{"fluid": "workingmedium:inerts", "amount": 40}],
+  "pressure_min": 4.0, "pressure_max": 18.0, "temp_min": -20, "temp_max": 40,
+  "air": 25, "time": 100, "heat": -4.0, "min_size": 2
+}

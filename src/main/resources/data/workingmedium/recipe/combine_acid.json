@@ -1,0 +1,11 @@
+{
+  "type": "workingmedium:window",
+  "machine": "electrolyzer",
+  "fluids": [
+    {"fluid": "workingmedium:hydrogen", "amount": 100},
+    {"fluid": "workingmedium:chlorine", "amount": 100}
+  ],
+  "fluid_outputs": [{"fluid": "workingmedium:hydrochloric", "amount": 200}],
+  "pressure_min": 8.0, "pressure_max": 20.0, "temp_min": 30, "temp_max": 90,
+  "air": 20, "time": 80, "lube": 1
+}
