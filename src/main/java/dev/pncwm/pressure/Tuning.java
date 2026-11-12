@@ -366,9 +366,34 @@ public final class Tuning {
         return true;
     }
 
-    /** A spilled hydrogen pool ignites when a flame, lava or magma is next to it. */
+    /** A spilled hydrogen pool ignites when a flame is next to it, or a burning creature walks in. */
     public static boolean poolIgnites(String path, boolean nearFlame) {
-        return isFlammableGas(path) && nearFlame;
+        return poolIgnites(path, nearFlame, false);
+    }
+
+    public static boolean poolIgnites(String path, boolean nearFlame, boolean burningEntity) {
+        return isFlammableGas(path) && (nearFlame || burningEntity);
+    }
+
+    /** A cracker cokes only when it sits above the recipe's high temperature. */
+    public static boolean crackerCokes(int celsius, int tempHigh) {
+        return celsius > tempHigh;
+    }
+
+    /** A cryo tower ices up only when it sits below the recipe's low temperature. */
+    public static boolean cryoFreezes(int celsius, int tempLow) {
+        return celsius < tempLow;
+    }
+
+    /**
+     * How much fluid a loop should move this tick. Never more than the source
+     * can give or the destination can take.
+     */
+    public static int loopMove(int simulatedDrain, int simulatedFill) {
+        if (simulatedDrain <= 0 || simulatedFill <= 0) {
+            return 0;
+        }
+        return Math.min(simulatedDrain, simulatedFill);
     }
 
     /**

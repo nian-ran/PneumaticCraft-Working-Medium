@@ -110,6 +110,23 @@ class ByproductRecipesTest {
         assertRecipe("quench_obsidian_water.json", "quench_well", "minecraft:lava", "minecraft:water", "minecraft:obsidian", "\"count\": 1");
         assertRecipe("cycle_wax.json", "cycle_island", "workingmedium:heavy_wax", "workingmedium:flue_gas", "\"air\": -150");
         assertRecipe("neutralize_feed.json", "scrubber_tower", "workingmedium:acid_feed", "workingmedium:caustic", "workingmedium:brine");
+        assertRecipe("crush_dripstone.json", "impact_crusher", "minecraft:dripstone_block", "minecraft:pointed_dripstone", "\"count\": 4");
+        assertRecipe("crush_mossy_cobble.json", "impact_crusher", "minecraft:mossy_cobblestone", "workingmedium:stone_dust");
+        assertRecipe("crush_mossy_stone_bricks.json", "impact_crusher", "minecraft:mossy_stone_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_stone_bricks.json", "impact_crusher", "minecraft:stone_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_cracked_stone_bricks.json", "impact_crusher", "minecraft:cracked_stone_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_packed_ice.json", "impact_crusher", "minecraft:packed_ice", "minecraft:ice", "\"count\": 9");
+        assertRecipe("crush_blue_ice.json", "impact_crusher", "minecraft:blue_ice", "minecraft:packed_ice", "\"count\": 9");
+        assertRecipe("kiln_deepslate.json", "residue_kiln", "minecraft:cobbled_deepslate", "minecraft:deepslate", "\"count\": 3");
+        assertRecipe("kiln_smooth_sandstone.json", "residue_kiln", "minecraft:sandstone", "minecraft:smooth_sandstone");
+        assertRecipe("kiln_smooth_red_sandstone.json", "residue_kiln", "minecraft:red_sandstone", "minecraft:smooth_red_sandstone");
+        assertRecipe("kiln_smooth_basalt.json", "residue_kiln", "minecraft:basalt", "minecraft:smooth_basalt");
+        assertRecipe("kiln_smooth_quartz.json", "residue_kiln", "minecraft:quartz_block", "minecraft:smooth_quartz");
+        assertRecipe("wash_dirt.json", "washer_tower", "minecraft:dirt", "minecraft:mud");
+        assertRecipe("wash_coarse_dirt.json", "washer_tower", "minecraft:coarse_dirt", "minecraft:dirt");
+        assertRecipe("quench_ice_nitrogen.json", "quench_well", "minecraft:water", "workingmedium:nitrogen", "minecraft:packed_ice", "\"count\": 1");
+        assertRecipe("cycle_lubricant.json", "cycle_island", "pneumaticcraft:lubricant", "workingmedium:flue_gas", "\"air\": -100");
+        assertRecipe("neutralize_chlorine.json", "scrubber_tower", "workingmedium:chlorine", "workingmedium:caustic", "workingmedium:brine");
     }
 
     @Test
@@ -123,7 +140,7 @@ class ByproductRecipesTest {
             assertTrue(en.contains("hint.workingmedium." + status), status);
             assertTrue(en.contains("status.workingmedium." + status), "status " + status);
         }
-        for (int page = 0; page < 21; page++) {
+        for (int page = 0; page < 22; page++) {
             assertTrue(en.contains("manual.workingmedium.page." + page), "page " + page);
         }
         for (String key : new String[] {"tooltip.workingmedium.certificate", "tooltip.workingmedium.certified",

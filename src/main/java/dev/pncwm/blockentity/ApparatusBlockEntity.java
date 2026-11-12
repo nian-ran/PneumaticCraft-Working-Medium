@@ -518,14 +518,15 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 setStatus(MachineStatus.SCRAPPED);
                 return;
             }
-            if (kind() == ApparatusKind.CRACKER && celsius > recipe.tempHigh()) {
+            if (kind() == ApparatusKind.CRACKER && Tuning.crackerCokes(celsius, recipe.tempHigh())) {
                 fault++;
                 if (fault > Tuning.COKE_FAULT) {
                     setStatus(MachineStatus.COKING);
                     return;
                 }
             }
-            if (kind() == ApparatusKind.CRYO_TOWER && celsius > recipe.tempHigh()) {
+            // The tower ices up only when it overshoots the cold end, not when it is still warm.
+            if (kind() == ApparatusKind.CRYO_TOWER && Tuning.cryoFreezes(celsius, recipe.tempLow())) {
                 fault++;
                 if (fault > Tuning.FREEZE_FAULT) {
                     setStatus(MachineStatus.FROZEN);
@@ -820,12 +821,25 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setStatus(MachineStatus.IDLE);
             return;
         }
-        int filled = front.fill(drained, IFluidHandler.FluidAction.EXECUTE);
+        int move = Tuning.loopMove(drained.getAmount(), front.fill(drained, IFluidHandler.FluidAction.SIMULATE));
+        if (move <= 0) {
+            setStatus(MachineStatus.CLOGGED);
+            return;
+        }
+        FluidStack taken = back.drain(drained.copyWithAmount(move), IFluidHandler.FluidAction.EXECUTE);
+        if (taken.isEmpty()) {
+            setStatus(MachineStatus.IDLE);
+            return;
+        }
+        int filled = front.fill(taken, IFluidHandler.FluidAction.EXECUTE);
+        if (filled < taken.getAmount()) {
+            // Put back whatever the destination could not accept, so fluid is never created from nothing.
+            back.fill(taken.copyWithAmount(taken.getAmount() - filled), IFluidHandler.FluidAction.EXECUTE);
+        }
         if (filled <= 0) {
             setStatus(MachineStatus.CLOGGED);
             return;
         }
-        back.drain(filled, IFluidHandler.FluidAction.EXECUTE);
         setStatus(MachineStatus.WINDOW);
     }
 

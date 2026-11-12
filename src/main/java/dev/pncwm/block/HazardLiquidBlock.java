@@ -26,10 +26,11 @@ import net.minecraft.world.level.material.Fluids;
 /**
  * Chlorine, acid, caustic and flue gas hurt anything that stands in them. Liquid carbon dioxide, nitrogen,
  * argon and oxygen freeze and slow living things. Liquid carbon dioxide, nitrogen and argon also put out
- * fire; oxygen is cold but feeds a fire, so it does not. Dusty steam scalds. Hydrogen ignites next to fire
- * (including a torch, lantern, lit candle or lit furnace) and the spilled pool itself burns off; oxygen
- * feeds a fire that is already burning. Harmless fluids use this block too, but the tuning rules return
- * zero for those and nothing happens.
+ * fire; oxygen is cold but feeds a fire, so it does not. Those same cold fluids also put out lit
+ * candles and knock out adjacent torches. Dusty steam scalds. Hydrogen ignites next to fire
+ * (including a torch, lantern, lit candle or lit furnace) and also burns off if a burning creature
+ * walks into the pool; oxygen feeds a fire that is already burning. Harmless fluids use this block
+ * too, but the tuning rules return zero for those and nothing happens.
  */
 public class HazardLiquidBlock extends LiquidBlock {
     public HazardLiquidBlock(FlowingFluid fluid, Properties properties) {
@@ -73,10 +74,13 @@ public class HazardLiquidBlock extends LiquidBlock {
         if (scald > 0f) {
             living.hurt(living.damageSources().hotFloor(), scald);
         }
-        if (Tuning.isFlammableGas(path) && (living.isOnFire() || nearFlame(level, pos))) {
+        boolean burning = living.isOnFire();
+        boolean flame = nearFlame(level, pos);
+        if (Tuning.isFlammableGas(path) && (burning || flame)) {
             living.hurt(living.damageSources().onFire(), 2f);
             living.setRemainingFireTicks(Math.max(living.getRemainingFireTicks(), 80));
-            if (nearFlame(level, pos)) {
+            // A burning creature must light the pool itself, not just keep burning in it.
+            if (Tuning.poolIgnites(path, flame, burning)) {
                 ignitePool(level, pos);
             }
         }
@@ -131,6 +135,15 @@ public class HazardLiquidBlock extends LiquidBlock {
                     && neighbor.hasProperty(CampfireBlock.LIT) && neighbor.getValue(CampfireBlock.LIT)) {
                 level.setBlock(neighborPos, neighbor.setValue(CampfireBlock.LIT, false), 3);
                 level.playSound(null, neighborPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.0f);
+            } else if (neighbor.getBlock() instanceof AbstractCandleBlock
+                    && neighbor.hasProperty(BlockStateProperties.LIT) && neighbor.getValue(BlockStateProperties.LIT)) {
+                level.setBlock(neighborPos, neighbor.setValue(BlockStateProperties.LIT, false), 3);
+                level.playSound(null, neighborPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.1f);
+            } else if (neighbor.is(Blocks.TORCH) || neighbor.is(Blocks.WALL_TORCH)
+                    || neighbor.is(Blocks.SOUL_TORCH) || neighbor.is(Blocks.SOUL_WALL_TORCH)) {
+                // Same as water: the torch drops, the flame is gone.
+                level.destroyBlock(neighborPos, true);
+                level.playSound(null, neighborPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4f, 1.2f);
             }
         }
     }

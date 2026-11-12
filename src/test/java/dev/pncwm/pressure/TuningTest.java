@@ -391,4 +391,38 @@ class TuningTest {
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.mayDrainLube(false, false, false, false));
     }
 
+
+    @Test
+    void cryoTowerFreezesOnlyWhenTooCold() {
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.crackerCokes(-10, 760));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.crackerCokes(760, 760));
+        assertTrue(Tuning.crackerCokes(761, 760));
+        // Ambient air must not ice a cryo tower that has not been cooled yet.
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.cryoFreezes(20, -160));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.cryoFreezes(-40, -160));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.cryoFreezes(-160, -160));
+        assertTrue(Tuning.cryoFreezes(-161, -160));
+        assertTrue(Tuning.cryoFreezes(-200, -160));
+    }
+
+    @Test
+    void burningEntityIgnitesHydrogenPool() {
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("hydrogen", false));
+        assertTrue(Tuning.poolIgnites("hydrogen", true));
+        assertTrue(Tuning.poolIgnites("hydrogen", false, true));
+        assertTrue(Tuning.poolIgnites("flowing_hydrogen", false, true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("nitrogen", false, true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("hydrogen", false, false));
+    }
+
+    @Test
+    void loopMoveNeverExceedsEitherSide() {
+        assertEquals(0, Tuning.loopMove(0, 50));
+        assertEquals(0, Tuning.loopMove(50, 0));
+        assertEquals(0, Tuning.loopMove(-1, 20));
+        assertEquals(20, Tuning.loopMove(50, 20));
+        assertEquals(20, Tuning.loopMove(20, 50));
+        assertEquals(20, Tuning.loopMove(20, 20));
+    }
+
 }
