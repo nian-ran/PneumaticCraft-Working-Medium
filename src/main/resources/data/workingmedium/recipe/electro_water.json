@@ -1,0 +1,11 @@
+{
+  "type": "workingmedium:window",
+  "machine": "electrolyzer",
+  "fluids": [{"fluid": "minecraft:water", "amount": 500}],
+  "fluid_outputs": [
+    {"fluid": "workingmedium:hydrogen", "amount": 200},
+    {"fluid": "workingmedium:oxygen", "amount": 100}
+  ],
+  "pressure_min": 8.0, "pressure_max": 20.0, "temp_min": 40, "temp_max": 120,
+  "air": 50, "time": 180, "lube": 2
+}

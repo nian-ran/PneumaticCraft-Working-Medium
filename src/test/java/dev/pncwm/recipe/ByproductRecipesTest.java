@@ -45,6 +45,15 @@ class ByproductRecipesTest {
         String cobble = Files.readString(recipe("stone_dust_block.json"));
         assertTrue(cobble.contains("workingmedium:stone_dust"), cobble);
         assertTrue(cobble.contains("minecraft:cobblestone"), cobble);
+        assertRecipe("electro_water.json", "electrolyzer", "minecraft:water", "workingmedium:hydrogen", "workingmedium:oxygen");
+        assertRecipe("cycle_kerosene_oxygen.json", "cycle_island", "pneumaticcraft:kerosene", "workingmedium:oxygen", "\"air\": -300");
+        assertRecipe("cycle_gasoline_oxygen.json", "cycle_island", "pneumaticcraft:gasoline", "workingmedium:oxygen", "\"air\": -320");
+        assertRecipe("cycle_lpg_oxygen.json", "cycle_island", "pneumaticcraft:lpg", "workingmedium:oxygen", "\"air\": -340");
+        assertRecipe("brine_dried.json", "lube_mixer", "minecraft:dried_kelp", "workingmedium:brine");
+        assertRecipe("crush_netherrack.json", "impact_crusher", "minecraft:netherrack", "workingmedium:stone_dust", "minecraft:gold_nugget");
+        assertRecipe("crush_deepslate.json", "impact_crusher", "minecraft:deepslate", "workingmedium:stone_dust");
+        assertRecipe("crush_cobbled_deepslate.json", "impact_crusher", "minecraft:cobbled_deepslate", "workingmedium:stone_dust");
+        assertRecipe("crush_blackstone.json", "impact_crusher", "minecraft:blackstone", "workingmedium:stone_dust");
     }
 
     @Test
@@ -58,7 +67,7 @@ class ByproductRecipesTest {
             assertTrue(en.contains("hint.workingmedium." + status), status);
             assertTrue(en.contains("status.workingmedium." + status), "status " + status);
         }
-        for (int page = 0; page < 17; page++) {
+        for (int page = 0; page < 18; page++) {
             assertTrue(en.contains("manual.workingmedium.page." + page), "page " + page);
         }
         for (String key : new String[] {"tooltip.workingmedium.certificate", "tooltip.workingmedium.certified",
@@ -76,7 +85,11 @@ class ByproductRecipesTest {
                 "message.workingmedium.certify_unformed", "message.workingmedium.cannot_certify",
                 "jei.workingmedium.info.cryo_fluid", "jei.workingmedium.info.purge", "jei.workingmedium.info.flare",
                 "jei.workingmedium.info.hatch_drain", "jei.workingmedium.info.hatch_io",
-                "jei.workingmedium.info.redstone_pause", "jei.workingmedium.info.stone_dust"}) {
+                "jei.workingmedium.info.redstone_pause", "jei.workingmedium.info.stone_dust",
+                "jei.workingmedium.info.scald_fluid", "jei.workingmedium.info.flammable_fluid",
+                "jei.workingmedium.info.oxidizer_fluid", "jei.workingmedium.info.probe",
+                "tooltip.workingmedium.probe", "message.workingmedium.rotate_formed",
+                "message.workingmedium.probe_unbound"}) {
             assertTrue(en.contains(key), key);
         }
     }

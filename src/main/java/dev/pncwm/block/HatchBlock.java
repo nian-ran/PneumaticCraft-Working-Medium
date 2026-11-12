@@ -73,7 +73,8 @@ public class HatchBlock extends BaseEntityBlock {
     @Override
     protected boolean hasAnalogOutputSignal(BlockState state) {
         return type == HatchType.GAUGE || type == HatchType.ITEM_IN || type == HatchType.ITEM_OUT
-                || type == HatchType.FLUID || type == HatchType.GAS || type == HatchType.DRAIN;
+                || type == HatchType.FLUID || type == HatchType.GAS || type == HatchType.DRAIN
+                || type == HatchType.HEAT;
     }
 
     @Override

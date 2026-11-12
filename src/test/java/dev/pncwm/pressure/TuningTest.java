@@ -253,4 +253,37 @@ class TuningTest {
         assertEquals(20, Tuning.PURGE_MB);
     }
 
+    @Test
+    void temperatureSignalAndColumnLube() {
+        assertEquals(0, Tuning.temperatureSignal(-200));
+        assertEquals(0, Tuning.temperatureSignal(-400));
+        int ambient = Tuning.temperatureSignal(20);
+        assertTrue(ambient >= 2 && ambient <= 3);
+        assertEquals(15, Tuning.temperatureSignal(1500));
+        assertEquals(15, Tuning.temperatureSignal(2000));
+        assertTrue(Tuning.temperatureSignal(650) > ambient);
+        assertEquals(2, Tuning.columnLube(1));
+        assertEquals(8, Tuning.columnLube(4));
+        assertEquals(2, Tuning.columnLube(0));
+    }
+
+    @Test
+    void dustySteamScaldsButDoesNotNeedADrain() {
+        assertEquals(1.5f, Tuning.fluidScald("dusty_steam"));
+        assertEquals(1.5f, Tuning.fluidScald("flowing_dusty_steam"));
+        assertEquals(0f, Tuning.fluidScald("flue_gas"));
+        assertEquals(0f, Tuning.fluidScald(null));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.needsDrain("dusty_steam"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.needsDrain("hydrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.needsDrain("oxygen"));
+        assertTrue(Tuning.needsDrain("acid_mist"));
+        assertTrue(Tuning.needsDrain("hydrochloric"));
+        assertTrue(Tuning.isFlammableGas("hydrogen"));
+        assertTrue(Tuning.isFlammableGas("workingmedium:hydrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isFlammableGas("oxygen"));
+        assertTrue(Tuning.isOxidizer("oxygen"));
+        assertTrue(Tuning.isOxidizer("flowing_oxygen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isOxidizer("hydrogen"));
+    }
+
 }

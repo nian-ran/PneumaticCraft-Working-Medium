@@ -306,11 +306,48 @@ public final class Tuning {
     }
 
     /**
-     * Whether a recipe fluid output must leave through a drain hatch. Matches the fluids that hurt
-     * anything standing in them (acid, caustic, chlorine, flue gas).
+     * Whether a recipe fluid output must leave through a drain hatch. Chemical hazards (acid, caustic,
+     * chlorine, flue gas) need a drain. Dusty steam can scald but still leaves through a normal hatch.
      */
     public static boolean needsDrain(String path) {
-        return fluidHarm(path) > 0f;
+        return switch (fluidName(path)) {
+            case "chlorine", "acid_mist", "hydrochloric", "caustic", "acid_feed", "flue_gas" -> true;
+            default -> false;
+        };
+    }
+
+    /** Heat damage every 10 ticks from standing in hot dusty steam. Zero if the fluid is not scalding. */
+    public static float fluidScald(String path) {
+        return "dusty_steam".equals(fluidName(path)) ? 1.5f : 0f;
+    }
+
+    /** Hydrogen ignites if the victim is already on fire or a flame is next to the pool. */
+    public static boolean isFlammableGas(String path) {
+        return "hydrogen".equals(fluidName(path));
+    }
+
+    /** Oxygen feeds a fire that is already burning. */
+    public static boolean isOxidizer(String path) {
+        return "oxygen".equals(fluidName(path));
+    }
+
+    /** Lubricant millibuckets a compressor or expander column drinks every 20 running ticks. */
+    public static int columnLube(int stages) {
+        return 2 * Math.max(1, stages);
+    }
+
+    /**
+     * Comparator strength 0-15 for shell temperature in Celsius. -200 C is empty, 1500 C is full,
+     * and ambient air (~20 C) sits around 2.
+     */
+    public static int temperatureSignal(int celsius) {
+        int span = 1700;
+        int shifted = celsius + 200;
+        if (shifted <= 0 || span <= 0) {
+            return 0;
+        }
+        int scaled = 1 + (int) ((long) Math.min(shifted, span) * 14L / span);
+        return Math.max(1, Math.min(15, scaled));
     }
 
     /** Comparator strength 0-15 for how full a group of slots or tanks is. Any content gives at least 1. */

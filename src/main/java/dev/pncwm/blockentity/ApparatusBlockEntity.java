@@ -263,10 +263,11 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
         if (!formed.formed()) {
             setStatus(MachineStatus.UNFORMED);
-            progress = 0;
-            workTime = 0;
-            active = null;
-            activeId = null;
+            // Keep the batch and recipe id so a briefly broken shell can be repaired and finished.
+            notifyComparators();
+            if (level.getGameTime() % 10 == 0) {
+                sync();
+            }
             return;
         }
         autoApplyCertificate();
@@ -322,6 +323,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         if (status == MachineStatus.FROZEN && level.random.nextFloat() < 0.35f) {
             level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0, 0.01, 0);
         }
+        if (status == MachineStatus.NO_DRAIN && level.random.nextFloat() < 0.35f) {
+            level.addParticle(ParticleTypes.CLOUD, x, y, z, 0, 0.02, 0);
+        }
+        if (status == MachineStatus.NO_LUBE && level.random.nextFloat() < 0.3f) {
+            level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.02, 0);
+        }
     }
 
     public void shiftUse(Player player) {
@@ -335,6 +342,11 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setpoint = (setpoint + 1) % SETPOINTS.length;
             player.displayClientMessage(Component.translatable("message.workingmedium.setpoint", SETPOINTS[setpoint]), true);
             setChanged();
+            return;
+        }
+        if (formed.formed()) {
+            // Rotating a formed controller used to tear the structure down and wipe the batch.
+            player.displayClientMessage(Component.translatable("message.workingmedium.rotate_formed"), true);
             return;
         }
         Direction facing = facing().getClockWise();
@@ -587,9 +599,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setStatus(MachineStatus.IDLE);
             return;
         }
+        if (!prepareRunningTick()) {
+            return;
+        }
         if (kind() == ApparatusKind.COMPRESSOR_COLUMN) {
-            int produced = Tuning.certifiedCost(40 * stages * upgradeMultiplier("_cylinder"), certified);
-            int take = produced * 3;
+            int produced = 40 * stages * upgradeMultiplier("_cylinder");
+            int take = Tuning.certifiedCost(produced * 3, certified);
             if (neighborAir.getAir() < take) {
                 setStatus(MachineStatus.NO_AIR);
                 return;
@@ -599,14 +614,15 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             heat.addHeat(produced * 0.15);
             setStatus(MachineStatus.RUNNING);
         } else {
-            int take = Tuning.certifiedCost(80 * stages * upgradeMultiplier("_cylinder"), certified);
+            int base = 80 * stages * upgradeMultiplier("_cylinder");
+            int take = Tuning.certifiedCost(base, certified);
             if (air.getAir() < take) {
                 setStatus(MachineStatus.NO_AIR);
                 return;
             }
             air.addAir(-take);
-            neighborAir.addAir(take / 3);
-            heat.addHeat(formed.missingIntercooler() ? 10 : -take * 0.25);
+            neighborAir.addAir(base / 3);
+            heat.addHeat(formed.missingIntercooler() ? 10 : -base * 0.25);
             setStatus(MachineStatus.RUNNING);
         }
     }
@@ -719,7 +735,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     }
 
     private void tickCharge() {
-        int budget = Tuning.certifiedCost(200 * upgradeMultiplier("_gripper"), certified);
+        int budget = 200 * upgradeMultiplier("_gripper");
         boolean charged = false;
         for (int i = 0; i < MachineIo.INPUTS && budget > 0; i++) {
             ItemStack stack = io.items.getStackInSlot(i);
@@ -731,8 +747,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 // Stop at the item's own rating instead of pushing it past its maximum pressure.
                 if (air.getAir() > 500 && handler.getPressure() < handler.maxPressure() - 0.05f) {
                     int give = Math.min(budget, 100);
+                    int cost = Tuning.certifiedCost(give, certified);
+                    if (air.getAir() < cost) {
+                        break;
+                    }
                     handler.addAir(give);
-                    air.addAir(-give);
+                    air.addAir(-cost);
                     budget -= give;
                     charged = true;
                 }
@@ -1141,12 +1161,13 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         if (level == null || level.isClientSide) {
             return;
         }
-        int signal = comparatorSignal();
-        int hatchFill = hatchSignal(HatchType.ITEM_IN) << 12
-                | hatchSignal(HatchType.ITEM_OUT) << 8
-                | hatchSignal(HatchType.FLUID) << 4
-                | hatchSignal(HatchType.DRAIN);
-        int combined = signal | (hatchFill << 8);
+        int combined = comparatorSignal()
+                | hatchSignal(HatchType.ITEM_IN) << 8
+                | hatchSignal(HatchType.ITEM_OUT) << 12
+                | hatchSignal(HatchType.FLUID) << 16
+                | hatchSignal(HatchType.GAS) << 20
+                | hatchSignal(HatchType.DRAIN) << 24
+                | hatchSignal(HatchType.HEAT) << 28;
         if (combined == lastSignal) {
             return;
         }
@@ -1195,8 +1216,10 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         return switch (type) {
             case ITEM_IN -> itemFill(0, MachineIo.INPUTS);
             case ITEM_OUT -> itemFill(MachineIo.INPUTS, MachineIo.INPUTS);
-            case DRAIN -> fluidFill(MachineIo.INPUTS, MachineIo.INPUTS);
-            case FLUID, GAS -> fluidFill(0, MachineIo.INPUTS);
+            case DRAIN -> fluidFill(MachineIo.INPUTS, MachineIo.INPUTS, null);
+            case FLUID -> fluidFill(0, MachineIo.INPUTS, Boolean.FALSE);
+            case GAS -> fluidFill(0, MachineIo.INPUTS, Boolean.TRUE);
+            case HEAT -> heat == null ? 0 : Tuning.temperatureSignal(PressureGrade.kelvinToCelsius(heat.getTemperature()));
             case GAUGE -> comparatorSignal();
             default -> 0;
         };
@@ -1213,15 +1236,51 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         return Tuning.fillSignal(amount, capacity);
     }
 
-    private int fluidFill(int start, int count) {
+    /**
+     * {@code gases} is null to count every fluid (drain hatches), true for gas only, false for liquid only.
+     * Capacity stays the full row so the signal is "how full of that kind the inputs are".
+     */
+    private int fluidFill(int start, int count, Boolean gases) {
         int amount = 0;
         int capacity = 0;
         for (int i = 0; i < count; i++) {
             FluidTank tank = io.tanks[start + i];
             capacity += tank.getCapacity();
-            amount += tank.getFluidAmount();
+            FluidStack fluid = tank.getFluid();
+            if (fluid.isEmpty()) {
+                continue;
+            }
+            if (gases == null || MachineIo.isGas(fluid) == gases) {
+                amount += fluid.getAmount();
+            }
         }
         return Tuning.fillSignal(amount, capacity);
+    }
+
+    /**
+     * Seals, lubricant and an optional purge for a compressor or expander column that is about to transfer air.
+     * Returns false after setting a leak or no-lube status.
+     */
+    private boolean prepareRunningTick() {
+        if (seal <= 0 && io.items.getStackInSlot(MachineIo.SEAL).isEmpty()) {
+            setStatus(MachineStatus.LEAK);
+            return false;
+        }
+        int lubeNeed = Tuning.columnLube(formed.size());
+        if (lubeNeed > 0 && level.getGameTime() % 20 == 0) {
+            FluidStack drained = io.tanks[MachineIo.LUBE].drain(lubeNeed, IFluidHandler.FluidAction.SIMULATE);
+            if (drained.getAmount() < lubeNeed) {
+                heat.addHeat(30);
+                setStatus(MachineStatus.NO_LUBE);
+                return false;
+            }
+            io.tanks[MachineIo.LUBE].drain(lubeNeed, IFluidHandler.FluidAction.EXECUTE);
+        }
+        if (!wearSeal(tryPurge(null))) {
+            setStatus(MachineStatus.LEAK);
+            return false;
+        }
+        return true;
     }
 
     private boolean hasElectrode() {
@@ -1251,7 +1310,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 continue;
             }
             String path = BuiltInRegistries.FLUID.getKey(fluid.getFluid()).getPath();
-            if (!Tuning.isPurgeGas(path) || recipeUsesFluid(recipe, path)) {
+            if (!Tuning.isPurgeGas(path) || (recipe != null && recipeUsesFluid(recipe, path))) {
                 continue;
             }
             if (level.getGameTime() % 20 == 0) {
@@ -1294,8 +1353,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         if (handler != null) {
             if (air.getAir() > 500 && handler.getPressure() < handler.maxPressure() - 0.05f) {
                 int give = Math.min(budget, 100);
+                int cost = Tuning.certifiedCost(give, certified);
+                if (air.getAir() < cost) {
+                    return budget;
+                }
                 handler.addAir(give);
-                air.addAir(-give);
+                air.addAir(-cost);
                 return budget - give;
             }
             return budget;

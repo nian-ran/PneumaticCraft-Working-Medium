@@ -1,0 +1,11 @@
+{
+  "type": "workingmedium:window",
+  "machine": "cycle_island",
+  "fluids": [
+    {"fluid": "pneumaticcraft:gasoline", "amount": 20},
+    {"fluid": "workingmedium:oxygen", "amount": 20}
+  ],
+  "fluid_outputs": [{"fluid": "workingmedium:flue_gas", "amount": 40}],
+  "pressure_min": 8.0, "pressure_max": 40.0, "temp_min": 200, "temp_max": 900,
+  "air": -320, "time": 40, "heat": 28.0
+}

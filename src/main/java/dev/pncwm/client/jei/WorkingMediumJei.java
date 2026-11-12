@@ -129,7 +129,21 @@ public class WorkingMediumJei implements IModPlugin {
                 registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
                         NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.purge"));
             }
+            if (dev.pncwm.pressure.Tuning.fluidScald(fluid.name) > 0f) {
+                registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
+                        NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.scald_fluid"));
+            }
+            if (dev.pncwm.pressure.Tuning.isFlammableGas(fluid.name)) {
+                registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
+                        NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.flammable_fluid"));
+            }
+            if (dev.pncwm.pressure.Tuning.isOxidizer(fluid.name)) {
+                registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
+                        NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.oxidizer_fluid"));
+            }
         }
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMItems.PROBE.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.probe"));
         registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.CONTROLLERS.get(ApparatusKind.FLARE_STACK).get()), VanillaTypes.ITEM_STACK,
                 Component.translatable("jei.workingmedium.info.flare"));
         registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.HATCHES.get(dev.pncwm.block.HatchType.DRAIN).get()), VanillaTypes.ITEM_STACK,
