@@ -121,7 +121,35 @@ public class WorkingMediumJei implements IModPlugin {
                 registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
                         NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.hazard_fluid"));
             }
+            if (dev.pncwm.pressure.Tuning.isCryogenic(fluid.name)) {
+                registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
+                        NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.cryo_fluid"));
+            }
+            if (dev.pncwm.pressure.Tuning.isPurgeGas(fluid.name)) {
+                registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.source.get(), 1000),
+                        NeoForgeTypes.FLUID_STACK, Component.translatable("jei.workingmedium.info.purge"));
+            }
         }
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.CONTROLLERS.get(ApparatusKind.FLARE_STACK).get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.flare"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.HATCHES.get(dev.pncwm.block.HatchType.DRAIN).get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.hatch_drain"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.HATCHES.get(dev.pncwm.block.HatchType.ITEM_IN).get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.hatch_io"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.HATCHES.get(dev.pncwm.block.HatchType.ITEM_OUT).get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.hatch_io"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.HATCHES.get(dev.pncwm.block.HatchType.FLUID).get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.hatch_io"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.HATCHES.get(dev.pncwm.block.HatchType.GAS).get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.hatch_io"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.REDUCER.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.redstone_pause"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.BOOSTER.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.redstone_pause"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.RELIEF.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.redstone_pause"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMItems.STONE_DUST.get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.stone_dust"));
     }
 
     /**

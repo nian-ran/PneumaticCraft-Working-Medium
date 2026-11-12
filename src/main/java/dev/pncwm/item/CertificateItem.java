@@ -35,6 +35,12 @@ public class CertificateItem extends Item {
             }
             return InteractionResult.CONSUME;
         }
+        if (!apparatus.usesCertificate()) {
+            if (player != null) {
+                player.displayClientMessage(Component.translatable("message.workingmedium.cannot_certify"), true);
+            }
+            return InteractionResult.CONSUME;
+        }
         if (!apparatus.applyCertificate()) {
             if (player != null) {
                 player.displayClientMessage(Component.translatable("message.workingmedium.already_certified"), true);

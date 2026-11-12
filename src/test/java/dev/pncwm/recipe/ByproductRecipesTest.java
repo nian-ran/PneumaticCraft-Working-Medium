@@ -34,6 +34,17 @@ class ByproductRecipesTest {
         String critical = Files.readString(recipe("critical_window.json"));
         assertTrue(critical.contains("workingmedium:microfluidic_chip"), critical);
         assertTrue(critical.contains("\"item_counts\""), critical);
+        assertRecipe("cycle_kerosene.json", "cycle_island", "pneumaticcraft:kerosene", "\"air\": -220");
+        assertRecipe("cycle_gasoline.json", "cycle_island", "pneumaticcraft:gasoline", "\"air\": -240");
+        assertRecipe("cycle_lpg.json", "cycle_island", "pneumaticcraft:lpg", "\"air\": -260");
+        assertRecipe("cycle_diesel_oxygen.json", "cycle_island", "pneumaticcraft:diesel", "workingmedium:oxygen", "\"air\": -280");
+        assertRecipe("crush_cobble.json", "impact_crusher", "minecraft:cobblestone", "workingmedium:stone_dust");
+        assertRecipe("crush_stone.json", "impact_crusher", "minecraft:stone", "workingmedium:stone_dust");
+        assertRecipe("crush_gravel.json", "impact_crusher", "minecraft:gravel", "workingmedium:stone_dust");
+        assertRecipe("clay_dust.json", "lube_mixer", "workingmedium:stone_dust", "\"item_counts\": [4]", "minecraft:clay_ball");
+        String cobble = Files.readString(recipe("stone_dust_block.json"));
+        assertTrue(cobble.contains("workingmedium:stone_dust"), cobble);
+        assertTrue(cobble.contains("minecraft:cobblestone"), cobble);
     }
 
     @Test
@@ -43,11 +54,11 @@ class ByproductRecipesTest {
         assertEquals(en, zh);
         for (String status : new String[] {"unformed", "idle", "running", "window", "pressure", "temperature", "clogged",
                 "flood", "coking", "frozen", "leak", "no_lube", "no_vent", "no_air", "missing_part", "scrapped", "certified",
-                "paused"}) {
+                "paused", "no_drain"}) {
             assertTrue(en.contains("hint.workingmedium." + status), status);
             assertTrue(en.contains("status.workingmedium." + status), "status " + status);
         }
-        for (int page = 0; page < 16; page++) {
+        for (int page = 0; page < 17; page++) {
             assertTrue(en.contains("manual.workingmedium.page." + page), "page " + page);
         }
         for (String key : new String[] {"tooltip.workingmedium.certificate", "tooltip.workingmedium.certified",
@@ -62,7 +73,10 @@ class ByproductRecipesTest {
                 "jei.workingmedium.info.hatch_heat", "jei.workingmedium.info.hatch_gauge",
                 "jei.workingmedium.air_produce", "jei.workingmedium.air_cost",
                 "message.workingmedium.certified", "message.workingmedium.already_certified",
-                "message.workingmedium.certify_unformed"}) {
+                "message.workingmedium.certify_unformed", "message.workingmedium.cannot_certify",
+                "jei.workingmedium.info.cryo_fluid", "jei.workingmedium.info.purge", "jei.workingmedium.info.flare",
+                "jei.workingmedium.info.hatch_drain", "jei.workingmedium.info.hatch_io",
+                "jei.workingmedium.info.redstone_pause", "jei.workingmedium.info.stone_dust"}) {
             assertTrue(en.contains(key), key);
         }
     }

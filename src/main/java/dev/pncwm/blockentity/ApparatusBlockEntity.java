@@ -119,7 +119,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return 0;
         }
         if (kind().usesRecipes()) {
-            boolean running = status == MachineStatus.RUNNING || status == MachineStatus.WINDOW;
+            boolean running = status == MachineStatus.RUNNING || status == MachineStatus.WINDOW
+                    || (status == MachineStatus.PAUSED && workTime > 0 && progress > 0);
             return Tuning.progressSignal(progress, workTime, running);
         }
         if (air == null) {
@@ -299,15 +300,27 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     }
 
     public void clientTick() {
+        double x = worldPosition.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.35;
+        double y = worldPosition.getY() + 0.9 + level.random.nextDouble() * 0.4;
+        double z = worldPosition.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.35;
         if (kind() == ApparatusKind.FLARE_STACK && (status == MachineStatus.RUNNING || status == MachineStatus.WINDOW)
                 && level.random.nextFloat() < 0.45f) {
-            double x = worldPosition.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.35;
-            double y = worldPosition.getY() + 0.9 + level.random.nextDouble() * 0.4;
-            double z = worldPosition.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.35;
             level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0.04, 0);
             if (level.random.nextFloat() < 0.5f) {
                 level.addParticle(ParticleTypes.SMOKE, x, y + 0.2, z, 0, 0.06, 0);
             }
+        }
+        if (status == MachineStatus.LEAK && level.random.nextFloat() < 0.35f) {
+            level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.03, 0);
+        }
+        if (status == MachineStatus.NO_VENT && level.random.nextFloat() < 0.4f) {
+            level.addParticle(ParticleTypes.CLOUD, x, y, z, 0, 0.02, 0);
+        }
+        if (status == MachineStatus.COKING && level.random.nextFloat() < 0.4f) {
+            level.addParticle(ParticleTypes.LARGE_SMOKE, x, y, z, 0, 0.02, 0);
+        }
+        if (status == MachineStatus.FROZEN && level.random.nextFloat() < 0.35f) {
+            level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0, 0.01, 0);
         }
     }
 
@@ -378,9 +391,20 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         return io.controllerFluids();
     }
 
+    /** Machines that actually spend less air or wear, or gain rate, when certified. */
+    public boolean usesCertificate() {
+        if (kind().usesRecipes()) {
+            return true;
+        }
+        return switch (kind().family) {
+            case COLUMN, CHARGE, REGULATOR, LOOP -> true;
+            default -> false;
+        };
+    }
+
     /** Right-click with a certificate: the machine uses 25% less air and the seal wears 25% slower. */
     public boolean applyCertificate() {
-        if (!formed.formed() || certified) {
+        if (!formed.formed() || certified || !usesCertificate()) {
             return false;
         }
         certified = true;
@@ -489,6 +513,10 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         if (status == MachineStatus.COKING || status == MachineStatus.FROZEN) {
             return;
         }
+        if (kind() == ApparatusKind.ELECTROLYZER && !hasElectrode()) {
+            setStatus(MachineStatus.MISSING_PART);
+            return;
+        }
         if (recipe.heatPerTick > 0 && !formed.vent() && formed.size() > 1) {
             setStatus(MachineStatus.NO_VENT);
             if (level.getGameTime() % 40 == 0 && level.random.nextFloat() < 0.15f * formed.size()) {
@@ -496,9 +524,22 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             }
             return;
         }
-        // Do not wear the seal while the machine is clogged, dry or short of air.
+        if (recipeNeedsDrain(recipe) && !formed.drain()) {
+            setStatus(MachineStatus.NO_DRAIN);
+            return;
+        }
+        // Do not wear the seal or drink lube while the machine is clogged, dry or short of air.
         if (seal <= 0 && io.items.getStackInSlot(MachineIo.SEAL).isEmpty()) {
             setStatus(MachineStatus.LEAK);
+            return;
+        }
+        if (!outputsFit(recipe)) {
+            setStatus(MachineStatus.CLOGGED);
+            return;
+        }
+        int airChange = Tuning.airChange(recipe.airPerTick, formed.parallel(), WMConfig.airMultiplier(), certified);
+        if (airChange < 0 && air.getAir() < -airChange) {
+            setStatus(MachineStatus.NO_AIR);
             return;
         }
         if (recipe.lubeMb > 0 && level.getGameTime() % 20 == 0) {
@@ -511,18 +552,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             }
             io.tanks[MachineIo.LUBE].drain(lubeNeed, IFluidHandler.FluidAction.EXECUTE);
         }
-        if (!outputsFit(recipe)) {
-            setStatus(MachineStatus.CLOGGED);
-            return;
-        }
-        int airChange = Tuning.airChange(recipe.airPerTick, formed.parallel(), WMConfig.airMultiplier(), certified);
-        if (airChange < 0 && air.getAir() < -airChange) {
-            setStatus(MachineStatus.NO_AIR);
-            return;
-        }
         air.addAir(airChange);
         heat.addHeat(recipe.heatPerTick * formed.parallel());
-        if (!wearSeal()) {
+        if (!wearSeal(tryPurge(recipe))) {
             setStatus(MachineStatus.LEAK);
             return;
         }
@@ -591,7 +623,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         if (air.getPressure() < target && source.getPressure() > target + 0.3f) {
             int move = Math.min(500, source.getAir() / 8);
             source.addAir(-move);
-            air.addAir((int) (move * Tuning.regulatorEfficiency(upgradeMultiplier("_diaphragm"))));
+            float efficiency = Tuning.certifiedEfficiency(
+                    Tuning.regulatorEfficiency(upgradeMultiplier("_diaphragm")), certified);
+            air.addAir((int) (move * efficiency));
             heat.addHeat(move * 0.05);
         }
         int bleed = Tuning.regulatorBleed(air.getPressure(), target, air.getVolume());
@@ -615,7 +649,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             if (fluid.isEmpty()) {
                 continue;
             }
-            if (!isLightGas(fluid)) {
+            if (!Tuning.isCombustibleGas(BuiltInRegistries.FLUID.getKey(fluid.getFluid()).getPath())) {
                 blocked = true;
                 continue;
             }
@@ -753,7 +787,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setStatus(MachineStatus.IDLE);
             return;
         }
-        FluidStack drained = back.drain(50 * formed.size() * upgradeMultiplier("_pump"), IFluidHandler.FluidAction.SIMULATE);
+        int rate = Tuning.certifiedBoost(50 * formed.size() * upgradeMultiplier("_pump"), certified);
+        FluidStack drained = back.drain(rate, IFluidHandler.FluidAction.SIMULATE);
         if (drained.isEmpty()) {
             setStatus(MachineStatus.IDLE);
             return;
@@ -1006,8 +1041,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
     }
 
-    private boolean wearSeal() {
-        seal -= Tuning.sealWear(WMConfig.leakMultiplier(), certified);
+    private boolean wearSeal(boolean purged) {
+        seal -= Tuning.sealWear(WMConfig.leakMultiplier(), certified, purged);
         ItemStack sealStack = io.items.getStackInSlot(MachineIo.SEAL);
         if (seal < Tuning.SEAL_SWAP_AT && !sealStack.isEmpty()) {
             int gradeIndex = sealStack.getItem() instanceof GradeItem gradeItem ? gradeItem.grade.index : 2;
@@ -1107,21 +1142,26 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return;
         }
         int signal = comparatorSignal();
-        if (signal == lastSignal) {
+        int hatchFill = hatchSignal(HatchType.ITEM_IN) << 12
+                | hatchSignal(HatchType.ITEM_OUT) << 8
+                | hatchSignal(HatchType.FLUID) << 4
+                | hatchSignal(HatchType.DRAIN);
+        int combined = signal | (hatchFill << 8);
+        if (combined == lastSignal) {
             return;
         }
-        lastSignal = signal;
+        lastSignal = combined;
         level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
         for (BlockPos pos : bound) {
             BlockState state = level.getBlockState(pos);
-            if (state.getBlock() instanceof HatchBlock hatch && hatch.type == HatchType.GAUGE) {
+            if (state.getBlock() instanceof HatchBlock) {
                 level.updateNeighbourForOutputSignal(pos, state.getBlock());
             }
         }
     }
 
     private void autoApplyCertificate() {
-        if (certified) {
+        if (certified || !usesCertificate()) {
             return;
         }
         for (int i = 0; i < MachineIo.INPUTS; i++) {
@@ -1146,6 +1186,93 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return cleaned;
         }
         return true;
+    }
+
+    public int hatchSignal(HatchType type) {
+        if (!formed.formed()) {
+            return 0;
+        }
+        return switch (type) {
+            case ITEM_IN -> itemFill(0, MachineIo.INPUTS);
+            case ITEM_OUT -> itemFill(MachineIo.INPUTS, MachineIo.INPUTS);
+            case DRAIN -> fluidFill(MachineIo.INPUTS, MachineIo.INPUTS);
+            case FLUID, GAS -> fluidFill(0, MachineIo.INPUTS);
+            case GAUGE -> comparatorSignal();
+            default -> 0;
+        };
+    }
+
+    private int itemFill(int start, int count) {
+        int amount = 0;
+        int capacity = 0;
+        for (int i = 0; i < count; i++) {
+            ItemStack stack = io.items.getStackInSlot(start + i);
+            capacity += io.items.getSlotLimit(start + i);
+            amount += stack.getCount();
+        }
+        return Tuning.fillSignal(amount, capacity);
+    }
+
+    private int fluidFill(int start, int count) {
+        int amount = 0;
+        int capacity = 0;
+        for (int i = 0; i < count; i++) {
+            FluidTank tank = io.tanks[start + i];
+            capacity += tank.getCapacity();
+            amount += tank.getFluidAmount();
+        }
+        return Tuning.fillSignal(amount, capacity);
+    }
+
+    private boolean hasElectrode() {
+        ItemStack stack = io.items.getStackInSlot(MachineIo.SPECIAL);
+        if (stack.isEmpty()) {
+            return false;
+        }
+        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().equals("electrode");
+    }
+
+    private boolean recipeNeedsDrain(WindowRecipe recipe) {
+        for (FluidSpec spec : recipe.fluidOutputs) {
+            if (formed.size() < spec.minSize()) {
+                continue;
+            }
+            if (Tuning.needsDrain(spec.fluid())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean tryPurge(WindowRecipe recipe) {
+        for (int i = 0; i < MachineIo.INPUTS; i++) {
+            FluidStack fluid = io.tanks[i].getFluid();
+            if (fluid.isEmpty()) {
+                continue;
+            }
+            String path = BuiltInRegistries.FLUID.getKey(fluid.getFluid()).getPath();
+            if (!Tuning.isPurgeGas(path) || recipeUsesFluid(recipe, path)) {
+                continue;
+            }
+            if (level.getGameTime() % 20 == 0) {
+                int take = Math.min(Tuning.PURGE_MB, fluid.getAmount());
+                if (take > 0) {
+                    io.tanks[i].drain(take, IFluidHandler.FluidAction.EXECUTE);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean recipeUsesFluid(WindowRecipe recipe, String path) {
+        String name = Tuning.fluidName(path);
+        for (FluidSpec spec : recipe.fluids) {
+            if (Tuning.fluidName(spec.fluid()).equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasProgramSheet() {

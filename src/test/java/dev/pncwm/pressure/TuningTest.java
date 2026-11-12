@@ -193,4 +193,64 @@ class TuningTest {
         assertEquals(64, Tuning.electrodeLife());
     }
 
+    @Test
+    void flareBurnsWasteGasesButNotProducts() {
+        assertTrue(Tuning.isCombustibleGas("hydrogen"));
+        assertTrue(Tuning.isCombustibleGas("flue_gas"));
+        assertTrue(Tuning.isCombustibleGas("acid_mist"));
+        assertTrue(Tuning.isCombustibleGas("chlorine"));
+        assertTrue(Tuning.isCombustibleGas("dusty_steam"));
+        assertTrue(Tuning.isCombustibleGas("flowing_flue_gas"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isCombustibleGas("nitrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isCombustibleGas("argon"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isCombustibleGas("oxygen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isCombustibleGas("pure_nitrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isCombustibleGas("inerts"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isCombustibleGas("brine"));
+    }
+
+    @Test
+    void purgeAndCryogenicFluidsAreDistinctFromAcids() {
+        assertTrue(Tuning.isPurgeGas("nitrogen"));
+        assertTrue(Tuning.isPurgeGas("pure_nitrogen"));
+        assertTrue(Tuning.isPurgeGas("argon"));
+        assertTrue(Tuning.isPurgeGas("inerts"));
+        assertTrue(Tuning.isPurgeGas("workingmedium:nitrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isPurgeGas("hydrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isPurgeGas("oxygen"));
+        assertTrue(Tuning.isCryogenic("liquid_co2"));
+        assertTrue(Tuning.isCryogenic("nitrogen"));
+        assertTrue(Tuning.isCryogenic("argon"));
+        assertTrue(Tuning.isCryogenic("oxygen"));
+        assertTrue(Tuning.isCryogenic("pure_nitrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isCryogenic("chlorine"));
+        assertEquals(1f, Tuning.fluidFreeze("liquid_co2"));
+        assertEquals(0f, Tuning.fluidFreeze("chlorine"));
+        assertEquals(80, Tuning.fluidSlowTicks("nitrogen"));
+        assertEquals(0, Tuning.fluidSlowTicks("caustic"));
+        assertTrue(Tuning.needsDrain("acid_mist"));
+        assertTrue(Tuning.needsDrain("workingmedium:flue_gas"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.needsDrain("nitrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.needsDrain("liquid_co2"));
+    }
+
+    @Test
+    void fillSignalAndCertifiedHelpers() {
+        assertEquals(0, Tuning.fillSignal(0, 64));
+        assertEquals(0, Tuning.fillSignal(10, 0));
+        assertEquals(1, Tuning.fillSignal(1, 64));
+        assertEquals(8, Tuning.fillSignal(32, 64));
+        assertEquals(15, Tuning.fillSignal(64, 64));
+        assertEquals(15, Tuning.fillSignal(80, 64));
+        assertEquals(0.80f, Tuning.certifiedEfficiency(0.80f, false), 1e-5);
+        assertEquals(0.85f, Tuning.certifiedEfficiency(0.80f, true), 1e-5);
+        assertEquals(0.97f, Tuning.certifiedEfficiency(0.96f, true), 1e-5);
+        assertEquals(50, Tuning.certifiedBoost(50, false));
+        assertEquals(67, Tuning.certifiedBoost(50, true));
+        assertEquals(0, Tuning.certifiedBoost(0, true));
+        assertEquals(1, Tuning.sealWear(2.0, false, true));
+        assertEquals(2, Tuning.sealWear(2.0, false, false));
+        assertEquals(20, Tuning.PURGE_MB);
+    }
+
 }

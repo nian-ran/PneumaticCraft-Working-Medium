@@ -54,8 +54,9 @@ public class ReliefValveBlockEntity extends AirMachine {
         if (air != null) {
             Direction vent = getBlockState().getValue(HorizontalDirectionalBlock.FACING);
             float setpoint = SETPOINTS[index];
-            air.enableSafetyVenting(pressure -> pressure > setpoint, vent);
-            if (level != null && !level.isClientSide && air.getPressure() > setpoint && level.getGameTime() % 40 == 0) {
+            boolean paused = level != null && level.hasNeighborSignal(worldPosition);
+            air.enableSafetyVenting(pressure -> !paused && pressure > setpoint, vent);
+            if (!paused && level != null && !level.isClientSide && air.getPressure() > setpoint && level.getGameTime() % 40 == 0) {
                 WMSounds.play(level, worldPosition, WMSounds.VENT.get(), SoundSource.BLOCKS, 0.45f, 1.05f);
             }
             int signal = signal();

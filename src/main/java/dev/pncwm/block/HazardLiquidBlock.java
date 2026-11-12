@@ -14,8 +14,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 
 /**
- * Chlorine, acid, caustic and flue gas hurt anything that stands in them. Safe fluids use this block too,
- * but {@link Tuning#fluidHarm} returns zero for those and nothing happens.
+ * Chlorine, acid, caustic and flue gas hurt anything that stands in them. Liquid carbon dioxide, nitrogen,
+ * argon and oxygen freeze and slow living things. Harmless fluids use this block too, but the tuning rules
+ * return zero for those and nothing happens.
  */
 public class HazardLiquidBlock extends LiquidBlock {
     public HazardLiquidBlock(FlowingFluid fluid, Properties properties) {
@@ -36,13 +37,21 @@ public class HazardLiquidBlock extends LiquidBlock {
         }
         String path = BuiltInRegistries.FLUID.getKey(state.getFluidState().getType()).getPath();
         float harm = Tuning.fluidHarm(path);
-        if (harm <= 0f) {
-            return;
+        if (harm > 0f) {
+            living.hurt(living.damageSources().magic(), harm);
         }
-        living.hurt(living.damageSources().magic(), harm);
         int poison = Tuning.fluidPoisonTicks(path);
         if (poison > 0) {
             living.addEffect(new MobEffectInstance(MobEffects.POISON, poison, 0));
+        }
+        float freeze = Tuning.fluidFreeze(path);
+        if (freeze > 0f) {
+            living.hurt(living.damageSources().freeze(), freeze);
+            living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + 40, living.getTicksFrozen() + 40));
+        }
+        int slow = Tuning.fluidSlowTicks(path);
+        if (slow > 0) {
+            living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slow, 0));
         }
     }
 }

@@ -70,9 +70,14 @@ public final class Tuning {
         return Math.max(1, Math.round(amount * CERTIFIED_COST));
     }
 
-    /** Seal points worn in one running tick. A certificate cuts wear by 25%, but a running tick still wears at least 1. */
+    /** Seal points worn in one running tick. A certificate cuts wear by 25%, a nitrogen purge halves it, but a running tick still wears at least 1. */
     public static int sealWear(double leakMultiplier, boolean certified) {
-        int wear = (int) Math.max(1, Math.round(leakMultiplier));
+        return sealWear(leakMultiplier, certified, false);
+    }
+
+    public static int sealWear(double leakMultiplier, boolean certified, boolean purged) {
+        double factor = purged ? 0.5 : 1.0;
+        int wear = (int) Math.max(1, Math.round(leakMultiplier * factor));
         return certifiedCost(wear, certified);
     }
 
@@ -103,10 +108,10 @@ public final class Tuning {
      * refuses hydrogen, and so the flare stack can burn any waste gas.
      */
     public static boolean isGasPath(String path) {
-        if (path == null || path.isEmpty()) {
+        String name = fluidName(path);
+        if (name.isEmpty()) {
             return false;
         }
-        String name = path.startsWith("flowing_") ? path.substring("flowing_".length()) : path;
         if (name.contains("gas") || name.contains("steam") || name.contains("mist")
                 || name.contains("vapour") || name.contains("vapor")) {
             return true;
@@ -186,10 +191,10 @@ public final class Tuning {
      * Zero means the fluid is harmless.
      */
     public static float fluidHarm(String path) {
-        if (path == null || path.isEmpty()) {
+        String name = fluidName(path);
+        if (name.isEmpty()) {
             return 0f;
         }
-        String name = path.startsWith("flowing_") ? path.substring("flowing_".length()) : path;
         return switch (name) {
             case "chlorine", "acid_mist" -> 2f;
             case "hydrochloric", "caustic" -> 3f;
@@ -201,10 +206,10 @@ public final class Tuning {
 
     /** Poison duration in ticks for a hazardous gas or mist. Zero if it only deals damage. */
     public static int fluidPoisonTicks(String path) {
-        if (path == null || path.isEmpty()) {
+        String name = fluidName(path);
+        if (name.isEmpty()) {
             return 0;
         }
-        String name = path.startsWith("flowing_") ? path.substring("flowing_".length()) : path;
         return switch (name) {
             case "chlorine", "acid_mist" -> 80;
             default -> 0;
@@ -246,5 +251,94 @@ public final class Tuning {
     /** How many uses a fresh electrode has in the electrolyzer. */
     public static int electrodeLife() {
         return 64;
+    }
+
+    /** Millibuckets of purge gas consumed every 20 running ticks when a purge is active. */
+    public static final int PURGE_MB = 20;
+
+    public static String fluidName(String path) {
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+        String name = path;
+        int colon = name.indexOf(':');
+        if (colon >= 0) {
+            name = name.substring(colon + 1);
+        }
+        return name.startsWith("flowing_") ? name.substring("flowing_".length()) : name;
+    }
+
+    /**
+     * Gases the flare may actually burn. Nitrogen, argon, oxygen, pure nitrogen and inerts are products,
+     * not fuel, and must be refused.
+     */
+    public static boolean isCombustibleGas(String path) {
+        return switch (fluidName(path)) {
+            case "hydrogen", "flue_gas", "acid_mist", "chlorine", "dusty_steam" -> true;
+            default -> false;
+        };
+    }
+
+    /** Inert cover gas that can purge a running machine and cut seal wear in half. */
+    public static boolean isPurgeGas(String path) {
+        return switch (fluidName(path)) {
+            case "nitrogen", "pure_nitrogen", "argon", "inerts" -> true;
+            default -> false;
+        };
+    }
+
+    /** Cold process fluids that freeze living things standing in them. */
+    public static boolean isCryogenic(String path) {
+        return switch (fluidName(path)) {
+            case "liquid_co2", "nitrogen", "pure_nitrogen", "argon", "oxygen" -> true;
+            default -> false;
+        };
+    }
+
+    /** Slowness duration in ticks for a cryogenic fluid. Zero if it is not cold. */
+    public static int fluidSlowTicks(String path) {
+        return isCryogenic(path) ? 80 : 0;
+    }
+
+    /** Freeze damage applied every 10 ticks in a cryogenic fluid. Zero if it is not cold. */
+    public static float fluidFreeze(String path) {
+        return isCryogenic(path) ? 1f : 0f;
+    }
+
+    /**
+     * Whether a recipe fluid output must leave through a drain hatch. Matches the fluids that hurt
+     * anything standing in them (acid, caustic, chlorine, flue gas).
+     */
+    public static boolean needsDrain(String path) {
+        return fluidHarm(path) > 0f;
+    }
+
+    /** Comparator strength 0-15 for how full a group of slots or tanks is. Any content gives at least 1. */
+    public static int fillSignal(int amount, int capacity) {
+        if (amount <= 0 || capacity <= 0) {
+            return 0;
+        }
+        int scaled = 1 + (int) ((long) Math.min(amount, capacity) * 14L / capacity);
+        return Math.max(1, Math.min(15, scaled));
+    }
+
+    /**
+     * Outlet share after a certificate is applied. A certificate cuts the lost fraction by 25%
+     * (0.80 becomes 0.85, 0.96 becomes 0.97).
+     */
+    public static float certifiedEfficiency(float base, boolean certified) {
+        float clamped = Math.min(1f, Math.max(0f, base));
+        if (!certified) {
+            return clamped;
+        }
+        return 1f - (1f - clamped) * CERTIFIED_COST;
+    }
+
+    /** Integer rate after a certificate raises throughput. Always at least the original positive amount. */
+    public static int certifiedBoost(int amount, boolean certified) {
+        if (amount <= 0 || !certified) {
+            return Math.max(0, amount);
+        }
+        return Math.max(amount, Math.round(amount / CERTIFIED_COST));
     }
 }

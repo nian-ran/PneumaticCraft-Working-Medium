@@ -1,0 +1,10 @@
+{
+  "type": "workingmedium:window",
+  "machine": "lube_mixer",
+  "items": [{"item": "workingmedium:stone_dust"}],
+  "item_counts": [4],
+  "fluids": [{"fluid": "minecraft:water", "amount": 250}],
+  "item_outputs": [{"item": "minecraft:clay_ball", "count": 2}],
+  "pressure_min": 2.0, "pressure_max": 10.0, "temp_min": 10, "temp_max": 80,
+  "air": 10, "time": 60
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["SS", "SS"],
+  "key": {"S": {"item": "workingmedium:stone_dust"}},
+  "result": {"id": "minecraft:cobblestone", "count": 1}
+}

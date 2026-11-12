@@ -101,10 +101,12 @@ public class TransferBlockEntity extends BlockEntity implements IManoMeasurable 
         inlet.tick(this);
         outlet.tick(this);
         heat.tick();
-        if (booster) {
-            boost();
-        } else {
-            reduce();
+        if (!level.hasNeighborSignal(worldPosition)) {
+            if (booster) {
+                boost();
+            } else {
+                reduce();
+            }
         }
         if (level.getGameTime() % 20 == 0) {
             // Mark dirty when either side changed, so both pressures and the heat are actually written to disk.

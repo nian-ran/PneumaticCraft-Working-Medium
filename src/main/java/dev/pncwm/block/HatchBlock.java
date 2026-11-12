@@ -72,15 +72,16 @@ public class HatchBlock extends BaseEntityBlock {
 
     @Override
     protected boolean hasAnalogOutputSignal(BlockState state) {
-        return type == HatchType.GAUGE;
+        return type == HatchType.GAUGE || type == HatchType.ITEM_IN || type == HatchType.ITEM_OUT
+                || type == HatchType.FLUID || type == HatchType.GAS || type == HatchType.DRAIN;
     }
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        if (type == HatchType.GAUGE && level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) {
+        if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) {
             ApparatusBlockEntity apparatus = hatch.controller();
             if (apparatus != null) {
-                return apparatus.comparatorSignal();
+                return apparatus.hatchSignal(type);
             }
         }
         return 0;
