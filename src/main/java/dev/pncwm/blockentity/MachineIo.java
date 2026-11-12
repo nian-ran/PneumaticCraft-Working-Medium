@@ -214,22 +214,33 @@ public final class MachineIo {
         return new IFluidHandler() {
             @Override
             public int getTanks() {
-                return INPUTS;
+                return Tuning.hatchTankViews(drainOnly, type == HatchType.GAS, type == HatchType.FLUID);
             }
 
             @Override
             public FluidStack getFluidInTank(int tank) {
-                return tanks[drainOnly ? tank + INPUTS : tank].getFluid();
+                int index = viewTank(tank);
+                return index < 0 ? FluidStack.EMPTY : tanks[index].getFluid();
             }
 
             @Override
             public int getTankCapacity(int tank) {
-                return 16_000;
+                int index = viewTank(tank);
+                return index < 0 ? 0 : tanks[index].getCapacity();
             }
 
             @Override
             public boolean isFluidValid(int tank, FluidStack stack) {
+                int index = viewTank(tank);
+                // Only the input row accepts a fill; lubricant still redirects in fill().
+                if (index < 0 || index >= INPUTS) {
+                    return false;
+                }
                 return accepts(type, stack);
+            }
+
+            private int viewTank(int tank) {
+                return Tuning.hatchTankIndex(drainOnly, type == HatchType.GAS, type == HatchType.FLUID, tank);
             }
 
             @Override
@@ -348,6 +359,9 @@ public final class MachineIo {
                 return drained;
             }
         }
+        if (isLube(resource)) {
+            return tanks[LUBE].drain(resource, action);
+        }
         return FluidStack.EMPTY;
     }
 
@@ -366,12 +380,19 @@ public final class MachineIo {
                 return drained;
             }
         }
+        boolean gas = type == HatchType.GAS;
+        boolean fluid = type == HatchType.FLUID;
+        boolean drain = type == HatchType.DRAIN;
+        if (Tuning.mayDrainLube(drain, gas, fluid, type == null) && !tanks[LUBE].getFluid().isEmpty()) {
+            return tanks[LUBE].drain(maxDrain, action);
+        }
         return FluidStack.EMPTY;
     }
 
     /**
      * Drain-side filter for a hatch. A gas hatch only yields gases, a fluid hatch only yields liquids,
-     * and a drain hatch yields whatever is in the output tanks.
+     * and a drain hatch yields whatever is in the output tanks. Lubricant is drained separately after
+     * the product tanks, and only through a fluid hatch, a drain hatch or the controller.
      */
     public static boolean acceptsOutput(HatchType type, FluidStack stack) {
         if (stack.isEmpty()) {

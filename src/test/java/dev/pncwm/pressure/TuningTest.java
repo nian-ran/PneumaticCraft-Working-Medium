@@ -348,6 +348,47 @@ class TuningTest {
         assertTrue(Tuning.isFlameSource(false, false, false, true, false));
         assertTrue(Tuning.isFlameSource(false, false, false, false, true));
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.isFlameSource(false, false, false, false, false));
+        assertTrue(Tuning.isFlameSource(false, false, false, false, false, true, false));
+        assertTrue(Tuning.isFlameSource(false, false, false, false, false, false, true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isFlameSource(false, false, false, false, false, false, false));
+    }
+
+    @Test
+    void cryogenicFluidsExtinguishExceptOxygen() {
+        assertTrue(Tuning.extinguishesFire("liquid_co2"));
+        assertTrue(Tuning.extinguishesFire("nitrogen"));
+        assertTrue(Tuning.extinguishesFire("pure_nitrogen"));
+        assertTrue(Tuning.extinguishesFire("argon"));
+        assertTrue(Tuning.extinguishesFire("workingmedium:liquid_co2"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.extinguishesFire("oxygen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.extinguishesFire("hydrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.extinguishesFire("water"));
+    }
+
+    @Test
+    void hatchViewsExposeOutputsAndLubeWhereAllowed() {
+        assertEquals(5, Tuning.hatchTankViews(true, false, false));
+        assertEquals(8, Tuning.hatchTankViews(false, true, false));
+        assertEquals(9, Tuning.hatchTankViews(false, false, true));
+        assertEquals(0, Tuning.hatchTankViews(false, false, false));
+        // Drain: 0-3 are output tanks 4-7, 4 is lubricant.
+        assertEquals(4, Tuning.hatchTankIndex(true, false, false, 0));
+        assertEquals(7, Tuning.hatchTankIndex(true, false, false, 3));
+        assertEquals(8, Tuning.hatchTankIndex(true, false, false, 4));
+        assertEquals(-1, Tuning.hatchTankIndex(true, false, false, 5));
+        // Gas: 0-3 inputs, 4-7 outputs, no lubricant.
+        assertEquals(0, Tuning.hatchTankIndex(false, true, false, 0));
+        assertEquals(7, Tuning.hatchTankIndex(false, true, false, 7));
+        assertEquals(-1, Tuning.hatchTankIndex(false, true, false, 8));
+        // Fluid: same as gas plus lubricant at 8.
+        assertEquals(7, Tuning.hatchTankIndex(false, false, true, 7));
+        assertEquals(8, Tuning.hatchTankIndex(false, false, true, 8));
+        assertEquals(-1, Tuning.hatchTankIndex(false, false, true, 9));
+        assertTrue(Tuning.mayDrainLube(true, false, false, false));
+        assertTrue(Tuning.mayDrainLube(false, false, true, false));
+        assertTrue(Tuning.mayDrainLube(false, false, false, true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.mayDrainLube(false, true, false, false));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.mayDrainLube(false, false, false, false));
     }
 
 }

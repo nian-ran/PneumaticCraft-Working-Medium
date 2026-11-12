@@ -12,19 +12,24 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractCandleBlock;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluids;
 
 /**
  * Chlorine, acid, caustic and flue gas hurt anything that stands in them. Liquid carbon dioxide, nitrogen,
- * argon and oxygen freeze and slow living things. Dusty steam scalds. Hydrogen ignites next to fire and
- * the spilled pool itself burns off; oxygen feeds a fire that is already burning. Harmless fluids use
- * this block too, but the tuning rules return zero for those and nothing happens.
+ * argon and oxygen freeze and slow living things. Liquid carbon dioxide, nitrogen and argon also put out
+ * fire; oxygen is cold but feeds a fire, so it does not. Dusty steam scalds. Hydrogen ignites next to fire
+ * (including a torch, lantern, lit candle or lit furnace) and the spilled pool itself burns off; oxygen
+ * feeds a fire that is already burning. Harmless fluids use this block too, but the tuning rules return
+ * zero for those and nothing happens.
  */
 public class HazardLiquidBlock extends LiquidBlock {
     public HazardLiquidBlock(FlowingFluid fluid, Properties properties) {
@@ -51,6 +56,9 @@ public class HazardLiquidBlock extends LiquidBlock {
         int poison = Tuning.fluidPoisonTicks(path);
         if (poison > 0) {
             living.addEffect(new MobEffectInstance(MobEffects.POISON, poison, 0));
+        }
+        if (Tuning.extinguishesFire(path) && living.getRemainingFireTicks() > 0) {
+            living.clearFire();
         }
         float freeze = Tuning.fluidFreeze(path);
         if (freeze > 0f) {
@@ -82,12 +90,14 @@ public class HazardLiquidBlock extends LiquidBlock {
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
         tryIgnite(level, pos, state);
+        tryDouse(level, pos, state);
     }
 
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
         tryIgnite(level, pos, state);
+        tryDouse(level, pos, state);
     }
 
     private static void tryIgnite(Level level, BlockPos pos, BlockState state) {
@@ -97,6 +107,31 @@ public class HazardLiquidBlock extends LiquidBlock {
         String path = BuiltInRegistries.FLUID.getKey(state.getFluidState().getType()).getPath();
         if (Tuning.poolIgnites(path, nearFlame(level, pos))) {
             ignitePool(level, pos);
+        }
+    }
+
+    private static void tryDouse(Level level, BlockPos pos, BlockState state) {
+        if (level.isClientSide) {
+            return;
+        }
+        String path = BuiltInRegistries.FLUID.getKey(state.getFluidState().getType()).getPath();
+        if (Tuning.extinguishesFire(path)) {
+            douseNearbyFire(level, pos);
+        }
+    }
+
+    private static void douseNearbyFire(Level level, BlockPos pos) {
+        for (Direction direction : Direction.values()) {
+            BlockPos neighborPos = pos.relative(direction);
+            BlockState neighbor = level.getBlockState(neighborPos);
+            if (neighbor.is(Blocks.FIRE) || neighbor.is(Blocks.SOUL_FIRE)) {
+                level.setBlock(neighborPos, Blocks.AIR.defaultBlockState(), 3);
+                level.playSound(null, neighborPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
+            } else if ((neighbor.is(Blocks.CAMPFIRE) || neighbor.is(Blocks.SOUL_CAMPFIRE))
+                    && neighbor.hasProperty(CampfireBlock.LIT) && neighbor.getValue(CampfireBlock.LIT)) {
+                level.setBlock(neighborPos, neighbor.setValue(CampfireBlock.LIT, false), 3);
+                level.playSound(null, neighborPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.0f);
+            }
         }
     }
 
@@ -118,7 +153,15 @@ public class HazardLiquidBlock extends LiquidBlock {
             boolean litCampfire = (neighbor.is(Blocks.CAMPFIRE) || neighbor.is(Blocks.SOUL_CAMPFIRE))
                     && neighbor.hasProperty(CampfireBlock.LIT) && neighbor.getValue(CampfireBlock.LIT);
             boolean lavaCauldron = neighbor.is(Blocks.LAVA_CAULDRON);
-            if (Tuning.isFlameSource(openFlame, lava, magma, litCampfire, lavaCauldron)) {
+            boolean torchOrLantern = neighbor.is(Blocks.TORCH) || neighbor.is(Blocks.WALL_TORCH)
+                    || neighbor.is(Blocks.SOUL_TORCH) || neighbor.is(Blocks.SOUL_WALL_TORCH)
+                    || neighbor.is(Blocks.LANTERN) || neighbor.is(Blocks.SOUL_LANTERN)
+                    || neighbor.is(Blocks.JACK_O_LANTERN);
+            boolean litCandle = neighbor.getBlock() instanceof AbstractCandleBlock
+                    && neighbor.hasProperty(BlockStateProperties.LIT) && neighbor.getValue(BlockStateProperties.LIT);
+            boolean litFurnace = neighbor.getBlock() instanceof AbstractFurnaceBlock
+                    && neighbor.hasProperty(AbstractFurnaceBlock.LIT) && neighbor.getValue(AbstractFurnaceBlock.LIT);
+            if (Tuning.isFlameSource(openFlame, lava, magma, litCampfire, lavaCauldron, torchOrLantern, litCandle || litFurnace)) {
                 return true;
             }
         }

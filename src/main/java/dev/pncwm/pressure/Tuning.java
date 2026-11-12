@@ -444,6 +444,77 @@ public final class Tuning {
      */
     public static boolean isFlameSource(boolean openFlame, boolean lava, boolean magma,
                                        boolean litCampfire, boolean lavaCauldron) {
-        return openFlame || lava || magma || litCampfire || lavaCauldron;
+        return isFlameSource(openFlame, lava, magma, litCampfire, lavaCauldron, false, false);
+    }
+
+    /**
+     * Also treats a torch, lantern or jack o'lantern, and a lit candle, furnace, smoker or blast
+     * furnace, as a flame that can ignite spilled hydrogen.
+     */
+    public static boolean isFlameSource(boolean openFlame, boolean lava, boolean magma,
+                                       boolean litCampfire, boolean lavaCauldron,
+                                       boolean torchOrLantern, boolean litAppliance) {
+        return openFlame || lava || magma || litCampfire || lavaCauldron || torchOrLantern || litAppliance;
+    }
+
+    /**
+     * Cold process fluids that put out fire. Oxygen is cold but feeds a fire, so it does not.
+     */
+    public static boolean extinguishesFire(String path) {
+        return isCryogenic(path) && !isOxidizer(path);
+    }
+
+    /**
+     * How many tanks a hatch reports to pipes. A drain hatch shows the four output tanks plus
+     * lubricant; a gas hatch shows four inputs and four outputs; a fluid hatch also shows lubricant.
+     */
+    public static int hatchTankViews(boolean drainHatch, boolean gasHatch, boolean fluidHatch) {
+        if (drainHatch) {
+            return 5;
+        }
+        if (gasHatch) {
+            return 8;
+        }
+        if (fluidHatch) {
+            return 9;
+        }
+        return 0;
+    }
+
+    /**
+     * Maps a visible hatch tank index to a MachineIo tank index (0-3 in, 4-7 out, 8 lubricant).
+     * Returns -1 when the view index is out of range for that hatch.
+     */
+    public static int hatchTankIndex(boolean drainHatch, boolean gasHatch, boolean fluidHatch, int view) {
+        if (view < 0) {
+            return -1;
+        }
+        if (drainHatch) {
+            if (view < 4) {
+                return 4 + view;
+            }
+            if (view == 4) {
+                return 8;
+            }
+            return -1;
+        }
+        if (gasHatch || fluidHatch) {
+            if (view < 8) {
+                return view;
+            }
+            if (fluidHatch && view == 8) {
+                return 8;
+            }
+            return -1;
+        }
+        return -1;
+    }
+
+    /**
+     * Whether leftover lubricant may be drained through this handler. Gas hatches never take
+     * lubricant out; fluid hatches, drain hatches and the controller itself may.
+     */
+    public static boolean mayDrainLube(boolean drainHatch, boolean gasHatch, boolean fluidHatch, boolean controller) {
+        return !gasHatch && (drainHatch || fluidHatch || controller);
     }
 }

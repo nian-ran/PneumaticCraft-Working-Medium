@@ -271,6 +271,14 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return;
         }
         autoApplyCertificate();
+        // A redstone pause used to overwrite coking or frozen, which hid the fault and blocked sneak-clear.
+        if (stuckFault()) {
+            notifyComparators();
+            if (level.getGameTime() % 10 == 0) {
+                sync();
+            }
+            return;
+        }
         if (level.hasNeighborSignal(worldPosition)) {
             setStatus(MachineStatus.PAUSED);
             notifyComparators();

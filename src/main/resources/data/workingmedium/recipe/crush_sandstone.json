@@ -1,0 +1,10 @@
+{
+  "type": "workingmedium:window",
+  "machine": "impact_crusher",
+  "items": [{"item": "minecraft:sandstone"}],
+  "item_outputs": [
+    {"item": "minecraft:sand", "count": 4}
+  ],
+  "pressure_min": 2.0, "pressure_max": 8.0, "temp_min": 0, "temp_max": 80,
+  "air": 20, "time": 40
+}

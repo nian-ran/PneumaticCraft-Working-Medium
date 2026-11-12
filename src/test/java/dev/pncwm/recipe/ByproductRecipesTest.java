@@ -97,6 +97,19 @@ class ByproductRecipesTest {
         assertRecipe("wash_gravel.json", "washer_tower", "minecraft:gravel", "minecraft:flint", "workingmedium:stone_dust");
         assertRecipe("cycle_monomer.json", "cycle_island", "workingmedium:monomer", "\"air\": -140");
         assertRecipe("cycle_plasticizer.json", "cycle_island", "workingmedium:plasticizer", "\"air\": -120");
+        assertRecipe("crush_sandstone.json", "impact_crusher", "minecraft:sandstone", "minecraft:sand", "\"count\": 4");
+        assertRecipe("crush_red_sandstone.json", "impact_crusher", "minecraft:red_sandstone", "minecraft:red_sand");
+        assertRecipe("crush_bone_block.json", "impact_crusher", "minecraft:bone_block", "minecraft:bone_meal", "\"count\": 9");
+        assertRecipe("wash_sand.json", "washer_tower", "minecraft:sand", "minecraft:clay_ball");
+        assertRecipe("wash_red_sand.json", "washer_tower", "minecraft:red_sand", "minecraft:clay_ball");
+        assertRecipe("wash_concrete_white.json", "washer_tower", "minecraft:white_concrete_powder", "minecraft:white_concrete");
+        assertRecipe("wash_concrete_black.json", "washer_tower", "minecraft:black_concrete_powder", "minecraft:black_concrete");
+        assertRecipe("kiln_stone.json", "residue_kiln", "minecraft:cobblestone", "minecraft:stone", "\"count\": 3");
+        assertRecipe("kiln_sponge.json", "residue_kiln", "minecraft:wet_sponge", "minecraft:sponge");
+        assertRecipe("kiln_terracotta.json", "residue_kiln", "minecraft:clay", "minecraft:terracotta");
+        assertRecipe("quench_obsidian_water.json", "quench_well", "minecraft:lava", "minecraft:water", "minecraft:obsidian", "\"count\": 1");
+        assertRecipe("cycle_wax.json", "cycle_island", "workingmedium:heavy_wax", "workingmedium:flue_gas", "\"air\": -150");
+        assertRecipe("neutralize_feed.json", "scrubber_tower", "workingmedium:acid_feed", "workingmedium:caustic", "workingmedium:brine");
     }
 
     @Test
@@ -110,7 +123,7 @@ class ByproductRecipesTest {
             assertTrue(en.contains("hint.workingmedium." + status), status);
             assertTrue(en.contains("status.workingmedium." + status), "status " + status);
         }
-        for (int page = 0; page < 20; page++) {
+        for (int page = 0; page < 21; page++) {
             assertTrue(en.contains("manual.workingmedium.page." + page), "page " + page);
         }
         for (String key : new String[] {"tooltip.workingmedium.certificate", "tooltip.workingmedium.certified",

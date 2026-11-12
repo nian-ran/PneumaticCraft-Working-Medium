@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "washer_tower",
+  "items": [{"item": "minecraft:gray_concrete_powder"}],
+  "fluids": [{"fluid": "minecraft:water", "amount": 250}],
+  "item_outputs": [{"item": "minecraft:gray_concrete", "count": 1}],
+  "pressure_min": 8.0, "pressure_max": 18.0, "temp_min": 20, "temp_max": 90,
+  "air": 20, "time": 40, "lube": 1, "min_size": 6
+}
