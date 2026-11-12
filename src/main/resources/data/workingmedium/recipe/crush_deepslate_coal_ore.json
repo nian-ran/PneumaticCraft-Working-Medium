@@ -1,0 +1,11 @@
+{
+  "type": "workingmedium:window",
+  "machine": "impact_crusher",
+  "items": [{"item": "minecraft:deepslate_coal_ore"}],
+  "item_outputs": [
+    {"item": "minecraft:coal", "count": 3},
+    {"item": "workingmedium:stone_dust", "count": 1}
+  ],
+  "pressure_min": 3.0, "pressure_max": 6.5, "temp_min": 0, "temp_max": 120,
+  "air": 100, "time": 100, "heat": 2.0
+}

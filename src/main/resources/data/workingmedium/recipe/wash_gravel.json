@@ -1,0 +1,12 @@
+{
+  "type": "workingmedium:window",
+  "machine": "washer_tower",
+  "items": [{"item": "minecraft:gravel"}],
+  "fluids": [{"fluid": "minecraft:water", "amount": 250}],
+  "item_outputs": [
+    {"item": "minecraft:flint", "count": 1},
+    {"item": "workingmedium:stone_dust", "count": 1}
+  ],
+  "pressure_min": 8.0, "pressure_max": 18.0, "temp_min": 20, "temp_max": 90,
+  "air": 40, "time": 100, "lube": 2, "min_size": 6
+}

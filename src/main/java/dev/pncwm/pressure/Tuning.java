@@ -413,4 +413,37 @@ public final class Tuning {
         }
         return Math.max(amount, Math.round(amount / CERTIFIED_COST));
     }
+
+    /** G0 machines do not wear seals or leak when the fitted seal runs out. From G1 on, they do. */
+    public static boolean wearsSeal(int gradeIndex) {
+        return gradeIndex >= 1;
+    }
+
+    /** Whether a shell holds enough air for one charge step. */
+    public static boolean canAfford(int available, int cost) {
+        return cost <= 0 || available >= cost;
+    }
+
+    /**
+     * Comparator from two fill readings (for example input tanks and output tanks).
+     * The stronger reading wins, so a full output still reads as full even if the inputs are empty.
+     */
+    public static int maxFillSignal(int left, int right) {
+        return Math.max(Math.max(0, left), Math.max(0, right));
+    }
+
+    /** Ticks a cracker may sit above its window before it cokes and stays down until cleared. */
+    public static final int COKE_FAULT = 60;
+
+    /** Ticks a cryo tower may sit above its window before it ices up and stays down until cleared. */
+    public static final int FREEZE_FAULT = 80;
+
+    /**
+     * Open flame, lava, magma, a lit campfire or a lava cauldron can ignite a spilled hydrogen pool.
+     * An unlit campfire is not a source.
+     */
+    public static boolean isFlameSource(boolean openFlame, boolean lava, boolean magma,
+                                       boolean litCampfire, boolean lavaCauldron) {
+        return openFlame || lava || magma || litCampfire || lavaCauldron;
+    }
 }

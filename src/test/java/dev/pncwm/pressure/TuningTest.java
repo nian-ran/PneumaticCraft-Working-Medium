@@ -326,4 +326,28 @@ class TuningTest {
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("flue_gas", true));
     }
 
+    @Test
+    void sealWearAffordAndFlameSources() {
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.wearsSeal(0));
+        assertTrue(Tuning.wearsSeal(1));
+        assertTrue(Tuning.wearsSeal(5));
+        assertTrue(Tuning.canAfford(100, 100));
+        assertTrue(Tuning.canAfford(500, 100));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.canAfford(99, 100));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.canAfford(400, 500));
+        assertTrue(Tuning.canAfford(10, 0));
+        assertEquals(15, Tuning.maxFillSignal(15, 0));
+        assertEquals(15, Tuning.maxFillSignal(0, 15));
+        assertEquals(8, Tuning.maxFillSignal(8, 3));
+        assertEquals(0, Tuning.maxFillSignal(0, 0));
+        assertEquals(60, Tuning.COKE_FAULT);
+        assertEquals(80, Tuning.FREEZE_FAULT);
+        assertTrue(Tuning.isFlameSource(true, false, false, false, false));
+        assertTrue(Tuning.isFlameSource(false, true, false, false, false));
+        assertTrue(Tuning.isFlameSource(false, false, true, false, false));
+        assertTrue(Tuning.isFlameSource(false, false, false, true, false));
+        assertTrue(Tuning.isFlameSource(false, false, false, false, true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isFlameSource(false, false, false, false, false));
+    }
+
 }

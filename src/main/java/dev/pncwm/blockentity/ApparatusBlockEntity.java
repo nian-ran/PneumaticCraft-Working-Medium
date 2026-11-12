@@ -458,6 +458,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setStatus(MachineStatus.FLOOD);
             return;
         }
+        if (stuckFault()) {
+            return;
+        }
         if (kind() == ApparatusKind.CLEAN_ROOM && (formed.airlockOpen() || air.getPressure() < 0.15f || air.getPressure() > 2.5f)) {
             if (progress > 0) {
                 scrapWafer();
@@ -509,14 +512,14 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             }
             if (kind() == ApparatusKind.CRACKER && celsius > recipe.tempHigh()) {
                 fault++;
-                if (fault > 60) {
+                if (fault > Tuning.COKE_FAULT) {
                     setStatus(MachineStatus.COKING);
                     return;
                 }
             }
             if (kind() == ApparatusKind.CRYO_TOWER && celsius > recipe.tempHigh()) {
                 fault++;
-                if (fault > 80) {
+                if (fault > Tuning.FREEZE_FAULT) {
                     setStatus(MachineStatus.FROZEN);
                     return;
                 }
@@ -525,9 +528,6 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return;
         }
         fault = 0;
-        if (status == MachineStatus.COKING || status == MachineStatus.FROZEN) {
-            return;
-        }
         if (kind() == ApparatusKind.ELECTROLYZER && !hasElectrode()) {
             setStatus(MachineStatus.MISSING_PART);
             return;
@@ -544,7 +544,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return;
         }
         // Do not wear the seal or drink lube while the machine is clogged, dry or short of air.
-        if (seal <= 0 && io.items.getStackInSlot(MachineIo.SEAL).isEmpty()) {
+        // G0 machines (the impact crusher) never leak for want of a seal.
+        boolean wearsSeal = Tuning.wearsSeal(kind().grade.index);
+        if (wearsSeal && seal <= 0 && io.items.getStackInSlot(MachineIo.SEAL).isEmpty()) {
             setStatus(MachineStatus.LEAK);
             return;
         }
@@ -569,7 +571,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
         air.addAir(airChange);
         heat.addHeat(recipe.heatPerTick * formed.parallel());
-        if (!wearSeal(tryPurge(recipe))) {
+        if (wearsSeal && !wearSeal(tryPurge(recipe))) {
             setStatus(MachineStatus.LEAK);
             return;
         }
@@ -602,14 +604,14 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setStatus(MachineStatus.IDLE);
             return;
         }
-        if (!prepareRunningTick()) {
-            return;
-        }
         if (kind() == ApparatusKind.COMPRESSOR_COLUMN) {
             int produced = 40 * stages * upgradeMultiplier("_cylinder");
             int take = Tuning.certifiedCost(produced * 3, certified);
             if (neighborAir.getAir() < take) {
                 setStatus(MachineStatus.NO_AIR);
+                return;
+            }
+            if (!prepareRunningTick()) {
                 return;
             }
             neighborAir.addAir(-take);
@@ -621,6 +623,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             int take = Tuning.certifiedCost(base, certified);
             if (air.getAir() < take) {
                 setStatus(MachineStatus.NO_AIR);
+                return;
+            }
+            if (!prepareRunningTick()) {
                 return;
             }
             air.addAir(-take);
@@ -1225,8 +1230,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             case ITEM_IN -> itemFill(0, MachineIo.INPUTS);
             case ITEM_OUT -> itemFill(MachineIo.INPUTS, MachineIo.INPUTS);
             case DRAIN -> fluidFill(MachineIo.INPUTS, MachineIo.INPUTS, null);
-            case FLUID -> fluidFill(0, MachineIo.INPUTS, Boolean.FALSE);
-            case GAS -> fluidFill(0, MachineIo.INPUTS, Boolean.TRUE);
+            case FLUID -> Tuning.maxFillSignal(
+                    fluidFill(0, MachineIo.INPUTS, Boolean.FALSE),
+                    fluidFill(MachineIo.INPUTS, MachineIo.INPUTS, Boolean.FALSE));
+            case GAS -> Tuning.maxFillSignal(
+                    fluidFill(0, MachineIo.INPUTS, Boolean.TRUE),
+                    fluidFill(MachineIo.INPUTS, MachineIo.INPUTS, Boolean.TRUE));
             case HEAT -> heat == null ? 0 : Tuning.temperatureSignal(PressureGrade.kelvinToCelsius(heat.getTemperature()));
             case GAUGE -> comparatorSignal();
             default -> 0;
@@ -1246,7 +1255,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
 
     /**
      * {@code gases} is null to count every fluid (drain hatches), true for gas only, false for liquid only.
-     * Capacity stays the full row so the signal is "how full of that kind the inputs are".
+     * Capacity stays the full row so the signal is how full of that kind that row is. Gas and fluid
+     * hatches take the stronger of the input and output rows.
      */
     private int fluidFill(int start, int count, Boolean gases) {
         int amount = 0;
@@ -1289,6 +1299,22 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Coke or ice stays down until sneak-cleared. Fault is also kept across a brief unform,
+     * so repairing the shell does not silently clear a coked cracker or a frozen tower.
+     */
+    private boolean stuckFault() {
+        if (kind() == ApparatusKind.CRACKER && fault > Tuning.COKE_FAULT) {
+            setStatus(MachineStatus.COKING);
+            return true;
+        }
+        if (kind() == ApparatusKind.CRYO_TOWER && fault > Tuning.FREEZE_FAULT) {
+            setStatus(MachineStatus.FROZEN);
+            return true;
+        }
+        return status == MachineStatus.COKING || status == MachineStatus.FROZEN;
     }
 
     private boolean hasElectrode() {
@@ -1359,10 +1385,10 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
         var handler = stack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM);
         if (handler != null) {
-            if (air.getAir() > 500 && handler.getPressure() < handler.maxPressure() - 0.05f) {
+            if (handler.getPressure() < handler.maxPressure() - 0.05f) {
                 int give = Math.min(budget, 100);
                 int cost = Tuning.certifiedCost(give, certified);
-                if (air.getAir() < cost) {
+                if (!Tuning.canAfford(air.getAir(), cost)) {
                     return budget;
                 }
                 handler.addAir(give);
@@ -1376,7 +1402,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             int heatLevel = stack.getOrDefault(WMData.HEAT, 0);
             int cost = Tuning.certifiedCost(800, certified);
             int step = Tuning.DRILL_CHARGE_BUDGET;
-            if (charge < 100 && air.getAir() > cost && budget >= step) {
+            if (charge < 100 && Tuning.canAfford(air.getAir(), cost) && budget >= step) {
                 stack.set(WMData.CHARGE, charge + 1);
                 air.addAir(-cost);
                 if (heatLevel > 0) {

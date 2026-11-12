@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -110,9 +111,14 @@ public class HazardLiquidBlock extends LiquidBlock {
     private static boolean nearFlame(Level level, BlockPos pos) {
         for (Direction direction : Direction.values()) {
             BlockState neighbor = level.getBlockState(pos.relative(direction));
-            if (neighbor.is(Blocks.FIRE) || neighbor.is(Blocks.SOUL_FIRE) || neighbor.is(Blocks.LAVA)
-                    || neighbor.getFluidState().is(Fluids.LAVA) || neighbor.getFluidState().is(Fluids.FLOWING_LAVA)
-                    || neighbor.is(Blocks.MAGMA_BLOCK)) {
+            boolean openFlame = neighbor.is(Blocks.FIRE) || neighbor.is(Blocks.SOUL_FIRE);
+            boolean lava = neighbor.is(Blocks.LAVA) || neighbor.getFluidState().is(Fluids.LAVA)
+                    || neighbor.getFluidState().is(Fluids.FLOWING_LAVA);
+            boolean magma = neighbor.is(Blocks.MAGMA_BLOCK);
+            boolean litCampfire = (neighbor.is(Blocks.CAMPFIRE) || neighbor.is(Blocks.SOUL_CAMPFIRE))
+                    && neighbor.hasProperty(CampfireBlock.LIT) && neighbor.getValue(CampfireBlock.LIT);
+            boolean lavaCauldron = neighbor.is(Blocks.LAVA_CAULDRON);
+            if (Tuning.isFlameSource(openFlame, lava, magma, litCampfire, lavaCauldron)) {
                 return true;
             }
         }
