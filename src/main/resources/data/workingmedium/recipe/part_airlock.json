@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "D",
+    "C"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:iron_door"
+    },
+    "C": {
+      "item": "workingmedium:casing_g4"
+    }
+  },
+  "result": {
+    "id": "workingmedium:part_airlock",
+    "count": 1
+  }
+}

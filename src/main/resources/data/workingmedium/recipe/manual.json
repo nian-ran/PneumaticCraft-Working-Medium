@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["B","G"],
+  "key": {"G": {"item": "workingmedium:gauge"},"B": {"item": "minecraft:book"}},
+  "result": {"id": "workingmedium:manual", "count": 1}
+}

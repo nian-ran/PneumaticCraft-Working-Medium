@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["C","B"],
+  "key": {"C": {"item": "workingmedium:casing_g0"},"B": {"item": "minecraft:iron_bars"}},
+  "result": {"id": "workingmedium:hatch_vent", "count": 1}
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "F",
+    "C"
+  ],
+  "key": {
+    "F": {
+      "item": "minecraft:furnace"
+    },
+    "C": {
+      "item": "workingmedium:casing_g0"
+    }
+  },
+  "result": {
+    "id": "workingmedium:hatch_heat",
+    "count": 1
+  }
+}

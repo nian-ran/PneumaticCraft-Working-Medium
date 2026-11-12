@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/impact_crusher",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/impact_crusher",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/impact_crusher",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/impact_crusher",
+      "y": 270
+    }
+  }
+}

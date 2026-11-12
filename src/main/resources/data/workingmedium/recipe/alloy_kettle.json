@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C",
+    "B"
+  ],
+  "key": {
+    "C": {
+      "item": "workingmedium:casing_g3"
+    },
+    "B": {
+      "item": "workingmedium:part_body"
+    }
+  },
+  "result": {
+    "id": "workingmedium:alloy_kettle",
+    "count": 1
+  }
+}

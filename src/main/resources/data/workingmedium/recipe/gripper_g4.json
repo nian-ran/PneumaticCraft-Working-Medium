@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["P P"," S "],
+  "key": {"S": {"item": "workingmedium:g4_seal"},"P": {"item": "workingmedium:g4_plate"}},
+  "result": {"id": "workingmedium:g4_gripper", "count": 1}
+}

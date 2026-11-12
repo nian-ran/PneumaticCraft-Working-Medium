@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/flare_stack",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/flare_stack",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/flare_stack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/flare_stack",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CIC"],
+  "key": {"C": {"item": "workingmedium:casing_g2"},"I": {"item": "minecraft:iron_bars"}},
+  "result": {"id": "workingmedium:part_bay", "count": 1}
+}

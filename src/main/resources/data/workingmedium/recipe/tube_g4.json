@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["AAA"],
+  "key": {"A": {"item": "workingmedium:cryo_alloy"}},
+  "result": {"id": "workingmedium:cryo_tube", "count": 4}
+}

@@ -1,0 +1,8 @@
+{
+  "type": "workingmedium:window",
+  "machine": "sinter_kiln",
+  "items": [{"item": "workingmedium:metal_ash"}],
+  "item_outputs": [{"item": "workingmedium:catalyst", "count": 1}],
+  "pressure_min": 10.0, "pressure_max": 30.0, "temp_min": 500, "temp_max": 900,
+  "air": 40, "time": 120, "heat": 6.0
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["C","G"],
+  "key": {"C": {"item": "minecraft:copper_ingot"},"G": {"item": "minecraft:gold_ingot"}},
+  "result": {"id": "workingmedium:electrode", "count": 2}
+}

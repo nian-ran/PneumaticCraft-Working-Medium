@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["C","K"],
+  "key": {"C": {"item": "workingmedium:casing_g1"},"K": {"item": "minecraft:cauldron"}},
+  "result": {"id": "workingmedium:lube_mixer", "count": 1}
+}

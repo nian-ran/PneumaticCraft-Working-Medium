@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "P",
+    "C"
+  ],
+  "key": {
+    "P": {
+      "item": "pneumaticcraft:printed_circuit_board"
+    },
+    "C": {
+      "item": "workingmedium:casing_g4"
+    }
+  },
+  "result": {
+    "id": "workingmedium:charging_station",
+    "count": 1
+  }
+}

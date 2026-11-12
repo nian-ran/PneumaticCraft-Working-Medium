@@ -1,0 +1,25 @@
+{
+  "machine_run": {
+    "subtitle": "subtitles.workingmedium.machine_run",
+    "sounds": [
+      { "name": "workingmedium:machine_run", "volume": 0.7 }
+    ]
+  },
+  "machine_done": {
+    "subtitle": "subtitles.workingmedium.machine_done",
+    "sounds": [
+      { "name": "workingmedium:machine_done", "volume": 0.8 }
+    ]
+  },
+  "vent": {
+    "subtitle": "subtitles.workingmedium.vent",
+    "sounds": [
+      { "name": "workingmedium:vent", "volume": 0.7 }
+    ]
+  },
+  "ui_click": {
+    "sounds": [
+      { "name": "workingmedium:ui_click", "volume": 0.6 }
+    ]
+  }
+}

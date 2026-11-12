@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "north": "workingmedium:block/catalog",
+    "south": "workingmedium:block/machine_side_g2",
+    "east": "workingmedium:block/machine_side_g2",
+    "west": "workingmedium:block/machine_side_g2",
+    "up": "workingmedium:block/machine_side_g2",
+    "down": "workingmedium:block/machine_side_g2",
+    "particle": "workingmedium:block/catalog"
+  }
+}

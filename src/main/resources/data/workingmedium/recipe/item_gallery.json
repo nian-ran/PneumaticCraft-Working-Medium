@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "B",
+    "C"
+  ],
+  "key": {
+    "B": {
+      "item": "workingmedium:part_bay"
+    },
+    "C": {
+      "item": "workingmedium:casing_g2"
+    }
+  },
+  "result": {
+    "id": "workingmedium:item_gallery",
+    "count": 1
+  }
+}

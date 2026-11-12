@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "P",
+    "C"
+  ],
+  "key": {
+    "P": {
+      "item": "pneumaticcraft:plastic"
+    },
+    "C": {
+      "item": "workingmedium:casing_g3"
+    }
+  },
+  "result": {
+    "id": "workingmedium:polymerizer",
+    "count": 1
+  }
+}

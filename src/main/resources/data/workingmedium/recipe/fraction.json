@@ -1,0 +1,16 @@
+{
+  "type": "workingmedium:window",
+  "machine": "fraction_tower",
+  "fluids": [{"fluid": "pneumaticcraft:oil", "amount": 500}],
+  "fluid_outputs": [
+    {"fluid": "pneumaticcraft:diesel", "amount": 80, "min_size": 8},
+    {"fluid": "pneumaticcraft:kerosene", "amount": 80, "min_size": 8},
+    {"fluid": "pneumaticcraft:gasoline", "amount": 80, "min_size": 8},
+    {"fluid": "pneumaticcraft:lpg", "amount": 80, "min_size": 8},
+    {"fluid": "workingmedium:acid_feed", "amount": 40, "min_size": 10},
+    {"fluid": "workingmedium:monomer", "amount": 40, "min_size": 11}
+  ],
+  "item_outputs": [{"item": "workingmedium:heavy_wax", "count": 1, "min_size": 9}],
+  "pressure_min": 18.0, "pressure_max": 48.0, "temp_min": 180, "temp_max": 420,
+  "air": 90, "time": 200, "lube": 6, "min_size": 8
+}

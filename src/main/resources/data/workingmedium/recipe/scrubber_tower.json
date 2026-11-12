@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "V",
+    "C"
+  ],
+  "key": {
+    "V": {
+      "item": "workingmedium:hatch_vent"
+    },
+    "C": {
+      "item": "workingmedium:casing_g4"
+    }
+  },
+  "result": {
+    "id": "workingmedium:scrubber_tower",
+    "count": 1
+  }
+}

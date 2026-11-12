@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["NT","PS"],
+  "key": {"T": {"item": "workingmedium:g3_tube"},"P": {"item": "workingmedium:g3_plate"},"S": {"item": "workingmedium:g3_seal"},"N": {"item": "workingmedium:g3_nozzle"}},
+  "result": {"id": "workingmedium:g3_pump", "count": 1}
+}

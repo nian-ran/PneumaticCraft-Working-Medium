@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["E","C"],
+  "key": {"C": {"item": "pneumaticcraft:printed_circuit_board"},"E": {"item": "workingmedium:engineering_plastic"}},
+  "result": {"id": "workingmedium:substrate", "count": 2}
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "A",
+    "C"
+  ],
+  "key": {
+    "A": {
+      "item": "workingmedium:part_airlock"
+    },
+    "C": {
+      "item": "workingmedium:casing_g4"
+    }
+  },
+  "result": {
+    "id": "workingmedium:clean_room",
+    "count": 1
+  }
+}

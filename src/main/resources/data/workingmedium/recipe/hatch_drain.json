@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["B","C"],
+  "key": {"C": {"item": "workingmedium:casing_g0"},"B": {"item": "minecraft:bucket"}},
+  "result": {"id": "workingmedium:hatch_drain", "count": 1}
+}

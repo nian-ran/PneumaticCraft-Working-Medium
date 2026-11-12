@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "alloy_kettle",
+  "items": [{"item": "workingmedium:ceramic_alloy"}, {"item": "workingmedium:g4_plate"}],
+  "fluids": [{"fluid": "workingmedium:liquid_co2", "amount": 100}],
+  "item_outputs": [{"item": "workingmedium:cryo_alloy", "count": 1}],
+  "pressure_min": 40.0, "pressure_max": 80.0, "temp_min": -80, "temp_max": 20,
+  "air": 80, "time": 200, "lube": 4, "heat": -6.0
+}

@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/hatch_fluid"
+    },
+    "facing=south": {
+      "model": "workingmedium:block/hatch_fluid",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/hatch_fluid",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "workingmedium:block/hatch_fluid",
+      "y": 90
+    },
+    "facing=up": {
+      "model": "workingmedium:block/hatch_fluid",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "workingmedium:block/hatch_fluid",
+      "x": 90
+    }
+  }
+}

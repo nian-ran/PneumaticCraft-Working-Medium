@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/quench_well",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/quench_well",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/quench_well",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/quench_well",
+      "y": 270
+    }
+  }
+}

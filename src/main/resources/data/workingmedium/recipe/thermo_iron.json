@@ -1,0 +1,12 @@
+{
+  "type": "workingmedium:window",
+  "machine": "thermolysis_kettle",
+  "items": [{"item": "workingmedium:purified_iron"}],
+  "item_outputs": [
+    {"item": "minecraft:iron_ingot", "count": 2},
+    {"item": "workingmedium:slag", "count": 1}
+  ],
+  "fluid_outputs": [{"fluid": "workingmedium:dusty_steam", "amount": 100}],
+  "pressure_min": 12.0, "pressure_max": 20.0, "temp_min": 320, "temp_max": 760,
+  "air": 60, "time": 140, "lube": 4, "heat": 6.0
+}

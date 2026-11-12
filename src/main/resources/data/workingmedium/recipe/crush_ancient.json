@@ -1,0 +1,26 @@
+{
+  "type": "workingmedium:window",
+  "machine": "impact_crusher",
+  "items": [
+    {
+      "item": "minecraft:ancient_debris"
+    }
+  ],
+  "item_outputs": [
+    {
+      "item": "workingmedium:crushed_ancient",
+      "count": 1
+    },
+    {
+      "item": "workingmedium:stone_dust",
+      "count": 1
+    }
+  ],
+  "pressure_min": 4.0,
+  "pressure_max": 6.5,
+  "temp_min": 0,
+  "temp_max": 120,
+  "air": 100,
+  "time": 100,
+  "heat": 3.0
+}

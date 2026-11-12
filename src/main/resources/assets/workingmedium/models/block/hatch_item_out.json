@@ -1,0 +1,8 @@
+{
+  "parent": "workingmedium:block/shape_hatch",
+  "textures": {
+    "metal": "workingmedium:block/machine_side_g2",
+    "face": "workingmedium:block/hatch_item_out",
+    "particle": "workingmedium:block/hatch_item_out"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "workingmedium:window",
+  "machine": "impact_crusher",
+  "items": [{"item": "minecraft:raw_gold"}],
+  "item_outputs": [
+    {"item": "workingmedium:crushed_gold", "count": 1},
+    {"item": "workingmedium:stone_dust", "count": 1}
+  ],
+  "pressure_min": 3.0, "pressure_max": 6.5, "temp_min": 0, "temp_max": 120,
+  "air": 80, "time": 80, "heat": 2.0
+}

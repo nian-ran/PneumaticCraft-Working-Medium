@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C",
+    "H"
+  ],
+  "key": {
+    "C": {
+      "item": "workingmedium:casing_g2"
+    },
+    "H": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "id": "workingmedium:cyclone",
+    "count": 1
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/hatch_drain"
+    },
+    "facing=south": {
+      "model": "workingmedium:block/hatch_drain",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/hatch_drain",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "workingmedium:block/hatch_drain",
+      "y": 90
+    },
+    "facing=up": {
+      "model": "workingmedium:block/hatch_drain",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "workingmedium:block/hatch_drain",
+      "x": 90
+    }
+  }
+}

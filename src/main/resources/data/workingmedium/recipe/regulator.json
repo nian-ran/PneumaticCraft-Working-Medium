@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["R","G"],
+  "key": {"R": {"item": "workingmedium:reducer"},"G": {"item": "workingmedium:gauge"}},
+  "result": {"id": "workingmedium:regulator_skid", "count": 1}
+}

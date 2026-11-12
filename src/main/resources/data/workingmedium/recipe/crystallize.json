@@ -1,0 +1,8 @@
+{
+  "type": "workingmedium:window",
+  "machine": "alloy_kettle",
+  "fluids": [{"fluid": "workingmedium:metal_solution", "amount": 200}],
+  "item_outputs": [{"item": "minecraft:iron_ingot", "count": 3}],
+  "pressure_min": 20.0, "pressure_max": 48.0, "temp_min": 400, "temp_max": 900,
+  "air": 80, "time": 160, "lube": 4, "heat": 5.0
+}

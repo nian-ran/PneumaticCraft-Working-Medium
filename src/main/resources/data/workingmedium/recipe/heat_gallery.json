@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "L",
+    "C"
+  ],
+  "key": {
+    "L": {
+      "item": "workingmedium:part_coil"
+    },
+    "C": {
+      "item": "workingmedium:casing_g3"
+    }
+  },
+  "result": {
+    "id": "workingmedium:heat_gallery",
+    "count": 1
+  }
+}

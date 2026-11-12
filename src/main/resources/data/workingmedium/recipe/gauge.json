@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IGI","RPR","ICI"],
+  "key": {"G": {"item": "minecraft:glass_pane"},"R": {"item": "minecraft:redstone"},"P": {"item": "pneumaticcraft:pressure_tube"},"C": {"item": "pneumaticcraft:ingot_iron_compressed"},"I": {"item": "minecraft:iron_ingot"}},
+  "result": {"id": "workingmedium:gauge", "count": 1}
+}

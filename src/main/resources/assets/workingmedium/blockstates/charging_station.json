@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/charging_station",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/charging_station",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/charging_station",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/charging_station",
+      "y": 270
+    }
+  }
+}

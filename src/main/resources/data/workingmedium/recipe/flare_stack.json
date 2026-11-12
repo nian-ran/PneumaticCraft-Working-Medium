@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C",
+    "F"
+  ],
+  "key": {
+    "C": {
+      "item": "workingmedium:casing_g1"
+    },
+    "F": {
+      "item": "minecraft:campfire"
+    }
+  },
+  "result": {
+    "id": "workingmedium:flare_stack",
+    "count": 1
+  }
+}

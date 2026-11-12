@@ -1,0 +1,12 @@
+{
+  "type": "workingmedium:window",
+  "machine": "electrolyzer",
+  "fluids": [{"fluid": "workingmedium:byproduct_solution", "amount": 400}],
+  "item_outputs": [
+    {"item": "minecraft:copper_ingot", "count": 1},
+    {"item": "minecraft:gold_nugget", "count": 2}
+  ],
+  "fluid_outputs": [{"fluid": "workingmedium:hydrochloric", "amount": 100}],
+  "pressure_min": 8.0, "pressure_max": 20.0, "temp_min": 40, "temp_max": 120,
+  "air": 60, "time": 200, "lube": 2
+}

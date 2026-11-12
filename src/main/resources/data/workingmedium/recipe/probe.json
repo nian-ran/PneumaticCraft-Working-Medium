@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["N","R","I"],
+  "key": {"R": {"item": "minecraft:redstone"},"I": {"item": "pneumaticcraft:ingot_iron_compressed"},"N": {"item": "workingmedium:g2_nozzle"}},
+  "result": {"id": "workingmedium:venturi_probe", "count": 1}
+}

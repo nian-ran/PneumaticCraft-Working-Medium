@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "P",
+    "C"
+  ],
+  "key": {
+    "P": {
+      "item": "pneumaticcraft:pressure_tube"
+    },
+    "C": {
+      "item": "workingmedium:casing_g0"
+    }
+  },
+  "result": {
+    "id": "workingmedium:hatch_manifold",
+    "count": 1
+  }
+}

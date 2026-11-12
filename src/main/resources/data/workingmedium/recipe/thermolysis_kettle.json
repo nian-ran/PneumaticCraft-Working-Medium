@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C",
+    "B"
+  ],
+  "key": {
+    "C": {
+      "item": "workingmedium:casing_g2"
+    },
+    "B": {
+      "item": "workingmedium:part_body"
+    }
+  },
+  "result": {
+    "id": "workingmedium:thermolysis_kettle",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "workingmedium:window",
+  "machine": "lamination_gallery",
+  "items": [
+    {"item": "workingmedium:substrate"},
+    {"item": "workingmedium:program_sheet"},
+    {"item": "pneumaticcraft:plastic"}
+  ],
+  "fluids": [
+    {"fluid": "workingmedium:pure_nitrogen", "amount": 100},
+    {"fluid": "workingmedium:argon", "amount": 20}
+  ],
+  "item_outputs": [{"item": "workingmedium:microfluidic_chip", "count": 1}],
+  "pressure_min": 16.0, "pressure_max": 19.0, "temp_min": 180, "temp_max": 220,
+  "air": 80, "time": 220, "lube": 4, "min_size": 8
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["C","W","C"],
+  "key": {"W": {"item": "minecraft:water_bucket"},"C": {"item": "workingmedium:part_coil"}},
+  "result": {"id": "workingmedium:part_intercooler", "count": 1}
+}

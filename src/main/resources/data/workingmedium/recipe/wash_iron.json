@@ -1,0 +1,12 @@
+{
+  "type": "workingmedium:window",
+  "machine": "washer_tower",
+  "items": [{"item": "workingmedium:crushed_iron"}],
+  "fluids": [{"fluid": "minecraft:water", "amount": 250}],
+  "item_outputs": [
+    {"item": "workingmedium:purified_iron", "count": 1},
+    {"item": "minecraft:gold_nugget", "count": 1, "min_size": 8}
+  ],
+  "pressure_min": 8.0, "pressure_max": 18.0, "temp_min": 20, "temp_max": 90,
+  "air": 40, "time": 100, "lube": 2, "min_size": 6
+}

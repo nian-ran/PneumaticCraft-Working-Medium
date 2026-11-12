@@ -1,0 +1,8 @@
+{
+  "type": "workingmedium:window",
+  "machine": "scrubber_tower",
+  "fluids": [{"fluid": "workingmedium:acid_mist", "amount": 200}, {"fluid": "workingmedium:caustic", "amount": 100}],
+  "fluid_outputs": [{"fluid": "workingmedium:brine", "amount": 200}],
+  "pressure_min": 6.0, "pressure_max": 24.0, "temp_min": 15, "temp_max": 90,
+  "air": 20, "time": 100, "lube": 1, "min_size": 6
+}

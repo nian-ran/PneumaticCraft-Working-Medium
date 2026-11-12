@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IPI"," R "],
+  "key": {"R": {"item": "pneumaticcraft:pressure_tube"},"P": {"item": "minecraft:piston"},"I": {"item": "pneumaticcraft:ingot_iron_compressed"}},
+  "result": {"id": "workingmedium:reducer", "count": 1}
+}

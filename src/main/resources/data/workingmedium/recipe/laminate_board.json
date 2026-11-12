@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "lamination_gallery",
+  "items": [{"item": "pneumaticcraft:printed_circuit_board"}, {"item": "workingmedium:substrate"}],
+  "fluids": [{"fluid": "workingmedium:nitrogen", "amount": 50}],
+  "item_outputs": [{"item": "workingmedium:g3_plate", "count": 1}],
+  "pressure_min": 16.0, "pressure_max": 19.0, "temp_min": 180, "temp_max": 220,
+  "air": 60, "time": 160, "lube": 2, "min_size": 2
+}

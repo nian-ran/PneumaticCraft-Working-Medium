@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "lube_mixer",
+  "items": [{"item": "minecraft:kelp"}],
+  "fluids": [{"fluid": "minecraft:water", "amount": 250}],
+  "fluid_outputs": [{"fluid": "workingmedium:brine", "amount": 250}],
+  "pressure_min": 4.0, "pressure_max": 12.0, "temp_min": 10, "temp_max": 80,
+  "air": 10, "time": 60
+}

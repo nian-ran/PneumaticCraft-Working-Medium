@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["TTT","PSP"],
+  "key": {"T": {"item": "workingmedium:g3_tube"},"P": {"item": "workingmedium:g3_plate"},"S": {"item": "workingmedium:g3_seal"}},
+  "result": {"id": "workingmedium:g3_slide", "count": 1}
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["C","H"],
+  "key": {"H": {"item": "minecraft:hopper"},"C": {"item": "workingmedium:casing_g0"}},
+  "result": {"id": "workingmedium:hatch_item_in", "count": 1}
+}

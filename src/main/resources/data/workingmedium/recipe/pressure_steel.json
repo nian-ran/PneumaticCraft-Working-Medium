@@ -1,0 +1,9 @@
+{
+  "type": "pneumaticcraft:pressure_chamber",
+  "inputs": [
+    {"count": 2, "item": "pneumaticcraft:ingot_iron_compressed"},
+    {"count": 1, "item": "minecraft:coal"}
+  ],
+  "pressure": 4.5,
+  "results": [{"count": 1, "id": "workingmedium:compressed_steel"}]
+}

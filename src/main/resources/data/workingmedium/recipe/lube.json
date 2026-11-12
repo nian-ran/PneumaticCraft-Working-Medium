@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "lube_mixer",
+  "items": [{"item": "workingmedium:heavy_wax"}, {"item": "pneumaticcraft:plastic"}],
+  "fluids": [{"fluid": "minecraft:water", "amount": 200}],
+  "fluid_outputs": [{"fluid": "pneumaticcraft:lubricant", "amount": 250}],
+  "pressure_min": 6.0, "pressure_max": 11.0, "temp_min": 80, "temp_max": 180,
+  "air": 20, "time": 120, "heat": 1.0
+}

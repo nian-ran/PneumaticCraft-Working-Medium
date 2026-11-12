@@ -1,0 +1,1 @@
+{"type":"pneumaticcraft:pressure_chamber","inputs":[{"count":1,"item":"workingmedium:critical_core"},{"count":1,"item":"pneumaticcraft:plastic"}],"pressure":3.0,"results":[{"count":4,"id":"workingmedium:g5_seal"}]}

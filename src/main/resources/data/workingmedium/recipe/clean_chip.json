@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "clean_room",
+  "items": [{"item": "workingmedium:microfluidic_chip"}],
+  "fluids": [{"fluid": "workingmedium:pure_nitrogen", "amount": 50}],
+  "item_outputs": [{"item": "workingmedium:microfluidic_chip", "count": 1}],
+  "pressure_min": 0.2, "pressure_max": 2.0, "temp_min": 18, "temp_max": 28,
+  "air": 15, "time": 80, "lube": 0
+}

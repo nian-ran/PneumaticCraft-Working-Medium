@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["PSP"],
+  "key": {"S": {"item": "workingmedium:g3_seal"},"P": {"item": "workingmedium:g3_plate"}},
+  "result": {"id": "workingmedium:g3_diaphragm", "count": 1}
+}

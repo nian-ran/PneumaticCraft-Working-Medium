@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "B",
+    "C"
+  ],
+  "key": {
+    "B": {
+      "item": "workingmedium:part_bay"
+    },
+    "C": {
+      "item": "workingmedium:casing_g4"
+    }
+  },
+  "result": {
+    "id": "workingmedium:lamination_gallery",
+    "count": 1
+  }
+}

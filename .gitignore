@@ -1,0 +1,15 @@
+.gradle/
+build/
+runs/
+run/
+out/
+.idea/
+*.iml
+src/generated/
+__pycache__/
+*.pyc
+*.pyo
+*.zip
+NOTES_FOR_PARENT.md
+tools/preview-*.py
+tools/gen-resources.ps1

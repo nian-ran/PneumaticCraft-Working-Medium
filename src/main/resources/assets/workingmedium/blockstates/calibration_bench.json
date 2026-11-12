@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/calibration_bench",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/calibration_bench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/calibration_bench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/calibration_bench",
+      "y": 270
+    }
+  }
+}

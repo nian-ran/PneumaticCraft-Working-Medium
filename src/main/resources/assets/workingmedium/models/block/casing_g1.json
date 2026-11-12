@@ -1,0 +1,8 @@
+{
+  "loader": "workingmedium:connected_cube",
+  "textures": {
+    "all": "workingmedium:block/casing_g1",
+    "ctm": "workingmedium:block/casing_g1_ctm",
+    "particle": "workingmedium:block/casing_g1"
+  }
+}

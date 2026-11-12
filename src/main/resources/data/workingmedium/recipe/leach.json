@@ -1,0 +1,14 @@
+{
+  "type": "workingmedium:window",
+  "machine": "leach_line",
+  "items": [{"item": "workingmedium:purified_iron"}],
+  "fluids": [{"fluid": "workingmedium:hydrochloric", "amount": 200}],
+  "fluid_outputs": [
+    {"fluid": "workingmedium:metal_solution", "amount": 200},
+    {"fluid": "workingmedium:byproduct_solution", "amount": 80},
+    {"fluid": "workingmedium:acid_mist", "amount": 40}
+  ],
+  "item_outputs": [{"item": "workingmedium:filter_cake", "count": 1}],
+  "pressure_min": 12.0, "pressure_max": 30.0, "temp_min": 60, "temp_max": 140,
+  "air": 40, "time": 160, "lube": 3, "min_size": 2
+}

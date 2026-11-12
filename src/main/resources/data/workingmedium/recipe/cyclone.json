@@ -1,0 +1,11 @@
+{
+  "type": "workingmedium:window",
+  "machine": "cyclone",
+  "items": [{"item": "workingmedium:stone_dust"}],
+  "item_outputs": [
+    {"item": "workingmedium:metal_ash", "count": 1},
+    {"item": "minecraft:gravel", "count": 1}
+  ],
+  "pressure_min": 6.0, "pressure_max": 18.0, "temp_min": 10, "temp_max": 80,
+  "air": 30, "time": 60
+}

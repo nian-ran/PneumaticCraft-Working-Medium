@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["S","P"],
+  "key": {"S": {"item": "workingmedium:g2_seal"},"P": {"item": "pneumaticcraft:printed_circuit_board"}},
+  "result": {"id": "workingmedium:curtain_g2", "count": 1}
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["A","C"],
+  "key": {"C": {"item": "workingmedium:casing_g4"},"A": {"item": "workingmedium:critical_core"}},
+  "result": {"id": "workingmedium:casing_g5", "count": 1}
+}

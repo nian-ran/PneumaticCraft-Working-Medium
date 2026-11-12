@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "cyclone",
+  "fluids": [{"fluid": "workingmedium:dusty_steam", "amount": 200}],
+  "fluid_outputs": [{"fluid": "minecraft:water", "amount": 150}],
+  "item_outputs": [{"item": "workingmedium:stone_dust", "count": 1}],
+  "pressure_min": 4.0, "pressure_max": 16.0, "temp_min": 10, "temp_max": 220,
+  "air": 20, "time": 60
+}

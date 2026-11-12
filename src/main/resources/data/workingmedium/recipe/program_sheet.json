@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["P","D"],
+  "key": {"D": {"item": "pneumaticcraft:drone"},"P": {"item": "pneumaticcraft:empty_pcb"}},
+  "result": {"id": "workingmedium:program_sheet", "count": 1}
+}

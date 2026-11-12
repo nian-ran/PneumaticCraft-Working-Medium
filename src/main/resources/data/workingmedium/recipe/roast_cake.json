@@ -1,0 +1,12 @@
+{
+  "type": "workingmedium:window",
+  "machine": "residue_kiln",
+  "items": [{"item": "workingmedium:filter_cake"}],
+  "item_counts": [2],
+  "item_outputs": [
+    {"item": "workingmedium:metal_ash", "count": 1},
+    {"item": "minecraft:iron_nugget", "count": 3}
+  ],
+  "pressure_min": 6.0, "pressure_max": 12.0, "temp_min": 120, "temp_max": 280,
+  "air": 30, "time": 120, "heat": 4.0
+}

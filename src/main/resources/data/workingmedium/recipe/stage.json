@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["P","I","P"],
+  "key": {"I": {"item": "pneumaticcraft:pressure_tube"},"P": {"item": "workingmedium:g2_plate"}},
+  "result": {"id": "workingmedium:part_stage", "count": 1}
+}

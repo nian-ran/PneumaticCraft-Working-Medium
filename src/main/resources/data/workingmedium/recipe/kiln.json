@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["C","B"],
+  "key": {"C": {"item": "workingmedium:casing_g1"},"B": {"item": "minecraft:blast_furnace"}},
+  "result": {"id": "workingmedium:residue_kiln", "count": 1}
+}

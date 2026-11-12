@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["S","P","I"],
+  "key": {"S": {"item": "workingmedium:g2_plate"},"P": {"item": "minecraft:diamond_pickaxe"},"I": {"item": "pneumaticcraft:ingot_iron_compressed"}},
+  "result": {"id": "workingmedium:grade_drill", "count": 1}
+}

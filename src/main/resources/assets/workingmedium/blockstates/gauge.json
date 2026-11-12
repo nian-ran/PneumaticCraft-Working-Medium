@@ -1,0 +1,68 @@
+{
+  "variants": {
+    "band=off,facing=north": {
+      "model": "workingmedium:block/gauge",
+      "y": 0
+    },
+    "band=off,facing=east": {
+      "model": "workingmedium:block/gauge",
+      "y": 90
+    },
+    "band=off,facing=south": {
+      "model": "workingmedium:block/gauge",
+      "y": 180
+    },
+    "band=off,facing=west": {
+      "model": "workingmedium:block/gauge",
+      "y": 270
+    },
+    "band=green,facing=north": {
+      "model": "workingmedium:block/gauge",
+      "y": 0
+    },
+    "band=green,facing=east": {
+      "model": "workingmedium:block/gauge",
+      "y": 90
+    },
+    "band=green,facing=south": {
+      "model": "workingmedium:block/gauge",
+      "y": 180
+    },
+    "band=green,facing=west": {
+      "model": "workingmedium:block/gauge",
+      "y": 270
+    },
+    "band=yellow,facing=north": {
+      "model": "workingmedium:block/gauge",
+      "y": 0
+    },
+    "band=yellow,facing=east": {
+      "model": "workingmedium:block/gauge",
+      "y": 90
+    },
+    "band=yellow,facing=south": {
+      "model": "workingmedium:block/gauge",
+      "y": 180
+    },
+    "band=yellow,facing=west": {
+      "model": "workingmedium:block/gauge",
+      "y": 270
+    },
+    "band=red,facing=north": {
+      "model": "workingmedium:block/gauge",
+      "y": 0
+    },
+    "band=red,facing=east": {
+      "model": "workingmedium:block/gauge",
+      "y": 90
+    },
+    "band=red,facing=south": {
+      "model": "workingmedium:block/gauge",
+      "y": 180
+    },
+    "band=red,facing=west": {
+      "model": "workingmedium:block/gauge",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "G",
+    "C"
+  ],
+  "key": {
+    "G": {
+      "item": "workingmedium:gauge"
+    },
+    "C": {
+      "item": "workingmedium:casing_g0"
+    }
+  },
+  "result": {
+    "id": "workingmedium:hatch_gauge",
+    "count": 1
+  }
+}

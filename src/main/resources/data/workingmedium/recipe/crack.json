@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "cracker",
+  "items": [{"item": "workingmedium:heavy_wax"}],
+  "fluid_outputs": [{"fluid": "workingmedium:monomer", "amount": 200}],
+  "item_outputs": [{"item": "workingmedium:slag", "count": 1}],
+  "pressure_min": 30.0, "pressure_max": 52.0, "temp_min": 480, "temp_max": 760,
+  "air": 70, "time": 160, "lube": 4, "heat": 8.0, "min_size": 2
+}

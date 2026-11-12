@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["P","C"],
+  "key": {"C": {"item": "workingmedium:casing_g4"},"P": {"item": "workingmedium:venturi_probe"}},
+  "result": {"id": "workingmedium:calibration_bench", "count": 1}
+}

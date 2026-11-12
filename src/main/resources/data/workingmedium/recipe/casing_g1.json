@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["P","C"],
+  "key": {"C": {"item": "workingmedium:casing_g0"},"P": {"item": "pneumaticcraft:plastic"}},
+  "result": {"id": "workingmedium:casing_g1", "count": 1}
+}

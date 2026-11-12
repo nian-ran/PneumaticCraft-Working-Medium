@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "E",
+    "C"
+  ],
+  "key": {
+    "E": {
+      "item": "workingmedium:electrode"
+    },
+    "C": {
+      "item": "workingmedium:casing_g3"
+    }
+  },
+  "result": {
+    "id": "workingmedium:electrolyzer",
+    "count": 1
+  }
+}

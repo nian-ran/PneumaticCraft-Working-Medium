@@ -1,0 +1,79 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "metal": "workingmedium:block/tube_cryo",
+    "end": "workingmedium:block/window",
+    "particle": "workingmedium:block/tube_cryo"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        6,
+        10
+      ],
+      "to": [
+        10,
+        10,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            6,
+            10,
+            10,
+            16
+          ],
+          "texture": "#metal"
+        },
+        "up": {
+          "uv": [
+            6,
+            0,
+            10,
+            6
+          ],
+          "texture": "#metal"
+        },
+        "north": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#metal"
+        },
+        "south": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#end",
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [
+            10,
+            6,
+            16,
+            10
+          ],
+          "texture": "#metal"
+        },
+        "east": {
+          "uv": [
+            0,
+            6,
+            6,
+            10
+          ],
+          "texture": "#metal"
+        }
+      }
+    }
+  ]
+}

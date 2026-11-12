@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "L",
+    "C"
+  ],
+  "key": {
+    "L": {
+      "item": "workingmedium:part_coil"
+    },
+    "C": {
+      "item": "workingmedium:casing_g5"
+    }
+  },
+  "result": {
+    "id": "workingmedium:fluid_loop",
+    "count": 1
+  }
+}

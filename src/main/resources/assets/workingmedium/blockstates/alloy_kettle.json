@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/alloy_kettle",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/alloy_kettle",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/alloy_kettle",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/alloy_kettle",
+      "y": 270
+    }
+  }
+}

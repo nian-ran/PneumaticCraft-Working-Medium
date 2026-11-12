@@ -1,0 +1,13 @@
+{
+  "type": "workingmedium:window",
+  "machine": "alloy_kettle",
+  "items": [
+    {"item": "workingmedium:compressed_steel"},
+    {"item": "pneumaticcraft:plastic"},
+    {"item": "minecraft:clay_ball"}
+  ],
+  "fluids": [{"fluid": "workingmedium:oxygen", "amount": 100}],
+  "item_outputs": [{"item": "workingmedium:ceramic_alloy", "count": 1}],
+  "pressure_min": 35.0, "pressure_max": 55.0, "temp_min": 900, "temp_max": 1400,
+  "air": 100, "time": 200, "lube": 6, "heat": 10.0
+}

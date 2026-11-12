@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["T","P","T"],
+  "key": {"P": {"item": "workingmedium:g5_plate"},"T": {"item": "workingmedium:g5_tube"}},
+  "result": {"id": "workingmedium:g5_cylinder", "count": 1}
+}

@@ -1,0 +1,8 @@
+{
+  "type": "workingmedium:window",
+  "machine": "electrolyzer",
+  "fluids": [{"fluid": "workingmedium:acid_feed", "amount": 100}, {"fluid": "minecraft:water", "amount": 100}],
+  "fluid_outputs": [{"fluid": "workingmedium:hydrochloric", "amount": 150}],
+  "pressure_min": 8.0, "pressure_max": 24.0, "temp_min": 30, "temp_max": 90,
+  "air": 20, "time": 100
+}

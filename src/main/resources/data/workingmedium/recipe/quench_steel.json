@@ -1,0 +1,10 @@
+{
+  "type": "workingmedium:window",
+  "machine": "quench_well",
+  "items": [{"item": "workingmedium:compressed_steel"}],
+  "fluids": [{"fluid": "pneumaticcraft:lpg", "amount": 100}],
+  "item_outputs": [{"item": "workingmedium:ceramic_alloy", "count": 1}],
+  "fluid_outputs": [{"fluid": "workingmedium:dusty_steam", "amount": 80}],
+  "pressure_min": 4.0, "pressure_max": 18.0, "temp_min": 40, "temp_max": 200,
+  "air": 20, "time": 80, "min_size": 2
+}

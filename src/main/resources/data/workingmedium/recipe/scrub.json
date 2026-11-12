@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "scrubber_tower",
+  "fluids": [{"fluid": "workingmedium:flue_gas", "amount": 400}, {"fluid": "minecraft:water", "amount": 200}],
+  "fluid_outputs": [{"fluid": "workingmedium:liquid_co2", "amount": 100, "min_size": 8}],
+  "item_outputs": [{"item": "workingmedium:slag", "count": 1}],
+  "pressure_min": 20.0, "pressure_max": 60.0, "temp_min": 30, "temp_max": 120,
+  "air": 50, "time": 160, "lube": 2, "min_size": 6
+}

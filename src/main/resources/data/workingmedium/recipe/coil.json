@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["C","C"],
+  "key": {"C": {"item": "minecraft:copper_ingot"}},
+  "result": {"id": "workingmedium:part_coil", "count": 2}
+}

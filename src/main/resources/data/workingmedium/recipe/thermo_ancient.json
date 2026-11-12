@@ -1,0 +1,33 @@
+{
+  "type": "workingmedium:window",
+  "machine": "thermolysis_kettle",
+  "items": [
+    {
+      "item": "workingmedium:crushed_ancient"
+    }
+  ],
+  "item_outputs": [
+    {
+      "item": "minecraft:netherite_scrap",
+      "count": 1
+    },
+    {
+      "item": "workingmedium:slag",
+      "count": 1
+    }
+  ],
+  "fluid_outputs": [
+    {
+      "fluid": "workingmedium:dusty_steam",
+      "amount": 100
+    }
+  ],
+  "pressure_min": 14.0,
+  "pressure_max": 20.0,
+  "temp_min": 400,
+  "temp_max": 800,
+  "air": 80,
+  "time": 180,
+  "lube": 6,
+  "heat": 8.0
+}

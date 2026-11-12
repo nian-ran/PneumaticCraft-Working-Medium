@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["APA","RIR"],
+  "key": {"R": {"item": "minecraft:redstone"},"P": {"item": "minecraft:piston"},"I": {"item": "pneumaticcraft:ingot_iron_compressed"},"A": {"item": "pneumaticcraft:advanced_pressure_tube"}},
+  "result": {"id": "workingmedium:booster", "count": 1}
+}

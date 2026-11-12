@@ -1,0 +1,16 @@
+{
+  "type": "pneumaticcraft:pressure_chamber",
+  "inputs": [
+    {
+      "count": 1,
+      "item": "workingmedium:ceramic_alloy"
+    }
+  ],
+  "pressure": 3.5,
+  "results": [
+    {
+      "count": 2,
+      "id": "workingmedium:g3_tube"
+    }
+  ]
+}

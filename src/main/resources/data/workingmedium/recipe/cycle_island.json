@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I",
+    "C"
+  ],
+  "key": {
+    "I": {
+      "item": "workingmedium:part_intercooler"
+    },
+    "C": {
+      "item": "workingmedium:casing_g4"
+    }
+  },
+  "result": {
+    "id": "workingmedium:cycle_island",
+    "count": 1
+  }
+}

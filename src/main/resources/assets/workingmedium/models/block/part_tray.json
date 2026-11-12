@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "workingmedium:block/part_tray",
+    "particle": "workingmedium:block/part_tray"
+  }
+}

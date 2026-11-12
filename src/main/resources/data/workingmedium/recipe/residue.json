@@ -1,0 +1,13 @@
+{
+  "type": "workingmedium:window",
+  "machine": "residue_kiln",
+  "fluids": [{"fluid": "pneumaticcraft:oil", "amount": 250}],
+  "item_outputs": [
+    {"item": "workingmedium:asphalt", "count": 1},
+    {"item": "workingmedium:heavy_wax", "count": 1},
+    {"item": "workingmedium:metal_ash", "count": 1}
+  ],
+  "fluid_outputs": [{"fluid": "pneumaticcraft:diesel", "amount": 50}],
+  "pressure_min": 6.0, "pressure_max": 12.0, "temp_min": 120, "temp_max": 280,
+  "air": 30, "time": 160, "heat": 4.0
+}

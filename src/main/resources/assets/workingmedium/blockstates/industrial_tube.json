@@ -1,0 +1,62 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "workingmedium:block/tube_center"
+      }
+    },
+    {
+      "when": {
+        "south": true
+      },
+      "apply": {
+        "model": "workingmedium:block/tube_arm"
+      }
+    },
+    {
+      "when": {
+        "north": true
+      },
+      "apply": {
+        "model": "workingmedium:block/tube_arm",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": true
+      },
+      "apply": {
+        "model": "workingmedium:block/tube_arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": true
+      },
+      "apply": {
+        "model": "workingmedium:block/tube_arm",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": true
+      },
+      "apply": {
+        "model": "workingmedium:block/tube_arm",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "down": true
+      },
+      "apply": {
+        "model": "workingmedium:block/tube_arm",
+        "x": 90
+      }
+    }
+  ]
+}

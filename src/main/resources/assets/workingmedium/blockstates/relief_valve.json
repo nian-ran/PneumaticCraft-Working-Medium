@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/relief_valve",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/relief_valve",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/relief_valve",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/relief_valve",
+      "y": 270
+    }
+  }
+}

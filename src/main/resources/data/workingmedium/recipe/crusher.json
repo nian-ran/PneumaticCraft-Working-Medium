@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CCC","CPC","CSC"],
+  "key": {"C": {"item": "workingmedium:casing_g0"},"S": {"item": "minecraft:blast_furnace"},"P": {"item": "minecraft:piston"}},
+  "result": {"id": "workingmedium:impact_crusher", "count": 1}
+}

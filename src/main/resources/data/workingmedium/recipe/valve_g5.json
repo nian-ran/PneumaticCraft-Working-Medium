@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["PTN","D S","G C"],
+  "key": {"G": {"item": "workingmedium:g5_gripper"},"S": {"item": "workingmedium:g5_seal"},"T": {"item": "workingmedium:g5_tube"},"N": {"item": "workingmedium:g5_nozzle"},"C": {"item": "workingmedium:g5_cylinder"},"D": {"item": "workingmedium:g5_diaphragm"},"P": {"item": "workingmedium:g5_plate"}},
+  "result": {"id": "workingmedium:g5_pump", "count": 1}
+}

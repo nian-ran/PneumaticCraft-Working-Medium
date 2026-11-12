@@ -1,0 +1,9 @@
+{
+  "type": "workingmedium:window",
+  "machine": "sinter_kiln",
+  "items": [{"item": "workingmedium:waste_chip"}],
+  "item_counts": [4],
+  "item_outputs": [{"item": "workingmedium:substrate", "count": 1}],
+  "pressure_min": 8.0, "pressure_max": 24.0, "temp_min": 400, "temp_max": 800,
+  "air": 30, "time": 140, "heat": 5.0
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" B ","PTP"],
+  "key": {"T": {"item": "minecraft:iron_trapdoor"},"P": {"item": "pneumaticcraft:pressure_tube"},"B": {"item": "minecraft:iron_bars"}},
+  "result": {"id": "workingmedium:relief_valve", "count": 1}
+}

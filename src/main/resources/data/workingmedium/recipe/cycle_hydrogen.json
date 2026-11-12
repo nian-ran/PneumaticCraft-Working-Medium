@@ -1,0 +1,8 @@
+{
+  "type": "workingmedium:window",
+  "machine": "cycle_island",
+  "fluids": [{"fluid": "workingmedium:hydrogen", "amount": 40}, {"fluid": "workingmedium:oxygen", "amount": 20}],
+  "fluid_outputs": [{"fluid": "minecraft:water", "amount": 40}],
+  "pressure_min": 8.0, "pressure_max": 40.0, "temp_min": 200, "temp_max": 900,
+  "air": -240, "time": 40, "heat": 16.0
+}

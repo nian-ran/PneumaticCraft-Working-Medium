@@ -1,0 +1,15 @@
+{
+  "type": "workingmedium:window",
+  "machine": "cryo_tower",
+  "fluids": [{"fluid": "workingmedium:flue_gas", "amount": 500}],
+  "fluid_outputs": [
+    {"fluid": "workingmedium:inerts", "amount": 80, "min_size": 8},
+    {"fluid": "workingmedium:nitrogen", "amount": 120, "min_size": 8},
+    {"fluid": "workingmedium:argon", "amount": 40, "min_size": 8},
+    {"fluid": "workingmedium:oxygen", "amount": 80, "min_size": 8},
+    {"fluid": "workingmedium:liquid_co2", "amount": 80, "min_size": 8},
+    {"fluid": "workingmedium:pure_nitrogen", "amount": 80, "min_size": 10}
+  ],
+  "pressure_min": 40.0, "pressure_max": 110.0, "temp_min": -160, "temp_max": -40,
+  "air": 120, "time": 240, "lube": 8, "heat": -12.0, "min_size": 8
+}

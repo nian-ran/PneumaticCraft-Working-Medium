@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["AAA"],
+  "key": {"A": {"item": "workingmedium:ceramic_alloy"}},
+  "result": {"id": "workingmedium:industrial_tube", "count": 4}
+}

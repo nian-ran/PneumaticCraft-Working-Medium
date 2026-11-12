@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C",
+    "F"
+  ],
+  "key": {
+    "C": {
+      "item": "workingmedium:casing_g3"
+    },
+    "F": {
+      "item": "minecraft:furnace"
+    }
+  },
+  "result": {
+    "id": "workingmedium:sinter_kiln",
+    "count": 1
+  }
+}

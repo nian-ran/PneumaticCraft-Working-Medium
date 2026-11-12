@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "metal": "workingmedium:block/tube",
+    "glass": "workingmedium:block/window",
+    "particle": "workingmedium:block/tube"
+  },
+  "elements": [
+    { "from": [0, 6, 6], "to": [16, 10, 10], "faces": {
+      "down": {"uv": [0, 6, 16, 10], "texture": "#metal"},
+      "up": {"uv": [0, 6, 16, 10], "texture": "#metal"},
+      "north": {"uv": [0, 6, 16, 10], "texture": "#metal"},
+      "south": {"uv": [0, 6, 16, 10], "texture": "#metal"},
+      "west": {"uv": [6, 6, 10, 10], "texture": "#glass", "cullface": "west"},
+      "east": {"uv": [6, 6, 10, 10], "texture": "#glass", "cullface": "east"}
+    }}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "workingmedium:block/gas_bank",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "workingmedium:block/gas_bank",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "workingmedium:block/gas_bank",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "workingmedium:block/gas_bank",
+      "y": 270
+    }
+  }
+}

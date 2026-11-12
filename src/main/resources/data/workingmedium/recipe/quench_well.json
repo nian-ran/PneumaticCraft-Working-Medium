@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "K",
+    "C"
+  ],
+  "key": {
+    "K": {
+      "item": "minecraft:cauldron"
+    },
+    "C": {
+      "item": "workingmedium:casing_g3"
+    }
+  },
+  "result": {
+    "id": "workingmedium:quench_well",
+    "count": 1
+  }
+}

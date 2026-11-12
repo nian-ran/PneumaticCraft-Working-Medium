@@ -1,0 +1,14 @@
+{
+  "type": "workingmedium:window",
+  "machine": "polymerizer",
+  "items": [{"item": "workingmedium:catalyst"}],
+  "item_counts": [0],
+  "fluids": [
+    {"fluid": "workingmedium:monomer", "amount": 200},
+    {"fluid": "workingmedium:chlorine", "amount": 50}
+  ],
+  "item_outputs": [{"item": "workingmedium:engineering_plastic", "count": 2}],
+  "fluid_outputs": [{"fluid": "workingmedium:acid_mist", "amount": 40}],
+  "pressure_min": 16.0, "pressure_max": 24.0, "temp_min": 160, "temp_max": 230,
+  "air": 40, "time": 140, "lube": 4, "heat": 18.0
+}
