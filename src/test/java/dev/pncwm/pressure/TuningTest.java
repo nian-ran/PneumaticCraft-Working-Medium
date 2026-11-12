@@ -286,4 +286,44 @@ class TuningTest {
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.isOxidizer("hydrogen"));
     }
 
+    @Test
+    void hatchDrainRespectsGasAndLiquid() {
+        assertTrue(Tuning.hatchMayDrain(true, false, false, "hydrogen"));
+        assertTrue(Tuning.hatchMayDrain(true, false, false, "hydrochloric"));
+        assertTrue(Tuning.hatchMayDrain(false, true, false, "hydrogen"));
+        assertTrue(Tuning.hatchMayDrain(false, true, false, "flue_gas"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.hatchMayDrain(false, true, false, "hydrochloric"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.hatchMayDrain(false, true, false, "lubricant"));
+        assertTrue(Tuning.hatchMayDrain(false, false, true, "hydrochloric"));
+        assertTrue(Tuning.hatchMayDrain(false, false, true, "lubricant"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.hatchMayDrain(false, false, true, "hydrogen"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.hatchMayDrain(false, false, true, "flue_gas"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.hatchMayDrain(false, true, false, null));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.hatchMayDrain(true, false, false, ""));
+    }
+
+    @Test
+    void regulatorSetpointsGainHighBarsWithoutShiftingOldOnes() {
+        assertEquals(5f, Tuning.REGULATOR_SETPOINTS[0]);
+        assertEquals(10f, Tuning.REGULATOR_SETPOINTS[1]);
+        assertEquals(16f, Tuning.REGULATOR_SETPOINTS[2]);
+        assertEquals(18f, Tuning.REGULATOR_SETPOINTS[3]);
+        assertEquals(20f, Tuning.REGULATOR_SETPOINTS[4]);
+        assertEquals(50f, Tuning.REGULATOR_SETPOINTS[5]);
+        assertEquals(80f, Tuning.REGULATOR_SETPOINTS[6]);
+        assertEquals(120f, Tuning.REGULATOR_SETPOINTS[7]);
+        assertEquals(8, Tuning.REGULATOR_SETPOINTS.length);
+    }
+
+    @Test
+    void chargingBudgetAndHydrogenPools() {
+        assertEquals(200, Tuning.CHARGE_BUDGET);
+        assertEquals(200, Tuning.DRILL_CHARGE_BUDGET);
+        assertTrue(Tuning.poolIgnites("hydrogen", true));
+        assertTrue(Tuning.poolIgnites("workingmedium:hydrogen", true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("hydrogen", false));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("oxygen", true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("flue_gas", true));
+    }
+
 }

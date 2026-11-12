@@ -245,12 +245,15 @@ public final class MachineIo {
 
             @Override
             public FluidStack drain(FluidStack resource, FluidAction action) {
+                if (resource.isEmpty() || !acceptsOutput(type, resource)) {
+                    return FluidStack.EMPTY;
+                }
                 return drainMatching(resource, action);
             }
 
             @Override
             public FluidStack drain(int maxDrain, FluidAction action) {
-                return drainAny(maxDrain, action);
+                return drainAny(maxDrain, action, type);
             }
         };
     }
@@ -349,12 +352,32 @@ public final class MachineIo {
     }
 
     private FluidStack drainAny(int maxDrain, IFluidHandler.FluidAction action) {
+        return drainAny(maxDrain, action, null);
+    }
+
+    private FluidStack drainAny(int maxDrain, IFluidHandler.FluidAction action, HatchType type) {
         for (int i = 0; i < INPUTS; i++) {
+            FluidStack held = tanks[i + INPUTS].getFluid();
+            if (held.isEmpty() || (type != null && !acceptsOutput(type, held))) {
+                continue;
+            }
             FluidStack drained = tanks[i + INPUTS].drain(maxDrain, action);
             if (!drained.isEmpty()) {
                 return drained;
             }
         }
         return FluidStack.EMPTY;
+    }
+
+    /**
+     * Drain-side filter for a hatch. A gas hatch only yields gases, a fluid hatch only yields liquids,
+     * and a drain hatch yields whatever is in the output tanks.
+     */
+    public static boolean acceptsOutput(HatchType type, FluidStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        String path = BuiltInRegistries.FLUID.getKey(stack.getFluid()).getPath();
+        return Tuning.hatchMayDrain(type == HatchType.DRAIN, type == HatchType.GAS, type == HatchType.FLUID, path);
     }
 }

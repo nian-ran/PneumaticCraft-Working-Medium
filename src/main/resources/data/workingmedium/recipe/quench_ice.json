@@ -1,0 +1,11 @@
+{
+  "type": "workingmedium:window",
+  "machine": "quench_well",
+  "fluids": [
+    {"fluid": "minecraft:water", "amount": 1000},
+    {"fluid": "workingmedium:liquid_co2", "amount": 100}
+  ],
+  "item_outputs": [{"item": "minecraft:packed_ice", "count": 2}],
+  "pressure_min": 4.0, "pressure_max": 18.0, "temp_min": -40, "temp_max": 10,
+  "air": 15, "time": 80, "heat": -2.0, "min_size": 2
+}

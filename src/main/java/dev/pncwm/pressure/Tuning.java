@@ -336,6 +336,41 @@ public final class Tuning {
         return 2 * Math.max(1, stages);
     }
 
+    /** Regulator skid setpoints, including 80 bar (critical / fluid loop) and 120 bar (G4). Older saves keep their index. */
+    public static final float[] REGULATOR_SETPOINTS = {5f, 10f, 16f, 18f, 20f, 50f, 80f, 120f};
+
+    /** Air units a charging station may push in one tick before a gripper multiplies it. */
+    public static final int CHARGE_BUDGET = 200;
+
+    /** Budget spent to add one charge point to a grade drill. Matches the base station rate of one point per tick. */
+    public static final int DRILL_CHARGE_BUDGET = 200;
+
+    /**
+     * Whether a hatch may extract this fluid (by registry path). Drain hatches take everything;
+     * gas hatches take only gases; fluid hatches take only liquids.
+     */
+    public static boolean hatchMayDrain(boolean drainHatch, boolean gasHatch, boolean fluidHatch, String path) {
+        if (path == null || fluidName(path).isEmpty()) {
+            return false;
+        }
+        if (drainHatch) {
+            return true;
+        }
+        boolean gas = isGasPath(path);
+        if (gasHatch) {
+            return gas;
+        }
+        if (fluidHatch) {
+            return !gas;
+        }
+        return true;
+    }
+
+    /** A spilled hydrogen pool ignites when a flame, lava or magma is next to it. */
+    public static boolean poolIgnites(String path, boolean nearFlame) {
+        return isFlammableGas(path) && nearFlame;
+    }
+
     /**
      * Comparator strength 0-15 for shell temperature in Celsius. -200 C is empty, 1500 C is full,
      * and ambient air (~20 C) sits around 2.

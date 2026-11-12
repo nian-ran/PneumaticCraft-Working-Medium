@@ -78,7 +78,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     private boolean certified;
     private final BlockPos[] watched = new BlockPos[3];
     private int setpoint = 2;
-    private static final float[] SETPOINTS = {5f, 10f, 16f, 18f, 20f, 50f};
+    private static final float[] SETPOINTS = Tuning.REGULATOR_SETPOINTS;
     private boolean scanned;
     private int lastSignal = -1;
     /** Recipe the current batch belongs to. Not saved: after a reload the first match keeps the saved progress. */
@@ -328,6 +328,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
         if (status == MachineStatus.NO_LUBE && level.random.nextFloat() < 0.3f) {
             level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.02, 0);
+        }
+        if (status == MachineStatus.NO_AIR && level.random.nextFloat() < 0.3f) {
+            level.addParticle(ParticleTypes.CLOUD, x, y, z, 0, 0.02, 0);
         }
     }
 
@@ -735,39 +738,19 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     }
 
     private void tickCharge() {
-        int budget = 200 * upgradeMultiplier("_gripper");
+        int budget = Tuning.CHARGE_BUDGET * upgradeMultiplier("_gripper");
         boolean charged = false;
+        boolean wantCharge = false;
         for (int i = 0; i < MachineIo.INPUTS && budget > 0; i++) {
             ItemStack stack = io.items.getStackInSlot(i);
-            if (stack.isEmpty()) {
+            if (!canCharge(stack)) {
                 continue;
             }
-            var handler = stack.getCapability(me.desht.pneumaticcraft.api.PNCCapabilities.AIR_HANDLER_ITEM);
-            if (handler != null) {
-                // Stop at the item's own rating instead of pushing it past its maximum pressure.
-                if (air.getAir() > 500 && handler.getPressure() < handler.maxPressure() - 0.05f) {
-                    int give = Math.min(budget, 100);
-                    int cost = Tuning.certifiedCost(give, certified);
-                    if (air.getAir() < cost) {
-                        break;
-                    }
-                    handler.addAir(give);
-                    air.addAir(-cost);
-                    budget -= give;
-                    charged = true;
-                }
-            } else if (stack.is(WMItems.DRILL.get())) {
-                int charge = stack.getOrDefault(dev.pncwm.registry.WMData.CHARGE, 0);
-                int heatLevel = stack.getOrDefault(dev.pncwm.registry.WMData.HEAT, 0);
-                int cost = Tuning.certifiedCost(800, certified);
-                if (charge < 100 && air.getAir() > cost) {
-                    stack.set(dev.pncwm.registry.WMData.CHARGE, charge + 1);
-                    air.addAir(-cost);
-                    if (heatLevel > 0) {
-                        stack.set(dev.pncwm.registry.WMData.HEAT, heatLevel - 1);
-                    }
-                    charged = true;
-                }
+            wantCharge = true;
+            int before = budget;
+            budget = chargeStack(stack, budget);
+            if (budget < before) {
+                charged = true;
             }
         }
         if (kind() == ApparatusKind.DRONE_NEST && hasProgramSheet() && budget > 0) {
@@ -777,6 +760,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                     break;
                 }
                 ItemStack stack = entity.getItem();
+                if (canCharge(stack)) {
+                    wantCharge = true;
+                }
                 int before = budget;
                 budget = chargeStack(stack, budget);
                 if (budget < before) {
@@ -792,7 +778,15 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 blocked = true;
             }
         }
-        setStatus(charged ? MachineStatus.RUNNING : blocked ? MachineStatus.CLOGGED : MachineStatus.IDLE);
+        if (charged) {
+            setStatus(MachineStatus.RUNNING);
+        } else if (blocked) {
+            setStatus(MachineStatus.CLOGGED);
+        } else if (wantCharge) {
+            setStatus(MachineStatus.NO_AIR);
+        } else {
+            setStatus(MachineStatus.IDLE);
+        }
     }
 
     private void tickLoop() {
@@ -1129,6 +1123,20 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         return Tuning.partMultiplier(path, suffix, gradeItem.grade.index);
     }
 
+    private boolean canCharge(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        var handler = stack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM);
+        if (handler != null) {
+            return handler.getPressure() < handler.maxPressure() - 0.05f;
+        }
+        if (stack.is(WMItems.DRILL.get())) {
+            return stack.getOrDefault(WMData.CHARGE, 0) < 100;
+        }
+        return false;
+    }
+
     private boolean fullyCharged(ItemStack stack) {
         var handler = stack.getCapability(me.desht.pneumaticcraft.api.PNCCapabilities.AIR_HANDLER_ITEM);
         if (handler != null) {
@@ -1367,13 +1375,14 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             int charge = stack.getOrDefault(WMData.CHARGE, 0);
             int heatLevel = stack.getOrDefault(WMData.HEAT, 0);
             int cost = Tuning.certifiedCost(800, certified);
-            if (charge < 100 && air.getAir() > cost && budget >= cost) {
+            int step = Tuning.DRILL_CHARGE_BUDGET;
+            if (charge < 100 && air.getAir() > cost && budget >= step) {
                 stack.set(WMData.CHARGE, charge + 1);
                 air.addAir(-cost);
                 if (heatLevel > 0) {
                     stack.set(WMData.HEAT, heatLevel - 1);
                 }
-                return budget - cost;
+                return budget - step;
             }
         }
         return budget;

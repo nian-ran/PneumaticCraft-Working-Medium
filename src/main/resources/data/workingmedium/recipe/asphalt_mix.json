@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "workingmedium:stone_dust"},
+    {"item": "workingmedium:stone_dust"},
+    {"item": "workingmedium:stone_dust"},
+    {"item": "workingmedium:stone_dust"},
+    {"item": "workingmedium:heavy_wax"}
+  ],
+  "result": {"id": "workingmedium:asphalt", "count": 4}
+}

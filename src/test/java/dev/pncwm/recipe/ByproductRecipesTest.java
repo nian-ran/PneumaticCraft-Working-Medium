@@ -54,6 +54,28 @@ class ByproductRecipesTest {
         assertRecipe("crush_deepslate.json", "impact_crusher", "minecraft:deepslate", "workingmedium:stone_dust");
         assertRecipe("crush_cobbled_deepslate.json", "impact_crusher", "minecraft:cobbled_deepslate", "workingmedium:stone_dust");
         assertRecipe("crush_blackstone.json", "impact_crusher", "minecraft:blackstone", "workingmedium:stone_dust");
+        assertRecipe("crush_andesite.json", "impact_crusher", "minecraft:andesite", "workingmedium:stone_dust");
+        assertRecipe("crush_diorite.json", "impact_crusher", "minecraft:diorite", "workingmedium:stone_dust");
+        assertRecipe("crush_granite.json", "impact_crusher", "minecraft:granite", "workingmedium:stone_dust");
+        assertRecipe("crush_tuff.json", "impact_crusher", "minecraft:tuff", "workingmedium:stone_dust");
+        assertRecipe("crush_basalt.json", "impact_crusher", "minecraft:basalt", "workingmedium:stone_dust");
+        assertRecipe("crush_calcite.json", "impact_crusher", "minecraft:calcite", "workingmedium:stone_dust");
+        assertRecipe("crush_end_stone.json", "impact_crusher", "minecraft:end_stone", "workingmedium:stone_dust");
+        assertRecipe("crush_iron_ore.json", "impact_crusher", "minecraft:iron_ore", "workingmedium:crushed_iron", "\"count\": 2");
+        assertRecipe("crush_deepslate_iron_ore.json", "impact_crusher", "minecraft:deepslate_iron_ore", "workingmedium:crushed_iron");
+        assertRecipe("crush_copper_ore.json", "impact_crusher", "minecraft:copper_ore", "workingmedium:crushed_copper");
+        assertRecipe("crush_gold_ore.json", "impact_crusher", "minecraft:gold_ore", "workingmedium:crushed_gold");
+        assertRecipe("crush_nether_gold_ore.json", "impact_crusher", "minecraft:nether_gold_ore", "workingmedium:crushed_gold", "minecraft:gold_nugget");
+        assertRecipe("kiln_glass.json", "residue_kiln", "minecraft:sand", "minecraft:glass", "\"count\": 3");
+        assertRecipe("quench_ice.json", "quench_well", "minecraft:water", "workingmedium:liquid_co2", "minecraft:packed_ice");
+        assertRecipe("quench_blue_ice.json", "quench_well", "minecraft:packed_ice", "workingmedium:liquid_co2", "minecraft:blue_ice");
+        assertRecipe("cycle_oil.json", "cycle_island", "pneumaticcraft:oil", "\"air\": -160");
+        assertRecipe("cycle_oil_oxygen.json", "cycle_island", "pneumaticcraft:oil", "workingmedium:oxygen", "\"air\": -220");
+        assertRecipe("neutralize_acid.json", "scrubber_tower", "workingmedium:hydrochloric", "workingmedium:caustic", "workingmedium:brine");
+        String asphalt = Files.readString(recipe("asphalt_mix.json"));
+        org.junit.jupiter.api.Assertions.assertTrue(asphalt.contains("workingmedium:stone_dust"), asphalt);
+        org.junit.jupiter.api.Assertions.assertTrue(asphalt.contains("workingmedium:heavy_wax"), asphalt);
+        org.junit.jupiter.api.Assertions.assertTrue(asphalt.contains("workingmedium:asphalt"), asphalt);
     }
 
     @Test
@@ -67,7 +89,7 @@ class ByproductRecipesTest {
             assertTrue(en.contains("hint.workingmedium." + status), status);
             assertTrue(en.contains("status.workingmedium." + status), "status " + status);
         }
-        for (int page = 0; page < 18; page++) {
+        for (int page = 0; page < 19; page++) {
             assertTrue(en.contains("manual.workingmedium.page." + page), "page " + page);
         }
         for (String key : new String[] {"tooltip.workingmedium.certificate", "tooltip.workingmedium.certified",
