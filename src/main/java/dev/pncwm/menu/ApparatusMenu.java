@@ -9,6 +9,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -291,14 +292,8 @@ public class ApparatusMenu extends AbstractContainerMenu {
             if (stack.isEmpty() || !mayPlace(stack)) {
                 return stack;
             }
-            ItemStack existing = getItem();
+            // Do not consume the carried stack. Leftover real items are returned in clicked().
             setByPlayer(ghostCopy(stack));
-            // Give back a pre-0.2.6.4 real filter item, otherwise it would vanish when replaced.
-            if (!existing.isEmpty() && !isGhost(existing) && !stack.is(existing.getItem())) {
-                if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, existing)) {
-                    return stack;
-                }
-            }
             return stack;
         }
 
@@ -325,6 +320,96 @@ public class ApparatusMenu extends AbstractContainerMenu {
         public boolean mayPickup(Player player) {
             return true;
         }
+    }
+
+    @Override
+    public void clicked(int slotId, int button, ClickType type, Player player) {
+        if (slotId == MachineIo.FILTER && slotId < slots.size() && slots.get(slotId) instanceof FilterSlot slot) {
+            if (type == ClickType.SWAP) {
+                filterSwap(slot, button, player);
+                return;
+            }
+            if (type == ClickType.CLONE) {
+                ItemStack existing = slot.getItem();
+                if (GhostFilter.mayClone(existing.isEmpty(), isGhost(existing))
+                        && player.getAbilities().instabuild
+                        && getCarried().isEmpty()) {
+                    setCarried(existing.copyWithCount(existing.getMaxStackSize()));
+                }
+                return;
+            }
+            if (type == ClickType.PICKUP) {
+                filterPickup(slot, player);
+                return;
+            }
+        }
+        super.clicked(slotId, button, type, player);
+    }
+
+    /**
+     * Number-key swap used getItem(), so a ghost mark could be copied into the hotbar as a real item,
+     * and a hotbar stack placed into the filter was consumed. Handle the slot ourselves.
+     */
+    private void filterSwap(FilterSlot slot, int button, Player player) {
+        if (button < 0 || (button > 8 && button != 40)) {
+            return;
+        }
+        var inventory = player.getInventory();
+        ItemStack hotbar = inventory.getItem(button);
+        ItemStack existing = slot.getItem();
+        switch (GhostFilter.swap(existing.isEmpty(), isGhost(existing), hotbar.isEmpty())) {
+            case NONE -> {
+            }
+            case CLEAR_GHOST -> slot.set(ItemStack.EMPTY);
+            case GIVE_REAL -> {
+                inventory.setItem(button, existing);
+                slot.set(ItemStack.EMPTY);
+            }
+            case PLACE_KEEP -> slot.setByPlayer(ghostCopy(hotbar));
+            case PLACE_RETURN_REAL -> {
+                ItemStack real = existing.copy();
+                slot.setByPlayer(ghostCopy(hotbar));
+                if (!inventory.add(real)) {
+                    player.drop(real, false);
+                }
+            }
+        }
+    }
+
+    /**
+     * Place a ghost without taking the carried item. A leftover real filter from an older world
+     * is given back if this click would replace it.
+     */
+    private void filterPickup(FilterSlot slot, Player player) {
+        ItemStack carried = getCarried();
+        ItemStack existing = slot.getItem();
+        if (carried.isEmpty()) {
+            if (!existing.isEmpty() && !isGhost(existing)) {
+                slot.set(ItemStack.EMPTY);
+                setCarried(existing);
+            } else {
+                slot.set(ItemStack.EMPTY);
+            }
+            return;
+        }
+        ItemStack real = (!existing.isEmpty() && !isGhost(existing)) ? existing.copy() : ItemStack.EMPTY;
+        slot.setByPlayer(ghostCopy(carried));
+        if (!real.isEmpty() && !player.getInventory().add(real)) {
+            player.drop(real, false);
+        }
+    }
+
+    @Override
+    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
+        if (slot instanceof FilterSlot) {
+            return GhostFilter.mayPickAll(isGhost(slot.getItem()));
+        }
+        return super.canTakeItemForPickAll(stack, slot);
+    }
+
+    @Override
+    public boolean canDragTo(Slot slot) {
+        return !(slot instanceof FilterSlot) && super.canDragTo(slot);
     }
 
     @Override

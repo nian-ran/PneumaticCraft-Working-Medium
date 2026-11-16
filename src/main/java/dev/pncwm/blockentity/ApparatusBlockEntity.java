@@ -162,8 +162,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
 
     /**
      * Called just before a player breaks the controller. Every full 1000 mB of a fluid that has a bucket is poured
-     * into one of the player's own empty buckets, so contents can be saved without creating buckets from nothing.
-     * Returns how many buckets were filled.
+     * into one of the player's own empty buckets (main inventory first, then the offhand), so contents can be saved
+     * without creating buckets from nothing. Returns how many buckets were filled.
      */
     public int bottleInto(Player player) {
         if (level == null || level.isClientSide || player.getAbilities().instabuild) {
@@ -182,7 +182,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             }
             int buckets = Tuning.bucketsFromMilli(fluid.getAmount());
             for (int n = 0; n < buckets; n++) {
-                int slot = inventory.findSlotMatchingItem(new ItemStack(Items.BUCKET));
+                int slot = findEmptyBucket(inventory);
                 if (slot < 0) {
                     break;
                 }
@@ -199,6 +199,19 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             player.displayClientMessage(Component.translatable("message.workingmedium.bottled", filled), true);
         }
         return filled;
+    }
+
+    /**
+     * Main inventory first, then the offhand. findSlotMatchingItem only searches the main
+     * inventory, so a bucket held in the offhand used to be ignored when breaking a controller.
+     */
+    private static int findEmptyBucket(Inventory inventory) {
+        int slot = inventory.findSlotMatchingItem(new ItemStack(Items.BUCKET));
+        if (slot >= 0) {
+            return slot;
+        }
+        ItemStack offhand = inventory.getItem(Inventory.SLOT_OFFHAND);
+        return offhand.is(Items.BUCKET) ? Inventory.SLOT_OFFHAND : -1;
     }
 
     public ApparatusKind kind() {

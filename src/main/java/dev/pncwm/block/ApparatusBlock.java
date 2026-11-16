@@ -118,6 +118,14 @@ public class ApparatusBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (level.getBlockEntity(pos) instanceof ApparatusBlockEntity apparatus) {
+            apparatus.neighborChanged();
+        }
+    }
+
+    @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof ApparatusBlockEntity apparatus) {
             apparatus.bottleInto(player);
