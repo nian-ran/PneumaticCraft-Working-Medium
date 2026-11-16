@@ -1,5 +1,7 @@
 package dev.pncwm.block;
 
+import java.util.List;
+
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -7,6 +9,13 @@ import dev.pncwm.apparatus.ApparatusKind;
 import dev.pncwm.blockentity.ApparatusBlockEntity;
 import dev.pncwm.registry.WMBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -139,5 +148,37 @@ public class ApparatusBlock extends BaseEntityBlock {
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = super.getDrops(state, params);
+        BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (be instanceof ApparatusBlockEntity apparatus) {
+            for (ItemStack drop : drops) {
+                if (drop.getItem() instanceof BlockItem item && item.getBlock() == this) {
+                    apparatus.saveFluidsToItem(drop);
+                    break;
+                }
+            }
+        }
+        return drops;
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity by, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, by, stack);
+        if (level.getBlockEntity(pos) instanceof ApparatusBlockEntity apparatus) {
+            apparatus.loadFluidsFromItem(stack);
+        }
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+        if (level.getBlockEntity(pos) instanceof ApparatusBlockEntity apparatus) {
+            apparatus.saveFluidsToItem(stack);
+        }
+        return stack;
     }
 }

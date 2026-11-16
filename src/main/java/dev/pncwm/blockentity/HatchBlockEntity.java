@@ -60,10 +60,17 @@ public class HatchBlockEntity extends BlockEntity {
         if (!bound || level == null) {
             return null;
         }
+        // The controller may sit in another chunk. Treating an unloaded block entity as "gone"
+        // used to clear the binding, and a later save would forget the link.
+        if (!level.isLoaded(controller)) {
+            return null;
+        }
         if (level.getBlockEntity(controller) instanceof ApparatusBlockEntity apparatus) {
             return apparatus;
         }
         bound = false;
+        setChanged();
+        refreshCapabilities();
         return null;
     }
 

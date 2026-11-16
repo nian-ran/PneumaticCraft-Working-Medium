@@ -561,4 +561,14 @@ public final class Tuning {
     public static boolean mayDrainLube(boolean drainHatch, boolean gasHatch, boolean fluidHatch, boolean controller) {
         return !gasHatch && (drainHatch || fluidHatch || controller);
     }
+
+    /**
+     * Manifold hatches used to raise a machine's parallel count with no cap, so a ring of cheap hatches
+     * could multiply a recipe without bound. Eight times is the ceiling, regardless of how many are attached.
+     */
+    public static final int MAX_PARALLEL = 8;
+
+    public static int clampParallel(int parallel) {
+        return Math.max(1, Math.min(MAX_PARALLEL, parallel));
+    }
 }

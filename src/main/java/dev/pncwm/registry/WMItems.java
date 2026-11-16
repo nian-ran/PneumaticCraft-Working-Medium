@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.pncwm.WorkingMedium;
+import dev.pncwm.block.ApparatusBlock;
+import dev.pncwm.item.ApparatusBlockItem;
 import dev.pncwm.item.CertificateItem;
 import dev.pncwm.item.CurtainModuleItem;
 import dev.pncwm.item.GradeDrillItem;
@@ -85,7 +87,13 @@ public final class WMItems {
             if (block == WMBlocks.ASPHALT) {
                 continue;
             }
-            ITEMS.registerSimpleBlockItem(block);
+            ITEMS.register(block.getId().getPath(), () -> {
+                var resolved = block.get();
+                if (resolved instanceof ApparatusBlock) {
+                    return new ApparatusBlockItem(resolved, new Item.Properties());
+                }
+                return new BlockItem(resolved, new Item.Properties());
+            });
         }
         for (PressureGrade grade : new PressureGrade[] {PressureGrade.G2, PressureGrade.G3, PressureGrade.G4, PressureGrade.G5}) {
             for (String shape : new String[] {"plate", "tube", "seal", "nozzle", "diaphragm", "cylinder", "pump", "gripper", "slide"}) {

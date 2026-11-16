@@ -443,4 +443,17 @@ class TuningTest {
         assertTrue(Tuning.isFlameSource(false, false, false, false, false, true, false));
     }
 
+
+    @Test
+    void manifoldParallelIsCappedAtEight() {
+        assertEquals(1, Tuning.clampParallel(0));
+        assertEquals(1, Tuning.clampParallel(-3));
+        assertEquals(1, Tuning.clampParallel(1));
+        assertEquals(4, Tuning.clampParallel(4));
+        assertEquals(8, Tuning.clampParallel(8));
+        assertEquals(8, Tuning.clampParallel(9));
+        assertEquals(8, Tuning.clampParallel(64));
+        assertEquals(8, Tuning.MAX_PARALLEL);
+    }
+
 }

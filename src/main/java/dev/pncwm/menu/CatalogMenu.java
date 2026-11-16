@@ -81,6 +81,12 @@ public class CatalogMenu extends AbstractContainerMenu {
                 count += stack.getCount();
             }
         }
+        // Offhand was ignored, so emeralds (or payment) held there made the catalog say "can't afford".
+        for (ItemStack stack : player.getInventory().offhand) {
+            if (ItemStack.isSameItem(stack, sample)) {
+                count += stack.getCount();
+            }
+        }
         return count;
     }
 
@@ -88,6 +94,14 @@ public class CatalogMenu extends AbstractContainerMenu {
         int left = amount;
         for (int i = 0; i < player.getInventory().items.size() && left > 0; i++) {
             ItemStack stack = player.getInventory().items.get(i);
+            if (ItemStack.isSameItem(stack, sample)) {
+                int take = Math.min(left, stack.getCount());
+                stack.shrink(take);
+                left -= take;
+            }
+        }
+        for (int i = 0; i < player.getInventory().offhand.size() && left > 0; i++) {
+            ItemStack stack = player.getInventory().offhand.get(i);
             if (ItemStack.isSameItem(stack, sample)) {
                 int take = Math.min(left, stack.getCount());
                 stack.shrink(take);

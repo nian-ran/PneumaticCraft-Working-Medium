@@ -2,6 +2,7 @@ package dev.pncwm.menu;
 
 import dev.pncwm.blockentity.ApparatusBlockEntity;
 import dev.pncwm.blockentity.MachineIo;
+import dev.pncwm.registry.WMData;
 import dev.pncwm.registry.WMMenus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -82,10 +83,7 @@ public class ApparatusMenu extends AbstractContainerMenu {
         if (apparatus == null) {
             return;
         }
-        for (int i = 0; i < MachineIo.SLOTS; i++) {
-            int x = 8 + (i % 4) * 18;
-            int y = 18 + (i / 4) * 18;
-            addSlot(new MachineSlot(new net.minecraft.world.Container() {
+        var container = new net.minecraft.world.Container() {
                 @Override
                 public int getContainerSize() {
                     return MachineIo.SLOTS;
@@ -131,7 +129,15 @@ public class ApparatusMenu extends AbstractContainerMenu {
                 @Override
                 public void clearContent() {
                 }
-            }, i, x, y));
+        };
+        for (int i = 0; i < MachineIo.SLOTS; i++) {
+            int x = 8 + (i % 4) * 18;
+            int y = 18 + (i / 4) * 18;
+            if (i == MachineIo.FILTER) {
+                addSlot(new FilterSlot(container, i, x, y));
+            } else {
+                addSlot(new MachineSlot(container, i, x, y));
+            }
         }
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -182,6 +188,12 @@ public class ApparatusMenu extends AbstractContainerMenu {
         ItemStack original = stack.copy();
         int playerStart = MachineIo.SLOTS;
         int playerEnd = slots.size();
+        if (index == MachineIo.FILTER) {
+            if (isGhost(stack)) {
+                slot.set(ItemStack.EMPTY);
+                return ItemStack.EMPTY;
+            }
+        }
         if (index < playerStart) {
             if (!moveItemStackTo(stack, playerStart, playerEnd, true)) {
                 return ItemStack.EMPTY;
@@ -222,7 +234,7 @@ public class ApparatusMenu extends AbstractContainerMenu {
         return MachineIo.dedicatedSlot(stack);
     }
 
-    private final class MachineSlot extends Slot {
+    private class MachineSlot extends Slot {
         private MachineSlot(net.minecraft.world.Container container, int slot, int x, int y) {
             super(container, slot, x, y);
         }
@@ -244,8 +256,83 @@ public class ApparatusMenu extends AbstractContainerMenu {
         }
     }
 
+    private static boolean isGhost(ItemStack stack) {
+        return !stack.isEmpty() && Boolean.TRUE.equals(stack.get(WMData.GHOST));
+    }
+
+    private static ItemStack ghostCopy(ItemStack stack) {
+        ItemStack ghost = stack.copy();
+        ghost.setCount(1);
+        ghost.set(WMData.GHOST.get(), true);
+        return ghost;
+    }
+
+    /**
+     * Filter slot holds a phantom copy. Placing an item does not consume it; clearing the slot does not
+     * give a ghost back. A leftover real item from an older world is still returned to the player.
+     */
+    private final class FilterSlot extends MachineSlot {
+        private FilterSlot(net.minecraft.world.Container container, int slot, int x, int y) {
+            super(container, slot, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return !stack.isEmpty();
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return 1;
+        }
+
+        @Override
+        public ItemStack safeInsert(ItemStack stack, int increment) {
+            if (stack.isEmpty() || !mayPlace(stack)) {
+                return stack;
+            }
+            ItemStack existing = getItem();
+            setByPlayer(ghostCopy(stack));
+            // Give back a pre-0.2.6.4 real filter item, otherwise it would vanish when replaced.
+            if (!existing.isEmpty() && !isGhost(existing) && !stack.is(existing.getItem())) {
+                if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, existing)) {
+                    return stack;
+                }
+            }
+            return stack;
+        }
+
+        @Override
+        public void setByPlayer(ItemStack stack) {
+            if (stack.isEmpty()) {
+                super.setByPlayer(ItemStack.EMPTY);
+                return;
+            }
+            super.setByPlayer(isGhost(stack) ? stack : ghostCopy(stack));
+        }
+
+        @Override
+        public ItemStack remove(int amount) {
+            ItemStack existing = getItem();
+            set(ItemStack.EMPTY);
+            if (existing.isEmpty() || isGhost(existing)) {
+                return ItemStack.EMPTY;
+            }
+            return existing;
+        }
+
+        @Override
+        public boolean mayPickup(Player player) {
+            return true;
+        }
+    }
+
     @Override
     public boolean stillValid(Player player) {
-        return apparatus != null && !apparatus.isRemoved() && apparatus.getBlockPos().distSqr(player.blockPosition()) < 64;
+        if (apparatus == null || apparatus.isRemoved() || apparatus.getLevel() != player.level()) {
+            return false;
+        }
+        var pos = apparatus.getBlockPos();
+        return player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64.0;
     }
 }

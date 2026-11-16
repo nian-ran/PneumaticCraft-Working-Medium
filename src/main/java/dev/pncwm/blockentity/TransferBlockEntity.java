@@ -123,6 +123,17 @@ public class TransferBlockEntity extends BlockEntity implements IManoMeasurable 
         }
     }
 
+    /**
+     * Heat hull and cached air faces must be rebuilt after a neighbour appears or the block is rotated.
+     * Without this, a heat pipe placed later never joined, and sneak-rotating left tubes on the old faces.
+     */
+    public void neighborChanged() {
+        hullReady = false;
+        if (level != null && !level.isClientSide) {
+            level.invalidateCapabilities(worldPosition);
+        }
+    }
+
     /** Comparator output from outlet pressure against the outlet's rating (G2 on a reducer, G4 on a booster). */
     public int signal() {
         if (outlet == null) {

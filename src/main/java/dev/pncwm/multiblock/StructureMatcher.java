@@ -9,6 +9,7 @@ import dev.pncwm.block.HatchBlock;
 import dev.pncwm.block.HatchType;
 import dev.pncwm.block.PartBlock;
 import dev.pncwm.block.PartKind;
+import dev.pncwm.pressure.Tuning;
 import dev.pncwm.pressure.PressureGrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -694,7 +695,7 @@ public final class StructureMatcher {
         }
 
         FormedStructure build(int size, BlockPos far) {
-            return new FormedStructure(size, coils, Math.max(1, parallel), vent, drain, false, false, airlockOpen,
+            return new FormedStructure(size, coils, Tuning.clampParallel(parallel), vent, drain, false, false, airlockOpen,
                     weakest == null ? PressureGrade.G0 : weakest, List.copyOf(hatches), far);
         }
     }

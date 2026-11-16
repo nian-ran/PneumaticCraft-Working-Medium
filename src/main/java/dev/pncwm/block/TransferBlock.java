@@ -111,10 +111,19 @@ public class TransferBlock extends BaseEntityBlock {
             if (player.isShiftKeyDown()) {
                 Direction facing = state.getValue(HorizontalDirectionalBlock.FACING);
                 level.setBlock(pos, state.setValue(HorizontalDirectionalBlock.FACING, facing.getClockWise()), Block.UPDATE_ALL);
+                transfer.neighborChanged();
             } else {
                 transfer.tell(player);
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (level.getBlockEntity(pos) instanceof TransferBlockEntity transfer) {
+            transfer.neighborChanged();
+        }
     }
 }

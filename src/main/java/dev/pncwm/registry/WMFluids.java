@@ -74,8 +74,8 @@ public final class WMFluids {
             block = WMBlocks.BLOCKS.register(name, () -> new HazardLiquidBlock(source.get(), BlockBehaviour.Properties.of()
                     .mapColor(MapColor.WATER).noCollission().strength(100f).noLootTable().replaceable().liquid()));
             bucket = WMItems.ITEMS.register(name + "_bucket", () -> new BucketItem(source.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
-            WMItems.ITEMS.registerSimpleBlockItem(block);
-            WMBlocks.ALL.add(block);
+            // Fluid blocks must not have a placeable item. The bucket is the only way to carry them;
+            // a hidden block item let anyone /give or pick-block a source without a bucket.
         }
 
         private BaseFlowingFluid.Properties properties() {

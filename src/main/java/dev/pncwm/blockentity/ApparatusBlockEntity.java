@@ -136,14 +136,19 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
         for (int slot = 0; slot < MachineIo.SLOTS; slot++) {
             ItemStack stack = io.items.getStackInSlot(slot);
-            if (!stack.isEmpty()) {
-                Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, stack.copy());
-                io.items.setStackInSlot(slot, ItemStack.EMPTY);
+            if (stack.isEmpty()) {
+                continue;
             }
+            // Ghost filter copies were never taken from the player; dropping them would fabricate an item.
+            if (slot == MachineIo.FILTER && Boolean.TRUE.equals(stack.get(WMData.GHOST))) {
+                io.items.setStackInSlot(slot, ItemStack.EMPTY);
+                continue;
+            }
+            Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, stack.copy());
+            io.items.setStackInSlot(slot, ItemStack.EMPTY);
         }
-        // Tank contents are no longer turned into brand-new filled buckets (that minted an iron bucket for every
-        // 1000 mB, an infinite iron source with a water pipe). Whatever the breaking player did not bottle with
-        // their own empty buckets (see bottleInto) is lost with the shell.
+        // Tank leftovers are written onto the dropped controller in ApparatusBlock.getDrops, then cleared here
+        // so they are not also turned into buckets (the old infinite-iron exploit).
         for (int tank = 0; tank < MachineIo.TANKS; tank++) {
             io.tanks[tank].setFluid(FluidStack.EMPTY);
         }
@@ -493,7 +498,26 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             setChanged();
         } else {
             formed = next;
+            if (next.formed()) {
+                ensureHatchesBound(next);
+            }
         }
+    }
+
+    /**
+     * Replacing a hatch (or a hatch unbinding itself) kept the same footprint, so the scanner treated the shell
+     * as unchanged and never bound the new block. Pipes and hoppers on that hatch then did nothing.
+     */
+    private void ensureHatchesBound(FormedStructure structure) {
+        for (BlockPos pos : structure.hatches()) {
+            if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) {
+                hatch.bind(worldPosition);
+                if (!bound.contains(pos)) {
+                    bound.add(pos.immutable());
+                }
+            }
+        }
+        bound.removeIf(pos -> !structure.hatches().contains(pos));
     }
 
     private void tickRecipe() {
@@ -1194,7 +1218,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return handler.getPressure() < handler.maxPressure() - 0.05f;
         }
         if (stack.is(WMItems.DRILL.get())) {
-            return stack.getOrDefault(WMData.CHARGE, 0) < 100;
+            return stack.getOrDefault(WMData.CHARGE, 0) < 100 || stack.getOrDefault(WMData.HEAT, 0) > 0;
         }
         return false;
     }
@@ -1205,7 +1229,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return handler.getPressure() >= handler.maxPressure() - 0.05f;
         }
         if (stack.is(WMItems.DRILL.get())) {
-            return stack.getOrDefault(dev.pncwm.registry.WMData.CHARGE, 0) >= 100;
+            return stack.getOrDefault(dev.pncwm.registry.WMData.CHARGE, 0) >= 100
+                    && stack.getOrDefault(dev.pncwm.registry.WMData.HEAT, 0) <= 0;
         }
         return false;
     }
@@ -1457,16 +1482,30 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         if (stack.is(WMItems.DRILL.get())) {
             int charge = stack.getOrDefault(WMData.CHARGE, 0);
             int heatLevel = stack.getOrDefault(WMData.HEAT, 0);
-            int cost = Tuning.certifiedCost(800, certified);
+            boolean needCharge = charge < 100;
+            boolean needCool = heatLevel > 0;
+            if (!needCharge && !needCool) {
+                return budget;
+            }
             int step = Tuning.DRILL_CHARGE_BUDGET;
-            if (charge < 100 && Tuning.canAfford(air.getAir(), cost) && budget >= step) {
+            if (budget < step) {
+                return budget;
+            }
+            if (needCharge) {
+                int cost = Tuning.certifiedCost(800, certified);
+                if (!Tuning.canAfford(air.getAir(), cost)) {
+                    return budget;
+                }
                 stack.set(WMData.CHARGE, charge + 1);
                 air.addAir(-cost);
-                if (heatLevel > 0) {
+                if (needCool) {
                     stack.set(WMData.HEAT, heatLevel - 1);
                 }
-                return budget - step;
+            } else {
+                // Already full but still hot: the station used to eject it and never cool it.
+                stack.set(WMData.HEAT, Math.max(0, heatLevel - 4));
             }
+            return budget - step;
         }
         return budget;
     }
@@ -1503,6 +1542,58 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
 
     private static boolean sameShape(FormedStructure left, FormedStructure right) {
         return left.size() == right.size() && left.formed() == right.formed() && left.hatches().equals(right.hatches());
+    }
+
+    public boolean hasStoredFluids() {
+        for (int tank = 0; tank < MachineIo.TANKS; tank++) {
+            if (!io.tanks[tank].getFluid().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Write leftover tank contents onto a dropped or middle-clicked controller item. */
+    public void saveFluidsToItem(ItemStack stack) {
+        java.util.ArrayList<WMData.StoredFluid> stored = new java.util.ArrayList<>();
+        for (int tank = 0; tank < MachineIo.TANKS; tank++) {
+            FluidStack fluid = io.tanks[tank].getFluid();
+            if (fluid.isEmpty()) {
+                continue;
+            }
+            ResourceLocation id = BuiltInRegistries.FLUID.getKey(fluid.getFluid());
+            if (id == null || fluid.getFluid() == Fluids.EMPTY) {
+                continue;
+            }
+            stored.add(new WMData.StoredFluid(tank, id.toString(), fluid.getAmount()));
+        }
+        if (stored.isEmpty()) {
+            stack.remove(WMData.MACHINE_FLUIDS.get());
+        } else {
+            stack.set(WMData.MACHINE_FLUIDS.get(), List.copyOf(stored));
+        }
+    }
+
+    public void loadFluidsFromItem(ItemStack stack) {
+        List<WMData.StoredFluid> stored = stack.get(WMData.MACHINE_FLUIDS.get());
+        if (stored == null || stored.isEmpty()) {
+            return;
+        }
+        for (WMData.StoredFluid entry : stored) {
+            if (entry.tank() < 0 || entry.tank() >= MachineIo.TANKS || entry.amount() <= 0) {
+                continue;
+            }
+            ResourceLocation id = ResourceLocation.tryParse(entry.fluid());
+            if (id == null) {
+                continue;
+            }
+            Fluid fluid = BuiltInRegistries.FLUID.get(id);
+            if (fluid == Fluids.EMPTY) {
+                continue;
+            }
+            io.tanks[entry.tank()].setFluid(new FluidStack(fluid, entry.amount()));
+        }
+        setChanged();
     }
 
     @Override

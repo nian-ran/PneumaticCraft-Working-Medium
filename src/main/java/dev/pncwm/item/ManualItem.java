@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class ManualItem extends Item {
-    public static final int PAGES = 24;
+    public static final int PAGES = 25;
 
     public ManualItem(Properties properties) {
         super(properties);
