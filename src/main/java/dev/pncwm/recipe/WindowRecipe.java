@@ -83,6 +83,35 @@ public class WindowRecipe implements Recipe<RecipeInput> {
         this.minSize = minSize;
     }
 
+    /** Cached result of {@link #resolvable()}; registries are frozen before recipes load. */
+    private Boolean resolvable;
+
+    /**
+     * False when the recipe names a fluid or output item that is not registered, or has no inputs at all. Such a
+     * recipe used to match an empty machine (the missing fluid counted as "nothing needed") and produce for free.
+     */
+    public boolean resolvable() {
+        Boolean cached = resolvable;
+        if (cached == null) {
+            boolean ok = !items.isEmpty() || !fluids.isEmpty();
+            for (Ingredient ingredient : items) {
+                ok &= !ingredient.isEmpty();
+            }
+            for (FluidSpec spec : fluids) {
+                ok &= spec.resolve() != net.minecraft.world.level.material.Fluids.EMPTY;
+            }
+            for (FluidSpec spec : fluidOutputs) {
+                ok &= spec.resolve() != net.minecraft.world.level.material.Fluids.EMPTY;
+            }
+            for (ItemOut out : itemOutputs) {
+                ok &= !out.stack(1).isEmpty();
+            }
+            cached = ok;
+            resolvable = cached;
+        }
+        return cached;
+    }
+
     public int requiredCoils() {
         if (tempMinC >= 800) {
             return 2;

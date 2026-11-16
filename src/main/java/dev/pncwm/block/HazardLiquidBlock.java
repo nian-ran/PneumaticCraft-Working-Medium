@@ -8,9 +8,15 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
@@ -22,15 +28,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * Chlorine, acid, caustic and flue gas hurt anything that stands in them. Liquid carbon dioxide, nitrogen,
  * argon and oxygen freeze and slow living things. Liquid carbon dioxide, nitrogen and argon also put out
  * fire; oxygen is cold but feeds a fire, so it does not. Those same cold fluids also put out lit
- * candles and knock out adjacent torches. Dusty steam scalds. Hydrogen ignites next to fire
- * (including a torch, lantern, lit candle or lit furnace) and also burns off if a burning creature
- * walks into the pool; oxygen feeds a fire that is already burning. Harmless fluids use this block
- * too, but the tuning rules return zero for those and nothing happens.
+ * candles and knock out adjacent torches, including redstone torches. Dusty steam scalds. Hydrogen
+ * ignites next to fire (including a torch, redstone torch, lantern, lit candle or lit furnace), when
+ * flint and steel or a fire charge is used on the pool, and also burns off if a burning creature,
+ * flaming arrow or fireball enters it; oxygen feeds a fire that is already burning. Harmless fluids
+ * use this block too, but the tuning rules return zero for those and nothing happens.
  */
 public class HazardLiquidBlock extends LiquidBlock {
     public HazardLiquidBlock(FlowingFluid fluid, Properties properties) {
@@ -40,16 +48,27 @@ public class HazardLiquidBlock extends LiquidBlock {
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         super.entityInside(state, level, pos, entity);
-        if (level.isClientSide || !(entity instanceof LivingEntity living) || !living.isAlive()) {
+        if (level.isClientSide) {
             return;
         }
-        if (living instanceof Player player && (player.isCreative() || player.isSpectator())) {
+        String path = BuiltInRegistries.FLUID.getKey(state.getFluidState().getType()).getPath();
+        boolean creativePlayer = entity instanceof Player player && (player.isCreative() || player.isSpectator());
+        boolean flame = nearFlame(level, pos);
+        boolean burningEntity = Tuning.ignitingEntity(entity.isOnFire(), isFireball(entity));
+        // Projectiles cross a block in one tick, so ignition cannot wait for the 10-tick living cadence.
+        if (!creativePlayer && Tuning.poolIgnites(path, flame, burningEntity)) {
+            if (entity instanceof LivingEntity living && living.isAlive()) {
+                living.hurt(living.damageSources().onFire(), 2f);
+                living.setRemainingFireTicks(Math.max(living.getRemainingFireTicks(), 80));
+            }
+            ignitePool(level, pos);
+        }
+        if (!(entity instanceof LivingEntity living) || !living.isAlive() || creativePlayer) {
             return;
         }
         if (level.getGameTime() % 10 != 0) {
             return;
         }
-        String path = BuiltInRegistries.FLUID.getKey(state.getFluidState().getType()).getPath();
         float harm = Tuning.fluidHarm(path);
         if (harm > 0f) {
             living.hurt(living.damageSources().magic(), harm);
@@ -74,20 +93,35 @@ public class HazardLiquidBlock extends LiquidBlock {
         if (scald > 0f) {
             living.hurt(living.damageSources().hotFloor(), scald);
         }
-        boolean burning = living.isOnFire();
-        boolean flame = nearFlame(level, pos);
-        if (Tuning.isFlammableGas(path) && (burning || flame)) {
-            living.hurt(living.damageSources().onFire(), 2f);
-            living.setRemainingFireTicks(Math.max(living.getRemainingFireTicks(), 80));
-            // A burning creature must light the pool itself, not just keep burning in it.
-            if (Tuning.poolIgnites(path, flame, burning)) {
-                ignitePool(level, pos);
-            }
-        }
         if (Tuning.isOxidizer(path) && living.isOnFire()) {
             living.hurt(living.damageSources().onFire(), 2f);
             living.setRemainingFireTicks(Math.max(living.getRemainingFireTicks(), 160));
         }
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                              Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player.isSpectator()) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        String path = BuiltInRegistries.FLUID.getKey(state.getFluidState().getType()).getPath();
+        boolean flint = stack.is(Items.FLINT_AND_STEEL);
+        boolean charge = stack.is(Items.FIRE_CHARGE);
+        if (!Tuning.isFlammableGas(path) || !Tuning.isIgnitionTool(flint, charge)) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (!level.isClientSide) {
+            ignitePool(level, pos);
+            if (flint) {
+                stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+                level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0f,
+                        level.getRandom().nextFloat() * 0.4f + 0.8f);
+            } else if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+        }
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override
@@ -139,8 +173,7 @@ public class HazardLiquidBlock extends LiquidBlock {
                     && neighbor.hasProperty(BlockStateProperties.LIT) && neighbor.getValue(BlockStateProperties.LIT)) {
                 level.setBlock(neighborPos, neighbor.setValue(BlockStateProperties.LIT, false), 3);
                 level.playSound(null, neighborPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.1f);
-            } else if (neighbor.is(Blocks.TORCH) || neighbor.is(Blocks.WALL_TORCH)
-                    || neighbor.is(Blocks.SOUL_TORCH) || neighbor.is(Blocks.SOUL_WALL_TORCH)) {
+            } else if (isDroppableTorch(neighbor)) {
                 // Same as water: the torch drops, the flame is gone.
                 level.destroyBlock(neighborPos, true);
                 level.playSound(null, neighborPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4f, 1.2f);
@@ -168,6 +201,7 @@ public class HazardLiquidBlock extends LiquidBlock {
             boolean lavaCauldron = neighbor.is(Blocks.LAVA_CAULDRON);
             boolean torchOrLantern = neighbor.is(Blocks.TORCH) || neighbor.is(Blocks.WALL_TORCH)
                     || neighbor.is(Blocks.SOUL_TORCH) || neighbor.is(Blocks.SOUL_WALL_TORCH)
+                    || neighbor.is(Blocks.REDSTONE_TORCH) || neighbor.is(Blocks.REDSTONE_WALL_TORCH)
                     || neighbor.is(Blocks.LANTERN) || neighbor.is(Blocks.SOUL_LANTERN)
                     || neighbor.is(Blocks.JACK_O_LANTERN);
             boolean litCandle = neighbor.getBlock() instanceof AbstractCandleBlock
@@ -179,5 +213,15 @@ public class HazardLiquidBlock extends LiquidBlock {
             }
         }
         return false;
+    }
+
+    private static boolean isDroppableTorch(BlockState state) {
+        return state.is(Blocks.TORCH) || state.is(Blocks.WALL_TORCH)
+                || state.is(Blocks.SOUL_TORCH) || state.is(Blocks.SOUL_WALL_TORCH)
+                || state.is(Blocks.REDSTONE_TORCH) || state.is(Blocks.REDSTONE_WALL_TORCH);
+    }
+
+    private static boolean isFireball(Entity entity) {
+        return entity instanceof SmallFireball || entity instanceof LargeFireball;
     }
 }

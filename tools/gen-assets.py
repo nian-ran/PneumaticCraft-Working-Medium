@@ -61,11 +61,12 @@ GRADES = {
                      base=(94, 80, 60), mid=(112, 94, 70), hi=(130, 110, 84), lo=(64, 52, 40),
                      fill=(98, 84, 64), rust=(80, 62, 44), sheen=(154, 136, 104),
                      edge=(50, 40, 30), rivet=(104, 88, 66), rivet_hi=(132, 114, 86)),
-    # G4 cryo — frost blue-grey, cooler than steel, not saturated teal.
-    "g4": _metal_pal("cryo", accent=(96, 128, 134),
-                     base=(52, 68, 74), mid=(66, 86, 92), hi=(90, 112, 118), lo=(36, 50, 56),
-                     fill=(54, 70, 76), rust=(44, 58, 62), sheen=(148, 170, 174),
-                     edge=(26, 38, 44), rivet=(76, 96, 102), rivet_hi=(124, 144, 150)),
+    # G4 cryo — pale frost-green steel. Lighter and greener than G2 blued steel so the two read apart in an
+    # inventory, still a muted metal (not saturated teal glass) and darker/cooler than G5 silver.
+    "g4": _metal_pal("cryo", accent=(110, 146, 148),
+                     base=(70, 92, 94), mid=(86, 110, 112), hi=(112, 136, 136), lo=(48, 66, 68),
+                     fill=(72, 94, 96), rust=(60, 80, 82), sheen=(160, 182, 182),
+                     edge=(34, 48, 50), rivet=(94, 116, 118), rivet_hi=(136, 158, 158)),
     # G5 critical — pale polished silver, the lightest finish.
     "g5": _metal_pal("critical", accent=(154, 152, 150),
                      base=(100, 98, 96), mid=(118, 116, 114), hi=(142, 140, 138), lo=(72, 70, 68),

@@ -112,6 +112,10 @@ public final class Tuning {
         if (name.isEmpty()) {
             return false;
         }
+        // Gasoline is a liquid fuel. Matching on "gas" sent it to gas hatches and kept it out of fluid hatches.
+        if (name.equals("gasoline") || name.endsWith("_gasoline")) {
+            return false;
+        }
         if (name.contains("gas") || name.contains("steam") || name.contains("mist")
                 || name.contains("vapour") || name.contains("vapor")) {
             return true;
@@ -473,13 +477,28 @@ public final class Tuning {
     }
 
     /**
-     * Also treats a torch, lantern or jack o'lantern, and a lit candle, furnace, smoker or blast
-     * furnace, as a flame that can ignite spilled hydrogen.
+     * Also treats a torch, soul torch, redstone torch, lantern or jack o'lantern, and a lit candle,
+     * furnace, smoker or blast furnace, as a flame that can ignite spilled hydrogen.
      */
     public static boolean isFlameSource(boolean openFlame, boolean lava, boolean magma,
                                        boolean litCampfire, boolean lavaCauldron,
                                        boolean torchOrLantern, boolean litAppliance) {
         return openFlame || lava || magma || litCampfire || lavaCauldron || torchOrLantern || litAppliance;
+    }
+
+    /**
+     * A burning creature, a flaming arrow, or a fireball (ghast, blaze or fire charge) can light
+     * a spilled hydrogen pool. A projectile that is not on fire and is not a fireball cannot.
+     */
+    public static boolean ignitingEntity(boolean onFire, boolean fireball) {
+        return onFire || fireball;
+    }
+
+    /**
+     * Flint and steel or a fire charge used on a spilled hydrogen pool will light it.
+     */
+    public static boolean isIgnitionTool(boolean flintAndSteel, boolean fireCharge) {
+        return flintAndSteel || fireCharge;
     }
 
     /**

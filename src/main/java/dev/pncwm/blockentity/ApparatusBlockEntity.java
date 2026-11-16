@@ -141,16 +141,10 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 io.items.setStackInSlot(slot, ItemStack.EMPTY);
             }
         }
-        // Full buckets of whatever was in the tanks, including lubricant. Leftover millibuckets are lost.
+        // Tank contents are no longer turned into brand-new filled buckets (that minted an iron bucket for every
+        // 1000 mB, an infinite iron source with a water pipe). Whatever the breaking player did not bottle with
+        // their own empty buckets (see bottleInto) is lost with the shell.
         for (int tank = 0; tank < MachineIo.TANKS; tank++) {
-            FluidStack fluid = io.tanks[tank].getFluid();
-            int buckets = Tuning.bucketsFromMilli(fluid.getAmount());
-            var bucketItem = fluid.isEmpty() ? Items.AIR : fluid.getFluid().getBucket();
-            if (buckets > 0 && bucketItem != Items.AIR && bucketItem != Items.BUCKET) {
-                for (int n = 0; n < buckets; n++) {
-                    Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, new ItemStack(bucketItem));
-                }
-            }
             io.tanks[tank].setFluid(FluidStack.EMPTY);
         }
         for (BlockPos pos : bound) {
@@ -159,6 +153,47 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             }
         }
         bound.clear();
+    }
+
+    /**
+     * Called just before a player breaks the controller. Every full 1000 mB of a fluid that has a bucket is poured
+     * into one of the player's own empty buckets, so contents can be saved without creating buckets from nothing.
+     * Returns how many buckets were filled.
+     */
+    public int bottleInto(Player player) {
+        if (level == null || level.isClientSide || player.getAbilities().instabuild) {
+            return 0;
+        }
+        int filled = 0;
+        Inventory inventory = player.getInventory();
+        for (int tank = 0; tank < MachineIo.TANKS; tank++) {
+            FluidStack fluid = io.tanks[tank].getFluid();
+            if (fluid.isEmpty()) {
+                continue;
+            }
+            var bucketItem = fluid.getFluid().getBucket();
+            if (bucketItem == Items.AIR || bucketItem == Items.BUCKET) {
+                continue;
+            }
+            int buckets = Tuning.bucketsFromMilli(fluid.getAmount());
+            for (int n = 0; n < buckets; n++) {
+                int slot = inventory.findSlotMatchingItem(new ItemStack(Items.BUCKET));
+                if (slot < 0) {
+                    break;
+                }
+                inventory.getItem(slot).shrink(1);
+                io.tanks[tank].drain(1000, IFluidHandler.FluidAction.EXECUTE);
+                ItemStack full = new ItemStack(bucketItem);
+                if (!inventory.add(full)) {
+                    player.drop(full, false);
+                }
+                filled++;
+            }
+        }
+        if (filled > 0) {
+            player.displayClientMessage(Component.translatable("message.workingmedium.bottled", filled), true);
+        }
+        return filled;
     }
 
     public ApparatusKind kind() {
@@ -876,7 +911,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         RecipeHolder<WindowRecipe> fallback = null;
         for (RecipeHolder<WindowRecipe> holder : level.getRecipeManager().getAllRecipesFor(WMRecipes.WINDOW.get())) {
             WindowRecipe recipe = holder.value();
-            if (!recipe.machine.equals(kind().id)) {
+            if (!recipe.machine.equals(kind().id) || !recipe.resolvable()) {
                 continue;
             }
             if (formed.size() < recipe.minSize) {
@@ -1549,6 +1584,19 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                     io.tanks[i].readFromNBT(registries, tank);
                 }
             }
+        }
+    }
+
+    /**
+     * Block-entity data packets went through the full save loader, which never read the tank snapshot, so the GUI
+     * tank gauges and tooltips only updated when the chunk was reloaded. Route them through handleUpdateTag.
+     */
+    @Override
+    public void onDataPacket(net.minecraft.network.Connection connection, ClientboundBlockEntityDataPacket packet,
+                             HolderLookup.Provider registries) {
+        CompoundTag tag = packet.getTag();
+        if (tag != null && !tag.isEmpty()) {
+            handleUpdateTag(tag, registries);
         }
     }
 

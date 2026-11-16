@@ -129,6 +129,9 @@ public final class MachineIo {
                 if (dedicated >= 0) {
                     return items.insertItem(dedicated, stack, simulate);
                 }
+                if (spreadsIntoNewSlot(slot, stack)) {
+                    return stack;
+                }
                 return items.insertItem(slot, stack, simulate);
             }
 
@@ -177,6 +180,9 @@ public final class MachineIo {
                 if (dedicated >= 0) {
                     // Seals, catalyst, electrodes, drone sheets, pumps and slides fed by a hopper go to their own slot.
                     return items.insertItem(dedicated, stack, simulate);
+                }
+                if (spreadsIntoNewSlot(slot, stack)) {
+                    return stack;
                 }
                 return items.insertItem(slot, stack, simulate);
             }
@@ -336,17 +342,50 @@ public final class MachineIo {
         return true;
     }
 
+    /**
+     * One fluid goes into the input tank that already holds it, or into a single empty tank if none does. A strong
+     * water line used to spill over into every empty input tank, leaving no room for the second ingredient
+     * (acid feed in the electrolyzer, oxygen in the cycle island), so two-fluid recipes deadlocked.
+     */
     private int fillInputs(FluidStack resource, IFluidHandler.FluidAction action) {
         int filled = 0;
         FluidStack left = resource.copy();
+        boolean held = false;
         for (int i = 0; i < INPUTS && !left.isEmpty(); i++) {
-            if (tanks[i].getFluid().isEmpty() || tanks[i].getFluid().is(resource.getFluid())) {
+            if (!tanks[i].getFluid().isEmpty() && tanks[i].getFluid().is(resource.getFluid())) {
+                held = true;
                 int step = tanks[i].fill(left, action);
                 filled += step;
                 left.shrink(step);
             }
         }
-        return filled;
+        if (held) {
+            return filled;
+        }
+        for (int i = 0; i < INPUTS; i++) {
+            if (tanks[i].getFluid().isEmpty()) {
+                return tanks[i].fill(left, action);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Automation (hoppers, pipes, hatches) may not start a second input stack of an item that already sits in
+     * another input slot. A full stack of one ingredient used to spread across all four inputs and starve a
+     * two-ingredient recipe. Unstackable items, such as pneumatic armour in a charging station, are exempt.
+     */
+    boolean spreadsIntoNewSlot(int slot, ItemStack stack) {
+        if (slot < 0 || slot >= INPUTS || stack.isEmpty() || stack.getMaxStackSize() <= 1
+                || !items.getStackInSlot(slot).isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < INPUTS; i++) {
+            if (i != slot && ItemStack.isSameItemSameComponents(items.getStackInSlot(i), stack)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private FluidStack drainMatching(FluidStack resource, IFluidHandler.FluidAction action) {

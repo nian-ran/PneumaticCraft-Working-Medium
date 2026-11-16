@@ -22,15 +22,30 @@ public class HatchBlockEntity extends BlockEntity {
     }
 
     public void bind(BlockPos controller) {
+        boolean changed = !bound || !this.controller.equals(controller);
         this.controller = controller.immutable();
         this.bound = true;
         setChanged();
+        if (changed) {
+            refreshCapabilities();
+        }
     }
 
     public void unbind() {
         if (bound) {
             bound = false;
             setChanged();
+            refreshCapabilities();
+        }
+    }
+
+    /**
+     * Pipes, hoppers and heat pipes cache what a hatch exposes. Without this they kept the "nothing here" they saw
+     * before the machine formed (or the old handlers after it broke) until the chunk was reloaded.
+     */
+    private void refreshCapabilities() {
+        if (level != null && !level.isClientSide) {
+            level.invalidateCapabilities(worldPosition);
         }
     }
 

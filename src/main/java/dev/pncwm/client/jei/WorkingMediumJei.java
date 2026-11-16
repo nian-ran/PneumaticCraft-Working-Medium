@@ -61,6 +61,7 @@ public class WorkingMediumJei implements IModPlugin {
         List<WindowRecipe> recipes = manager.getAllRecipesFor(WMRecipes.WINDOW.get())
                 .stream()
                 .map(RecipeHolder::value)
+                .filter(WindowRecipe::resolvable)
                 .toList();
         registration.addRecipes(TYPE, recipes);
         registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMItems.CERTIFICATE.get()), VanillaTypes.ITEM_STACK,

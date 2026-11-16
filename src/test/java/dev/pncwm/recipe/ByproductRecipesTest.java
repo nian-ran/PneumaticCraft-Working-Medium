@@ -127,6 +127,40 @@ class ByproductRecipesTest {
         assertRecipe("quench_ice_nitrogen.json", "quench_well", "minecraft:water", "workingmedium:nitrogen", "minecraft:packed_ice", "\"count\": 1");
         assertRecipe("cycle_lubricant.json", "cycle_island", "pneumaticcraft:lubricant", "workingmedium:flue_gas", "\"air\": -100");
         assertRecipe("neutralize_chlorine.json", "scrubber_tower", "workingmedium:chlorine", "workingmedium:caustic", "workingmedium:brine");
+        assertRecipe("cycle_diesel.json", "cycle_island", "pneumaticcraft:diesel", "\"air\": -200");
+        assertRecipe("kiln_smooth_stone.json", "residue_kiln", "minecraft:stone", "minecraft:smooth_stone", "\"count\": 3");
+        assertRecipe("kiln_cracked_stone_bricks.json", "residue_kiln", "minecraft:stone_bricks", "minecraft:cracked_stone_bricks");
+        assertRecipe("kiln_cracked_deepslate_bricks.json", "residue_kiln", "minecraft:deepslate_bricks", "minecraft:cracked_deepslate_bricks");
+        assertRecipe("kiln_cracked_deepslate_tiles.json", "residue_kiln", "minecraft:deepslate_tiles", "minecraft:cracked_deepslate_tiles");
+        assertRecipe("kiln_cracked_nether_bricks.json", "residue_kiln", "minecraft:nether_bricks", "minecraft:cracked_nether_bricks");
+        assertRecipe("kiln_cracked_polished_blackstone_bricks.json", "residue_kiln", "minecraft:polished_blackstone_bricks", "minecraft:cracked_polished_blackstone_bricks");
+        assertRecipe("crush_glass.json", "impact_crusher", "minecraft:glass", "minecraft:sand");
+        assertRecipe("crush_tinted_glass.json", "impact_crusher", "minecraft:tinted_glass", "minecraft:sand");
+        assertRecipe("crush_white_stained_glass.json", "impact_crusher", "minecraft:white_stained_glass", "minecraft:sand");
+        assertRecipe("crush_black_stained_glass.json", "impact_crusher", "minecraft:black_stained_glass", "minecraft:sand");
+        assertRecipe("crush_clay.json", "impact_crusher", "minecraft:clay", "minecraft:clay_ball", "\"count\": 4");
+        assertRecipe("crush_bricks.json", "impact_crusher", "minecraft:bricks", "minecraft:brick", "\"count\": 4");
+        assertRecipe("crush_nether_bricks.json", "impact_crusher", "minecraft:nether_bricks", "minecraft:nether_brick");
+        assertRecipe("crush_prismarine.json", "impact_crusher", "minecraft:prismarine", "minecraft:prismarine_shard");
+        assertRecipe("crush_cut_sandstone.json", "impact_crusher", "minecraft:cut_sandstone", "minecraft:sand", "\"count\": 4");
+        assertRecipe("crush_smooth_sandstone.json", "impact_crusher", "minecraft:smooth_sandstone", "minecraft:sand");
+        assertRecipe("crush_chiseled_red_sandstone.json", "impact_crusher", "minecraft:chiseled_red_sandstone", "minecraft:red_sand");
+        assertRecipe("wash_rooted_dirt.json", "washer_tower", "minecraft:rooted_dirt", "minecraft:dirt", "minecraft:hanging_roots");
+        assertRecipe("wash_muddy_mangrove_roots.json", "washer_tower", "minecraft:muddy_mangrove_roots", "minecraft:mangrove_roots");
+        assertRecipe("quench_blue_ice_nitrogen.json", "quench_well", "minecraft:packed_ice", "workingmedium:nitrogen", "minecraft:blue_ice", "\"count\": 1");
+        assertRecipe("quench_ice_argon.json", "quench_well", "minecraft:water", "workingmedium:argon", "minecraft:packed_ice", "\"count\": 1");
+        assertRecipe("quench_ice_pure_nitrogen.json", "quench_well", "minecraft:water", "workingmedium:pure_nitrogen", "minecraft:packed_ice");
+        assertRecipe("quench_blue_ice_argon.json", "quench_well", "minecraft:packed_ice", "workingmedium:argon", "minecraft:blue_ice");
+        assertRecipe("quench_blue_ice_pure_nitrogen.json", "quench_well", "minecraft:packed_ice", "workingmedium:pure_nitrogen", "minecraft:blue_ice");
+        // Plasticizer is an item; the old recipe named a missing fluid and let an empty island run for free.
+        assertRecipe("cycle_plasticizer.json", "cycle_island", "\"items\"", "\"item\": \"workingmedium:plasticizer\"");
+        org.junit.jupiter.api.Assertions.assertFalse(Files.readString(recipe("cycle_plasticizer.json")).contains("\"fluid\": \"workingmedium:plasticizer\""));
+        // The electrode has durability, so it stacks to one; a count of 2 made the whole recipe fail to load.
+        assertTrue(Files.readString(recipe("electrode.json")).contains("\"id\": \"workingmedium:electrode\", \"count\": 1"));
+        assertRecipe("cycle_biodiesel.json", "cycle_island", "pneumaticcraft:biodiesel", "workingmedium:flue_gas");
+        assertRecipe("cycle_biodiesel_oxygen.json", "cycle_island", "pneumaticcraft:biodiesel", "workingmedium:oxygen");
+        assertRecipe("cycle_ethanol.json", "cycle_island", "pneumaticcraft:ethanol", "workingmedium:flue_gas");
+        assertRecipe("cycle_ethanol_oxygen.json", "cycle_island", "pneumaticcraft:ethanol", "workingmedium:oxygen");
     }
 
     @Test
@@ -140,7 +174,7 @@ class ByproductRecipesTest {
             assertTrue(en.contains("hint.workingmedium." + status), status);
             assertTrue(en.contains("status.workingmedium." + status), "status " + status);
         }
-        for (int page = 0; page < 22; page++) {
+        for (int page = 0; page < 24; page++) {
             assertTrue(en.contains("manual.workingmedium.page." + page), "page " + page);
         }
         for (String key : new String[] {"tooltip.workingmedium.certificate", "tooltip.workingmedium.certified",

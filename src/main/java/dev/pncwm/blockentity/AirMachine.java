@@ -30,6 +30,7 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
     private PressureGrade builtTier;
     private int lastSavedAir = Integer.MIN_VALUE;
     private int lastSavedKelvin = Integer.MIN_VALUE;
+    private boolean capabilitiesStale;
 
     protected AirMachine(BlockEntityType<?> type, net.minecraft.core.BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -54,6 +55,10 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
     protected void openAir() {
         if (air != null && builtTier == airTier()) {
             return;
+        }
+        if (air != null) {
+            // The old handler object is about to be replaced; neighbours cache it, so tell them to look again.
+            capabilitiesStale = true;
         }
         int kept = air == null ? 0 : air.getAir();
         double keptTemp = heat == null ? Double.NaN : heat.getTemperature();
@@ -84,6 +89,12 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
             return;
         }
         openAir();
+        if (capabilitiesStale && !level.isClientSide) {
+            // Forming or breaking a shell changes the pressure tier and rebuilds the air handler. Tubes kept
+            // pushing air into the discarded handler, so the machine looked disconnected until a reload.
+            capabilitiesStale = false;
+            level.invalidateCapabilities(worldPosition);
+        }
         Collection<Direction> faces = airFaces();
         air.setConnectableFaces(faces);
         if (!hullReady) {

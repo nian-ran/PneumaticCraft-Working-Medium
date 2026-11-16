@@ -91,6 +91,9 @@ class TuningTest {
         assertTrue(Tuning.isGasPath("pure_nitrogen"));
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.isGasPath("lubricant"));
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.isGasPath("brine"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isGasPath("gasoline"));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isGasPath("pneumaticcraft:gasoline"));
+        assertTrue(Tuning.isGasPath("flowing_flue_gas"));
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.isGasPath("hydrochloric"));
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.isGasPath(""));
         org.junit.jupiter.api.Assertions.assertFalse(Tuning.isGasPath(null));
@@ -423,6 +426,21 @@ class TuningTest {
         assertEquals(20, Tuning.loopMove(50, 20));
         assertEquals(20, Tuning.loopMove(20, 50));
         assertEquals(20, Tuning.loopMove(20, 20));
+    }
+
+    @Test
+    void ignitionToolsAndEntitiesLightHydrogen() {
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.isIgnitionTool(false, false));
+        assertTrue(Tuning.isIgnitionTool(true, false));
+        assertTrue(Tuning.isIgnitionTool(false, true));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.ignitingEntity(false, false));
+        assertTrue(Tuning.ignitingEntity(true, false));
+        assertTrue(Tuning.ignitingEntity(false, true));
+        assertTrue(Tuning.poolIgnites("hydrogen", false, Tuning.ignitingEntity(false, true)));
+        assertTrue(Tuning.poolIgnites("flowing_hydrogen", false, Tuning.ignitingEntity(true, false)));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("hydrogen", false, Tuning.ignitingEntity(false, false)));
+        org.junit.jupiter.api.Assertions.assertFalse(Tuning.poolIgnites("nitrogen", false, Tuning.ignitingEntity(true, true)));
+        assertTrue(Tuning.isFlameSource(false, false, false, false, false, true, false));
     }
 
 }

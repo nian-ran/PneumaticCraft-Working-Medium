@@ -30,6 +30,11 @@ public class CurtainModuleItem extends GradeItem {
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
+        // Void, /kill and similar damage that ignores invulnerability is not a blast or a burst line: do not soften it
+        // or wear the module on it.
+        if (event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return;
+        }
         ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
         if (!chest.getItem().builtInRegistryHolder().key().location().getPath().contains("pneumatic")) {
             return;
@@ -37,7 +42,9 @@ public class CurtainModuleItem extends GradeItem {
         // Use the strongest intact curtain anywhere in the inventory, not just the first one found.
         ItemStack best = ItemStack.EMPTY;
         int bestGrade = -1;
-        for (ItemStack stack : player.getInventory().items) {
+        java.util.List<ItemStack> carried = new java.util.ArrayList<>(player.getInventory().items);
+        carried.addAll(player.getInventory().offhand);
+        for (ItemStack stack : carried) {
             if (stack.getItem() instanceof CurtainModuleItem curtain && stack.getDamageValue() < stack.getMaxDamage()
                     && curtain.grade.index > bestGrade) {
                 best = stack;
