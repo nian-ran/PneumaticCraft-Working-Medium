@@ -43,11 +43,11 @@ public final class WMBlockEntities {
     }
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(PNCCapabilities.AIR_HANDLER_MACHINE, TUBE.get(), (be, side) -> be.air());
+        event.registerBlockEntity(PNCCapabilities.AIR_HANDLER_MACHINE, TUBE.get(), dev.pncwm.blockentity.AirMachine::airOn);
         event.registerBlockEntity(PNCCapabilities.HEAT_EXCHANGER_BLOCK, TUBE.get(), (be, side) -> be.heat());
-        event.registerBlockEntity(PNCCapabilities.AIR_HANDLER_MACHINE, GAUGE.get(), (be, side) -> be.air());
+        event.registerBlockEntity(PNCCapabilities.AIR_HANDLER_MACHINE, GAUGE.get(), dev.pncwm.blockentity.AirMachine::airOn);
         event.registerBlockEntity(PNCCapabilities.HEAT_EXCHANGER_BLOCK, GAUGE.get(), (be, side) -> be.heat());
-        event.registerBlockEntity(PNCCapabilities.AIR_HANDLER_MACHINE, RELIEF.get(), (be, side) -> be.air());
+        event.registerBlockEntity(PNCCapabilities.AIR_HANDLER_MACHINE, RELIEF.get(), dev.pncwm.blockentity.AirMachine::airOn);
         event.registerBlockEntity(PNCCapabilities.HEAT_EXCHANGER_BLOCK, RELIEF.get(), (be, side) -> be.heat());
         event.registerBlockEntity(PNCCapabilities.AIR_HANDLER_MACHINE, TRANSFER.get(), TransferBlockEntity::air);
         event.registerBlockEntity(PNCCapabilities.HEAT_EXCHANGER_BLOCK, TRANSFER.get(), (be, side) -> be.heat());

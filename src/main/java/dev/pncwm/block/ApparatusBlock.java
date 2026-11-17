@@ -166,6 +166,7 @@ public class ApparatusBlock extends BaseEntityBlock {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof BlockItem item && item.getBlock() == this) {
                     apparatus.saveFluidsToItem(drop);
+                    apparatus.savePneumaticsToItem(drop);
                     break;
                 }
             }
@@ -178,6 +179,7 @@ public class ApparatusBlock extends BaseEntityBlock {
         super.setPlacedBy(level, pos, state, by, stack);
         if (level.getBlockEntity(pos) instanceof ApparatusBlockEntity apparatus) {
             apparatus.loadFluidsFromItem(stack);
+            apparatus.loadPneumaticsFromItem(stack);
         }
     }
 
@@ -186,6 +188,7 @@ public class ApparatusBlock extends BaseEntityBlock {
         ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
         if (level.getBlockEntity(pos) instanceof ApparatusBlockEntity apparatus) {
             apparatus.saveFluidsToItem(stack);
+            apparatus.savePneumaticsToItem(stack);
         }
         return stack;
     }

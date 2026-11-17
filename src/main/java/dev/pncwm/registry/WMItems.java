@@ -5,6 +5,7 @@ import java.util.List;
 
 import dev.pncwm.WorkingMedium;
 import dev.pncwm.block.ApparatusBlock;
+import dev.pncwm.item.AirBlockItem;
 import dev.pncwm.item.ApparatusBlockItem;
 import dev.pncwm.item.CertificateItem;
 import dev.pncwm.item.CurtainModuleItem;
@@ -91,6 +92,12 @@ public final class WMItems {
                 var resolved = block.get();
                 if (resolved instanceof ApparatusBlock) {
                     return new ApparatusBlockItem(resolved, new Item.Properties());
+                }
+                if (resolved instanceof dev.pncwm.block.GradeTubeBlock
+                        || resolved instanceof dev.pncwm.block.GaugeBlock
+                        || resolved instanceof dev.pncwm.block.ReliefValveBlock
+                        || resolved instanceof dev.pncwm.block.TransferBlock) {
+                    return new AirBlockItem(resolved, new Item.Properties());
                 }
                 return new BlockItem(resolved, new Item.Properties());
             });

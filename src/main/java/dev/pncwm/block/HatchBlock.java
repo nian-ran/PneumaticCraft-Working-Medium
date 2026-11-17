@@ -88,6 +88,17 @@ public class HatchBlock extends BaseEntityBlock {
         return 0;
     }
 
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) {
+            ApparatusBlockEntity apparatus = hatch.controller();
+            if (apparatus != null) {
+                apparatus.neighborChanged();
+            }
+        }
+    }
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

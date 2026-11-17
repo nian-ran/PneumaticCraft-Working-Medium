@@ -76,7 +76,7 @@ public final class StructureMatcher {
         if (scan.weakest == null) {
             return FormedStructure.none();
         }
-        return scan.build(1, world(controller, facing, 0, 2, 2));
+        return scan.build(1, world(controller, facing, 0, 2, 2), controller);
     }
 
     private static FormedStructure nest(Level level, BlockPos controller, Direction facing) {
@@ -104,7 +104,7 @@ public final class StructureMatcher {
         if (scan.weakest == null) {
             return FormedStructure.none();
         }
-        return scan.build(1, controller);
+        return scan.build(1, controller, controller);
     }
 
     private static FormedStructure ring(Level level, BlockPos controller, Direction facing) {
@@ -130,7 +130,7 @@ public final class StructureMatcher {
         if (scan.weakest == null) {
             return FormedStructure.none();
         }
-        return scan.build(1, world(controller, facing, 0, 1, 4));
+        return scan.build(1, world(controller, facing, 0, 1, 4), controller);
     }
 
     private static FormedStructure shell(Level level, BlockPos controller, Direction facing,
@@ -167,7 +167,7 @@ public final class StructureMatcher {
         if (scan.weakest == null) {
             return FormedStructure.none();
         }
-        return scan.build(1, shift(controller, facing, midR - ctrlR, midU - ctrlU, midF - ctrlF));
+        return scan.build(1, shift(controller, facing, midR - ctrlR, midU - ctrlU, midF - ctrlF), controller);
     }
 
     private static FormedStructure tower(Level level, BlockPos controller, Direction facing, ApparatusKind kind) {
@@ -194,7 +194,7 @@ public final class StructureMatcher {
                     BlockPos pos = world(controller, facing, r, y, f);
                     boolean center = r == 0 && f == 2;
                     if (center) {
-                        if (!isPart(level, pos, PartKind.TRAY)) {
+                        if (!ring.part(level, pos, PartKind.TRAY)) {
                             ok = false;
                             break;
                         }
@@ -225,7 +225,7 @@ public final class StructureMatcher {
                 BlockPos pos = world(controller, facing, r, trays + 1, f);
                 boolean center = r == 0 && f == 2;
                 if (center) {
-                    if (!cap.shell(level, pos) && !isPart(level, pos, PartKind.CAP)) {
+                    if (!cap.shell(level, pos) && !cap.part(level, pos, PartKind.CAP)) {
                         return FormedStructure.none();
                     }
                 } else if (!cap.shell(level, pos)) {
@@ -237,10 +237,9 @@ public final class StructureMatcher {
         if (floor.weakest == null) {
             return FormedStructure.none();
         }
-        FormedStructure formed = floor.build(trays, world(controller, facing, 0, trays + 1, 2));
+        FormedStructure formed = floor.build(trays, world(controller, facing, 0, trays + 1, 2), controller);
         if (flooded) {
-            return new FormedStructure(formed.size(), formed.coils(), formed.parallel(), formed.vent(), formed.drain(),
-                    formed.missingIntercooler(), true, formed.airlockOpen(), formed.weakest(), formed.hatches(), formed.farEnd());
+            return formed.withFlooded();
         }
         return formed;
     }
@@ -265,7 +264,7 @@ public final class StructureMatcher {
         int maxY = kind.maxSize * 2 + 2;
         for (int y = 1; y <= maxY; y++) {
             BlockPos center = world(controller, facing, 0, y, 1);
-            if (isPart(level, center, PartKind.STAGE)) {
+            if (scan.part(level, center, PartKind.STAGE)) {
                 if (!jacketRing(level, scan, controller, facing, y)) {
                     return FormedStructure.none();
                 }
@@ -280,7 +279,7 @@ public final class StructureMatcher {
                 }
                 continue;
             }
-            if (isPart(level, center, PartKind.INTERCOOLER)) {
+            if (scan.part(level, center, PartKind.INTERCOOLER)) {
                 if (!jacketRing(level, scan, controller, facing, y)) {
                     return FormedStructure.none();
                 }
@@ -288,7 +287,7 @@ public final class StructureMatcher {
                 far = center;
                 continue;
             }
-            if (isPart(level, center, PartKind.CAP) || scan.shell(level, center)) {
+            if (scan.part(level, center, PartKind.CAP) || scan.shell(level, center)) {
                 if (!jacketRing(level, scan, controller, facing, y)) {
                     return FormedStructure.none();
                 }
@@ -303,12 +302,11 @@ public final class StructureMatcher {
         if (scan.weakest == null) {
             scan.weakest = kind.grade;
         }
-        FormedStructure formed = scan.build(stages, far);
+        FormedStructure formed = scan.build(stages, far, controller);
         if (!missing) {
             return formed;
         }
-        return new FormedStructure(formed.size(), formed.coils(), formed.parallel(), formed.vent(), formed.drain(),
-                true, formed.flooded(), formed.airlockOpen(), formed.weakest(), formed.hatches(), formed.farEnd());
+        return formed.withMissingIntercooler();
     }
 
     private static boolean jacketRing(Level level, Scan scan, BlockPos controller, Direction facing, int y) {
@@ -342,7 +340,7 @@ public final class StructureMatcher {
         BlockPos far = controller;
         for (int z = 1; z < 16; z++) {
             BlockPos center = world(controller, facing, 0, 1, z);
-            if (isPart(level, center, PartKind.BAY)) {
+            if (scan.part(level, center, PartKind.BAY)) {
                 if (!tunnelRing(level, scan, controller, facing, z)) {
                     return FormedStructure.none();
                 }
@@ -356,7 +354,7 @@ public final class StructureMatcher {
             if (count == 0) {
                 return FormedStructure.none();
             }
-            if (isPart(level, center, PartKind.CAP) || scan.shell(level, center)) {
+            if (scan.part(level, center, PartKind.CAP) || scan.shell(level, center)) {
                 if (!tunnelRing(level, scan, controller, facing, z)) {
                     return FormedStructure.none();
                 }
@@ -371,7 +369,7 @@ public final class StructureMatcher {
         if (scan.weakest == null) {
             scan.weakest = kind.grade;
         }
-        return scan.build(count, far);
+        return scan.build(count, far, controller);
     }
 
     private static boolean tunnelRing(Level level, Scan scan, BlockPos controller, Direction facing, int z) {
@@ -404,7 +402,7 @@ public final class StructureMatcher {
         int bodies = 0;
         BlockPos far = controller;
         for (int y = 1; y <= kind.maxSize; y++) {
-            if (!isPart(level, world(controller, facing, 0, y, 2), PartKind.BODY)) {
+            if (!scan.part(level, world(controller, facing, 0, y, 2), PartKind.BODY)) {
                 break;
             }
             if (!vesselLayer(level, scan, controller, facing, y, true)) {
@@ -421,14 +419,14 @@ public final class StructureMatcher {
             return FormedStructure.none();
         }
         BlockPos cap = world(controller, facing, 0, capY, 2);
-        if (!scan.shell(level, cap) && !isPart(level, cap, PartKind.CAP)) {
+        if (!scan.shell(level, cap) && !scan.part(level, cap, PartKind.CAP)) {
             return FormedStructure.none();
         }
         far = cap;
         if (scan.weakest == null) {
             scan.weakest = kind.grade;
         }
-        return scan.build(bodies, far);
+        return scan.build(bodies, far, controller);
     }
 
     private static boolean vesselLayer(Level level, Scan scan, BlockPos controller, Direction facing, int y, boolean hollow) {
@@ -447,7 +445,7 @@ public final class StructureMatcher {
                     if (!scan.shell(level, pos)) {
                         return false;
                     }
-                } else if (isPart(level, pos, PartKind.COIL)) {
+                } else if (scan.part(level, pos, PartKind.COIL)) {
                     scan.coils++;
                 } else if (!level.getBlockState(pos).isAir()) {
                     return false;
@@ -474,7 +472,7 @@ public final class StructureMatcher {
         BlockPos far = controller;
         for (int y = 1; y <= kind.maxSize; y++) {
             BlockPos mid = world(controller, facing, 0, y, 1);
-            if (!isPart(level, mid, PartKind.BODY)) {
+            if (!scan.part(level, mid, PartKind.BODY)) {
                 break;
             }
             if (!jacketRing(level, scan, controller, facing, y)) {
@@ -488,7 +486,7 @@ public final class StructureMatcher {
         }
         int capY = depth + 1;
         BlockPos cap = world(controller, facing, 0, capY, 1);
-        if (!scan.shell(level, cap) && !isPart(level, cap, PartKind.CAP)) {
+        if (!scan.shell(level, cap) && !scan.part(level, cap, PartKind.CAP)) {
             return FormedStructure.none();
         }
         if (!jacketRing(level, scan, controller, facing, capY)) {
@@ -498,7 +496,7 @@ public final class StructureMatcher {
         if (scan.weakest == null) {
             scan.weakest = kind.grade;
         }
-        return scan.build(depth, far);
+        return scan.build(depth, far, controller);
     }
 
     private static FormedStructure flare(Level level, BlockPos controller, Direction facing, ApparatusKind kind) {
@@ -529,7 +527,7 @@ public final class StructureMatcher {
         if (height < kind.minSize || scan.weakest == null) {
             return FormedStructure.none();
         }
-        return scan.build(height, far);
+        return scan.build(height, far, controller);
     }
 
     private static FormedStructure room(Level level, BlockPos controller, Direction facing, ApparatusKind kind) {
@@ -539,8 +537,7 @@ public final class StructureMatcher {
             int half = outer / 2;
             FormedStructure formed = shell(level, controller, facing, -half, half, 0, outer - 1, 0, outer - 1, 0, 1, 0, true);
             if (formed.formed()) {
-                best = new FormedStructure(span, formed.coils(), formed.parallel(), formed.vent(), formed.drain(),
-                        formed.missingIntercooler(), formed.flooded(), formed.airlockOpen(), formed.weakest(), formed.hatches(), formed.farEnd());
+                best = formed.withSize(span);
             } else {
                 break;
             }
@@ -573,7 +570,7 @@ public final class StructureMatcher {
                 }
             }
             if (ok && casings > 0) {
-                best = scan.build(casings, controller);
+                best = scan.build(casings, controller, controller);
             } else {
                 break;
             }
@@ -600,10 +597,10 @@ public final class StructureMatcher {
                     if (pos.equals(controller)) {
                         continue;
                     }
-                    if (isPart(level, pos, PartKind.BODY)) {
+                    if (scan.part(level, pos, PartKind.BODY)) {
                         bodies++;
                         far = pos;
-                        if (isPart(level, pos.above(), PartKind.COIL)) {
+                        if (scan.part(level, pos.above(), PartKind.COIL)) {
                             scan.coils++;
                         }
                     } else {
@@ -615,7 +612,7 @@ public final class StructureMatcher {
                 if (scan.weakest == null) {
                     scan.weakest = kind.grade;
                 }
-                best = scan.build(span, far);
+                best = scan.build(span, far, controller);
             } else {
                 break;
             }
@@ -634,21 +631,39 @@ public final class StructureMatcher {
     private static final class Scan {
         private PressureGrade weakest;
         private final List<BlockPos> hatches = new ArrayList<>();
+        private final List<BlockPos> hull = new ArrayList<>();
         private int coils;
         private int parallel = 1;
         private boolean vent;
         private boolean drain;
         private boolean airlockOpen;
 
+        void include(BlockPos pos) {
+            BlockPos key = pos.immutable();
+            if (!hull.contains(key)) {
+                hull.add(key);
+            }
+        }
+
+        boolean part(Level level, BlockPos pos, PartKind kind) {
+            if (isPart(level, pos, kind)) {
+                include(pos);
+                return true;
+            }
+            return false;
+        }
+
         boolean shell(Level level, BlockPos pos) {
             BlockState state = level.getBlockState(pos);
             Block block = state.getBlock();
             if (block instanceof CasingBlock casing) {
                 noteCasing(casing.grade);
+                include(pos);
                 return true;
             }
             if (block instanceof HatchBlock hatch) {
                 hatches.add(pos.immutable());
+                include(pos);
                 if (hatch.type == HatchType.VENT) {
                     vent = true;
                 }
@@ -667,7 +682,11 @@ public final class StructureMatcher {
                 if (part.kind == PartKind.AIRLOCK) {
                     airlockOpen = level.hasNeighborSignal(pos);
                 }
-                return part.kind == PartKind.CAP || part.kind == PartKind.AIRLOCK;
+                boolean accepted = part.kind == PartKind.CAP || part.kind == PartKind.AIRLOCK;
+                if (accepted) {
+                    include(pos);
+                }
+                return accepted;
             }
             return false;
         }
@@ -688,15 +707,19 @@ public final class StructureMatcher {
             vent |= other.vent;
             drain |= other.drain;
             airlockOpen |= other.airlockOpen;
+            for (BlockPos pos : other.hull) {
+                include(pos);
+            }
         }
 
         boolean hasSideDraw() {
             return !hatches.isEmpty();
         }
 
-        FormedStructure build(int size, BlockPos far) {
+        FormedStructure build(int size, BlockPos far, BlockPos controller) {
+            include(controller);
             return new FormedStructure(size, coils, Tuning.clampParallel(parallel), vent, drain, false, false, airlockOpen,
-                    weakest == null ? PressureGrade.G0 : weakest, List.copyOf(hatches), far);
+                    weakest == null ? PressureGrade.G0 : weakest, List.copyOf(hatches), far, List.copyOf(hull));
         }
     }
 }

@@ -2,6 +2,7 @@ package dev.pncwm.blockentity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import dev.pncwm.WMConfig;
@@ -11,7 +12,10 @@ import dev.pncwm.block.ApparatusBlock;
 import dev.pncwm.block.HatchBlock;
 import dev.pncwm.block.HatchType;
 import dev.pncwm.menu.ApparatusMenu;
+import dev.pncwm.item.PendingPneumatics;
+import dev.pncwm.item.StoredPneumatics;
 import dev.pncwm.multiblock.FormedStructure;
+import dev.pncwm.multiblock.HeatHull;
 import dev.pncwm.multiblock.StructureMatcher;
 import dev.pncwm.pressure.MachineStatus;
 import dev.pncwm.pressure.PressureGrade;
@@ -81,6 +85,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     private static final float[] SETPOINTS = Tuning.REGULATOR_SETPOINTS;
     private boolean scanned;
     private int lastSignal = -1;
+    private final PendingPneumatics pending = new PendingPneumatics();
+    private final List<IHeatExchangerLogic> hullExtras = new ArrayList<>();
     /** Recipe the current batch belongs to. Not saved: after a reload the first match keeps the saved progress. */
     @Nullable
     private WindowRecipe active;
@@ -310,10 +316,12 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             rescan();
             scanned = true;
         }
-        tickPneumatics(true);
+        openAir();
         if (air != null && air.getBaseVolume() != airVolume()) {
             air.setBaseVolume(airVolume());
         }
+        releasePendingIfFormed();
+        tickPneumatics(true);
         if (!formed.formed()) {
             setStatus(MachineStatus.UNFORMED);
             // Keep the batch and recipe id so a briefly broken shell can be repaired and finished.
@@ -491,6 +499,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
 
     private void rescan() {
         FormedStructure next = StructureMatcher.match(level, worldPosition, facing(), kind());
+        boolean wasFormed = formed.formed();
         if (!sameShape(formed, next)) {
             for (BlockPos pos : bound) {
                 if (level.getBlockEntity(pos) instanceof HatchBlockEntity hatch) {
@@ -507,6 +516,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 }
             }
             formed = next;
+            if (wasFormed && !next.formed()) {
+                holdHandlerAirAsPending();
+            }
             neighborChanged();
             setChanged();
         } else {
@@ -1609,6 +1621,125 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         setChanged();
     }
 
+    /** Write hull air (including air still waiting for the shell to form) and heat onto the controller item. */
+    public void savePneumaticsToItem(ItemStack stack) {
+        if (air == null || heat == null) {
+            openAir();
+        }
+        int amount = pending.itemAir(air == null ? 0 : air.getAir());
+        double temperature = heat == null ? StoredPneumatics.AMBIENT_KELVIN : heat.getTemperature();
+        double ambient = heat == null ? StoredPneumatics.AMBIENT_KELVIN : heat.getAmbientTemperature();
+        StoredPneumatics stored = StoredPneumatics.of(amount, temperature);
+        if (stored.isEmpty(ambient)) {
+            stack.remove(WMData.MACHINE_PNEUMATICS.get());
+        } else {
+            stack.set(WMData.MACHINE_PNEUMATICS.get(), stored);
+        }
+    }
+
+    /**
+     * Keep saved air pending until the shell forms so it is not dumped into the unformed volume.
+     * Temperature is applied immediately.
+     */
+    public void loadPneumaticsFromItem(ItemStack stack) {
+        StoredPneumatics stored = stack.get(WMData.MACHINE_PNEUMATICS.get());
+        if (stored == null || stored.isEmpty()) {
+            return;
+        }
+        openAir();
+        pending.holdFromItem(stored.air());
+        if (heat != null) {
+            heat.setTemperature(stored.temperature());
+        }
+        setChanged();
+    }
+
+    private void holdHandlerAirAsPending() {
+        openAir();
+        if (air == null) {
+            return;
+        }
+        int current = air.getAir();
+        if (current != 0) {
+            pending.holdFromHandler(current);
+            air.addAir(-current);
+            setChanged();
+        }
+    }
+
+    private void releasePendingIfFormed() {
+        if (!formed.formed() || pending.isEmpty()) {
+            return;
+        }
+        openAir();
+        if (air == null) {
+            return;
+        }
+        int released = pending.releaseOnForm();
+        if (released != 0) {
+            air.addAir(released);
+            setChanged();
+        }
+    }
+
+    @Override
+    protected void initializeHeatHull() {
+        for (IHeatExchangerLogic extra : hullExtras) {
+            if (heat != null) {
+                heat.removeConnectedExchanger(extra);
+            }
+        }
+        hullExtras.clear();
+        super.initializeHeatHull();
+        if (level == null || level.isClientSide || heat == null || !formed.formed()) {
+            return;
+        }
+        HashSet<BlockPos> cells = new HashSet<>(formed.hull());
+        cells.add(worldPosition);
+        HashSet<HeatHull.Cell> relative = new HashSet<>();
+        for (BlockPos pos : cells) {
+            relative.add(new HeatHull.Cell(pos.getX(), pos.getY(), pos.getZ()));
+        }
+        IHeatExchangerLogic self = heat;
+        for (HeatHull.Probe probe : HeatHull.externalProbes(relative)) {
+            BlockPos neighbour = new BlockPos(probe.neighbour().x(), probe.neighbour().y(), probe.neighbour().z());
+            Direction outward = directionOf(probe.dx(), probe.dy(), probe.dz());
+            IHeatExchangerLogic other = level.getCapability(
+                    PNCCapabilities.HEAT_EXCHANGER_BLOCK, neighbour, outward.getOpposite());
+            if (other != null && other != self) {
+                heat.addConnectedExchanger(other);
+                hullExtras.add(other);
+            }
+        }
+    }
+
+    private static Direction directionOf(int dx, int dy, int dz) {
+        if (dx == 1) {
+            return Direction.EAST;
+        }
+        if (dx == -1) {
+            return Direction.WEST;
+        }
+        if (dy == 1) {
+            return Direction.UP;
+        }
+        if (dy == -1) {
+            return Direction.DOWN;
+        }
+        if (dz == 1) {
+            return Direction.SOUTH;
+        }
+        return Direction.NORTH;
+    }
+
+    @Override
+    public void printManometerMessage(Player player, List<Component> curInfo) {
+        super.printManometerMessage(player, curInfo);
+        if (!formed.formed() && !pending.isEmpty()) {
+            curInfo.add(Component.translatable("tooltip.workingmedium.pending_air", pending.air()));
+        }
+    }
+
     @Override
     public Component getDisplayName() {
         return Component.translatable("block.workingmedium." + kind().id);
@@ -1624,6 +1755,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         savePneumatics(tag);
+        tag.putInt("PendingAir", pending.air());
         io.save(tag, registries);
         tag.putInt("Progress", progress);
         tag.putInt("WorkTime", workTime);
@@ -1647,6 +1779,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         loadPneumatics(tag);
+        if (tag.contains("PendingAir")) {
+            pending.load(tag.getInt("PendingAir"));
+        }
         io.load(tag, registries);
         readProcess(tag);
     }

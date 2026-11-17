@@ -2,7 +2,9 @@ package dev.pncwm.blockentity;
 
 import java.util.Collection;
 
+import dev.pncwm.item.StoredPneumatics;
 import dev.pncwm.pressure.PressureGrade;
+import dev.pncwm.registry.WMData;
 import me.desht.pneumaticcraft.api.PneumaticRegistry;
 import me.desht.pneumaticcraft.api.heat.IHeatExchangerLogic;
 import me.desht.pneumaticcraft.api.tileentity.IAirHandlerMachine;
@@ -12,9 +14,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -44,6 +48,19 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
 
     public IAirHandlerMachine air() {
         openAir();
+        return air;
+    }
+
+    /**
+     * Air capability by side. Faces outside {@link #airFaces()} expose nothing, so a tube on the
+     * relief valve vent (or any later isolated face) cannot join the network.
+     */
+    @Nullable
+    public IAirHandlerMachine airOn(@Nullable Direction side) {
+        openAir();
+        if (side != null && !airFaces().contains(side)) {
+            return null;
+        }
         return air;
     }
 
@@ -98,7 +115,7 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
         Collection<Direction> faces = airFaces();
         air.setConnectableFaces(faces);
         if (!hullReady) {
-            heat.initializeAsHull(level, worldPosition, IHeatExchangerLogic.ALL_BLOCKS, faces.toArray(Direction[]::new));
+            initializeHeatHull();
             hullReady = true;
         }
         air.tick(this);
@@ -121,6 +138,15 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
         hullReady = false;
     }
 
+    /**
+     * Connect this exchanger to neighbouring heat pipes and heat behaviours. The default only
+     * inspects the air faces of this block; formed machines also walk the rest of the shell.
+     */
+    protected void initializeHeatHull() {
+        Collection<Direction> faces = airFaces();
+        heat.initializeAsHull(level, worldPosition, IHeatExchangerLogic.ALL_BLOCKS, faces.toArray(Direction[]::new));
+    }
+
     public void savePneumatics(CompoundTag tag) {
         if (air != null) {
             Tag saved = air.serializeNBT();
@@ -135,6 +161,43 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
         } else if (savedHeat != null) {
             tag.put("Heat", savedHeat);
         }
+    }
+
+    /** Write leftover air and heat onto a dropped or middle-clicked part. Ambient heat with no air is omitted. */
+    public void savePneumaticsToItem(ItemStack stack) {
+        if (air == null || heat == null) {
+            openAir();
+        }
+        if (air == null || heat == null) {
+            stack.remove(WMData.MACHINE_PNEUMATICS.get());
+            return;
+        }
+        StoredPneumatics stored = StoredPneumatics.of(air.getAir(), heat.getTemperature());
+        if (stored.isEmpty(heat.getAmbientTemperature())) {
+            stack.remove(WMData.MACHINE_PNEUMATICS.get());
+        } else {
+            stack.set(WMData.MACHINE_PNEUMATICS.get(), stored);
+        }
+    }
+
+    public void loadPneumaticsFromItem(ItemStack stack) {
+        StoredPneumatics stored = stack.get(WMData.MACHINE_PNEUMATICS.get());
+        if (stored == null || stored.isEmpty()) {
+            return;
+        }
+        openAir();
+        if (air == null || heat == null) {
+            return;
+        }
+        int current = air.getAir();
+        if (current != 0) {
+            air.addAir(-current);
+        }
+        if (stored.air() != 0) {
+            air.addAir(stored.air());
+        }
+        heat.setTemperature(stored.temperature());
+        setChanged();
     }
 
     public void loadPneumatics(CompoundTag tag) {

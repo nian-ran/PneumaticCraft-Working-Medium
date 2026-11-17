@@ -4,12 +4,19 @@ import com.mojang.serialization.MapCodec;
 
 import dev.pncwm.blockentity.ReliefValveBlockEntity;
 import dev.pncwm.registry.WMBlockEntities;
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -113,5 +120,23 @@ public class ReliefValveBlock extends BaseEntityBlock {
         if (level.getBlockEntity(pos) instanceof ReliefValveBlockEntity valve) {
             valve.neighborChanged();
         }
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        return PneumaticDrops.withStored(super.getDrops(state, params), this, params);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity by, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, by, stack);
+        PneumaticDrops.read(level.getBlockEntity(pos), stack);
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+        PneumaticDrops.write(level.getBlockEntity(pos), stack);
+        return stack;
     }
 }

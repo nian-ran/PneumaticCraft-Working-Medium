@@ -6,14 +6,21 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.pncwm.blockentity.GradeTubeBlockEntity;
 import dev.pncwm.pressure.PressureGrade;
 import dev.pncwm.registry.WMBlockEntities;
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -87,14 +94,8 @@ public class GradeTubeBlock extends BaseEntityBlock {
         };
     }
 
-    public static boolean connectsTo(BlockState neighbor) {
-        Block block = neighbor.getBlock();
-        return block instanceof GradeTubeBlock
-                || block instanceof HatchBlock
-                || block instanceof ApparatusBlock
-                || block instanceof TransferBlock
-                || block instanceof ReliefValveBlock
-                || block instanceof GaugeBlock;
+    public static boolean connectsTo(BlockState neighbor, Direction faceOnNeighbor) {
+        return TubeFaces.connectsTo(neighbor, faceOnNeighbor);
     }
 
     @Override
@@ -120,7 +121,7 @@ public class GradeTubeBlock extends BaseEntityBlock {
 
     @Override
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        return state.setValue(property(direction), connectsTo(neighborState));
+        return state.setValue(property(direction), connectsTo(neighborState, direction.getOpposite()));
     }
 
     @Override
@@ -149,7 +150,7 @@ public class GradeTubeBlock extends BaseEntityBlock {
 
     public BlockState connections(LevelAccessor level, BlockPos pos, BlockState state) {
         for (Direction direction : Direction.values()) {
-            state = state.setValue(property(direction), connectsTo(level.getBlockState(pos.relative(direction))));
+            state = state.setValue(property(direction), connectsTo(level.getBlockState(pos.relative(direction)), direction.getOpposite()));
         }
         return state;
     }
@@ -194,5 +195,23 @@ public class GradeTubeBlock extends BaseEntityBlock {
         if (level.getBlockEntity(pos) instanceof GradeTubeBlockEntity tube) {
             tube.neighborChanged();
         }
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        return PneumaticDrops.withStored(super.getDrops(state, params), this, params);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity by, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, by, stack);
+        PneumaticDrops.read(level.getBlockEntity(pos), stack);
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+        PneumaticDrops.write(level.getBlockEntity(pos), stack);
+        return stack;
     }
 }

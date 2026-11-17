@@ -1,8 +1,10 @@
 package dev.pncwm.blockentity;
 
+import dev.pncwm.item.StoredPneumatics;
 import dev.pncwm.pressure.PressureGrade;
 import dev.pncwm.pressure.Tuning;
 import dev.pncwm.registry.WMBlockEntities;
+import dev.pncwm.registry.WMData;
 import me.desht.pneumaticcraft.api.PneumaticRegistry;
 import me.desht.pneumaticcraft.api.heat.IHeatExchangerLogic;
 import me.desht.pneumaticcraft.api.tileentity.IAirHandlerMachine;
@@ -14,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -182,6 +185,47 @@ public class TransferBlockEntity extends BlockEntity implements IManoMeasurable 
         inlet.addAir(-take);
         outlet.addAir(produced);
         heat.addHeat(take * 0.12);
+    }
+
+    public void savePneumaticsToItem(ItemStack stack) {
+        open();
+        if (inlet == null || outlet == null || heat == null) {
+            stack.remove(WMData.MACHINE_PNEUMATICS.get());
+            return;
+        }
+        StoredPneumatics stored = StoredPneumatics.transfer(inlet.getAir(), outlet.getAir(), heat.getTemperature());
+        if (stored.isEmpty(heat.getAmbientTemperature())) {
+            stack.remove(WMData.MACHINE_PNEUMATICS.get());
+        } else {
+            stack.set(WMData.MACHINE_PNEUMATICS.get(), stored);
+        }
+    }
+
+    public void loadPneumaticsFromItem(ItemStack stack) {
+        StoredPneumatics stored = stack.get(WMData.MACHINE_PNEUMATICS.get());
+        if (stored == null || stored.isEmpty()) {
+            return;
+        }
+        open();
+        if (inlet == null || outlet == null || heat == null) {
+            return;
+        }
+        int in = inlet.getAir();
+        if (in != 0) {
+            inlet.addAir(-in);
+        }
+        int out = outlet.getAir();
+        if (out != 0) {
+            outlet.addAir(-out);
+        }
+        if (stored.air() != 0) {
+            inlet.addAir(stored.air());
+        }
+        if (stored.secondAir() != 0) {
+            outlet.addAir(stored.secondAir());
+        }
+        heat.setTemperature(stored.temperature());
+        setChanged();
     }
 
     public void tell(Player player) {
