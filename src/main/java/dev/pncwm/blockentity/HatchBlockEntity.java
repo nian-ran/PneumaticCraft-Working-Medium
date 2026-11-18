@@ -8,12 +8,17 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+import me.desht.pneumaticcraft.api.tileentity.IManoMeasurable;
 import me.desht.pneumaticcraft.api.heat.IHeatExchangerLogic;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
-public class HatchBlockEntity extends BlockEntity {
+import java.util.List;
+
+public class HatchBlockEntity extends BlockEntity implements IManoMeasurable {
     private BlockPos controller = BlockPos.ZERO;
     private boolean bound;
 
@@ -47,6 +52,15 @@ public class HatchBlockEntity extends BlockEntity {
         if (level != null && !level.isClientSide) {
             level.invalidateCapabilities(worldPosition);
         }
+    }
+
+    public boolean isBound() {
+        return bound;
+    }
+
+    /** Saved controller position, or null when the hatch is not bound. */
+    public BlockPos boundControllerPos() {
+        return bound ? controller.immutable() : null;
     }
 
     public HatchType type() {
@@ -97,6 +111,23 @@ public class HatchBlockEntity extends BlockEntity {
         }
         ApparatusBlockEntity apparatus = controller();
         return apparatus == null ? null : apparatus.heat();
+    }
+
+    /**
+     * Official PneumaticCraft manometers look at the block entity under the cursor.
+     * A bound hatch now answers with the controller's shell pressure and temperature.
+     */
+    @Override
+    public void printManometerMessage(Player player, List<Component> curInfo) {
+        ApparatusBlockEntity apparatus = controller();
+        if (apparatus != null) {
+            apparatus.printManometerMessage(player, curInfo);
+            return;
+        }
+        if (bound && level != null && !level.isLoaded(controller)) {
+            return;
+        }
+        curInfo.add(Component.translatable("message.workingmedium.probe_unbound"));
     }
 
     @Override

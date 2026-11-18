@@ -94,6 +94,10 @@ public class GradeTubeBlock extends BaseEntityBlock {
         };
     }
 
+    public static boolean connectsTo(LevelAccessor level, BlockPos neighborPos, BlockState neighbor, Direction faceOnNeighbor) {
+        return TubeFaces.connectsTo(level, neighborPos, neighbor, faceOnNeighbor);
+    }
+
     public static boolean connectsTo(BlockState neighbor, Direction faceOnNeighbor) {
         return TubeFaces.connectsTo(neighbor, faceOnNeighbor);
     }
@@ -121,7 +125,7 @@ public class GradeTubeBlock extends BaseEntityBlock {
 
     @Override
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        return state.setValue(property(direction), connectsTo(neighborState, direction.getOpposite()));
+        return state.setValue(property(direction), connectsTo(level, neighborPos, neighborState, direction.getOpposite()));
     }
 
     @Override
@@ -150,7 +154,8 @@ public class GradeTubeBlock extends BaseEntityBlock {
 
     public BlockState connections(LevelAccessor level, BlockPos pos, BlockState state) {
         for (Direction direction : Direction.values()) {
-            state = state.setValue(property(direction), connectsTo(level.getBlockState(pos.relative(direction)), direction.getOpposite()));
+            BlockPos neighborPos = pos.relative(direction);
+            state = state.setValue(property(direction), connectsTo(level, neighborPos, level.getBlockState(neighborPos), direction.getOpposite()));
         }
         return state;
     }

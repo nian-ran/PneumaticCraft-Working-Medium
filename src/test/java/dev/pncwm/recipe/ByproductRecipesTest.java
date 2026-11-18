@@ -174,7 +174,7 @@ class ByproductRecipesTest {
             assertTrue(en.contains("hint.workingmedium." + status), status);
             assertTrue(en.contains("status.workingmedium." + status), "status " + status);
         }
-        for (int page = 0; page < 26; page++) {
+        for (int page = 0; page < dev.pncwm.item.ManualItem.PAGES; page++) {
             assertTrue(en.contains("manual.workingmedium.page." + page), "page " + page);
         }
         for (String key : new String[] {"tooltip.workingmedium.certificate", "tooltip.workingmedium.certified",

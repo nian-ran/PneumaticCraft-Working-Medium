@@ -36,6 +36,16 @@ public enum MachineStatus {
         return Component.translatable("status.workingmedium." + id);
     }
 
+    /**
+     * True while the machine is operating inside its pressure/temperature window.
+     * Recipe machines use {@link #RUNNING} for ordinary batches and {@link #WINDOW}
+     * when the recipe voids outside that window. The calibration bench flashes
+     * {@link #CERTIFIED} for the tick it writes a certificate.
+     */
+    public boolean inOperatingWindow() {
+        return this == WINDOW || this == RUNNING || this == CERTIFIED;
+    }
+
     public static MachineStatus byOrdinal(int ordinal) {
         MachineStatus[] values = values();
         if (ordinal < 0 || ordinal >= values.length) {

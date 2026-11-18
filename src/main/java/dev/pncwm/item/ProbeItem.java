@@ -31,13 +31,18 @@ public class ProbeItem extends Item {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof HatchBlockEntity hatch) {
             ApparatusBlockEntity bound = hatch.controller();
-            if (bound == null) {
-                if (!level.isClientSide && context.getPlayer() != null) {
-                    context.getPlayer().displayClientMessage(Component.translatable("message.workingmedium.probe_unbound"), true);
-                }
-                return level.isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+            if (bound != null) {
+                return useOnApparatus(context, bound);
             }
-            return useOnApparatus(context, bound);
+            // A bound hatch whose controller chunk is only unloaded still knows the position.
+            // Do not tell the player it is unbound, and still store that position for the bench.
+            if (hatch.isBound()) {
+                return storeUnloadedController(context, hatch.boundControllerPos());
+            }
+            if (!level.isClientSide && context.getPlayer() != null) {
+                context.getPlayer().displayClientMessage(Component.translatable("message.workingmedium.probe_unbound"), true);
+            }
+            return level.isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
         }
         if (be instanceof ApparatusBlockEntity apparatus) {
             return useOnApparatus(context, apparatus);
@@ -62,6 +67,19 @@ public class ProbeItem extends Item {
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
+    }
+
+    private static InteractionResult storeUnloadedController(UseOnContext context, BlockPos target) {
+        Level level = context.getLevel();
+        if (level.isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+        if (target != null && context.getPlayer() != null) {
+            context.getItemInHand().set(WMData.PROBE_POS.get(), target.asLong());
+            context.getPlayer().displayClientMessage(
+                    Component.translatable("message.workingmedium.probe_saved_unloaded", target.toShortString()), true);
+        }
+        return InteractionResult.CONSUME;
     }
 
     private static InteractionResult useOnApparatus(UseOnContext context, ApparatusBlockEntity apparatus) {
