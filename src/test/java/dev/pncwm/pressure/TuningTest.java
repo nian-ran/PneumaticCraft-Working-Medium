@@ -456,4 +456,24 @@ class TuningTest {
         assertEquals(8, Tuning.MAX_PARALLEL);
     }
 
+
+    @Test
+    void progressStaysActiveWhileABatchIsStalled() {
+        assertEquals(false, Tuning.progressActive(false, 0, 100));
+        assertEquals(false, Tuning.progressActive(true, 0, 0));
+        assertEquals(true, Tuning.progressActive(true, 0, 100));
+        assertEquals(true, Tuning.progressActive(false, 40, 100));
+        assertEquals(8, Tuning.progressSignal(50, 100, Tuning.progressActive(false, 50, 100)));
+        assertEquals(0, Tuning.progressSignal(50, 100, Tuning.progressActive(false, 0, 100)));
+    }
+
+    @Test
+    void lubricantNameCoversFlowingVariant() {
+        assertEquals(true, Tuning.isLubricant("lubricant"));
+        assertEquals(true, Tuning.isLubricant("flowing_lubricant"));
+        assertEquals(true, Tuning.isLubricant("pneumaticcraft:lubricant"));
+        assertEquals(false, Tuning.isLubricant("oil"));
+        assertEquals(false, Tuning.isLubricant(""));
+        assertEquals(false, Tuning.isLubricant(null));
+    }
 }

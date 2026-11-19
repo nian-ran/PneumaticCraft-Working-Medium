@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_casing_g3": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:casing_g3"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:alloy_kettle"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_casing_g3"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:alloy_kettle"
+    ]
+  }
+}

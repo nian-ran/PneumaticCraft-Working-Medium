@@ -60,7 +60,7 @@ public final class MachineIo {
 
     /** Lubricant always goes to its own tank, whichever face or hatch it arrives through. */
     public static boolean isLube(FluidStack stack) {
-        return !stack.isEmpty() && BuiltInRegistries.FLUID.getKey(stack.getFluid()).getPath().equals("lubricant");
+        return !stack.isEmpty() && Tuning.isLubricant(BuiltInRegistries.FLUID.getKey(stack.getFluid()).getPath());
     }
 
     public static boolean isGas(FluidStack stack) {

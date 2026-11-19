@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_g4_seal": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:g4_seal"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:curtain_g4"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_g4_seal"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:curtain_g4"
+    ]
+  }
+}

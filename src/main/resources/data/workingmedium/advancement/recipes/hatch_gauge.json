@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_gauge": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:gauge"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:hatch_gauge"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_gauge"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:hatch_gauge"
+    ]
+  }
+}

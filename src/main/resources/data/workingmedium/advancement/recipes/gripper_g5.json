@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_g5_seal": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:g5_seal"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:gripper_g5"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_g5_seal"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:gripper_g5"
+    ]
+  }
+}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import dev.pncwm.WMConfig;
 import dev.pncwm.apparatus.ApparatusKind;
@@ -87,6 +88,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     private int lastSignal = -1;
     private final PendingPneumatics pending = new PendingPneumatics();
     private final List<IHeatExchangerLogic> hullExtras = new ArrayList<>();
+    private final HullFaceHeat hullFaceHeat = new HullFaceHeat();
     /** Recipe the current batch belongs to. Not saved: after a reload the first match keeps the saved progress. */
     @Nullable
     private WindowRecipe active;
@@ -125,9 +127,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             return 0;
         }
         if (kind().usesRecipes()) {
-            boolean running = status == MachineStatus.RUNNING || status == MachineStatus.WINDOW
-                    || (status == MachineStatus.PAUSED && workTime > 0 && progress > 0);
-            return Tuning.progressSignal(progress, workTime, running);
+            boolean runningNow = status == MachineStatus.RUNNING || status == MachineStatus.WINDOW;
+            return Tuning.progressSignal(progress, workTime, Tuning.progressActive(runningNow, progress, workTime));
         }
         if (air == null) {
             return 0;
@@ -322,6 +323,9 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         }
         releasePendingIfFormed();
         tickPneumatics(true);
+        if (!level.isClientSide && heat != null) {
+            hullFaceHeat.tick(heat);
+        }
         if (!formed.formed()) {
             setStatus(MachineStatus.UNFORMED);
             // Keep the batch and recipe id so a briefly broken shell can be repaired and finished.
@@ -1690,6 +1694,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
             }
         }
         hullExtras.clear();
+        hullFaceHeat.clear();
         super.initializeHeatHull();
         if (level == null || level.isClientSide || heat == null || !formed.formed()) {
             return;
@@ -1700,8 +1705,11 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         for (BlockPos pos : cells) {
             relative.add(new HeatHull.Cell(pos.getX(), pos.getY(), pos.getZ()));
         }
+        HeatHull.Cell controller = new HeatHull.Cell(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ());
+        HeatHull.Probe blocked = isolatedBackProbe(controller);
         IHeatExchangerLogic self = heat;
-        for (HeatHull.Probe probe : HeatHull.externalProbes(relative)) {
+        // Heat pipes on the shell, except the air-isolated back face of a column or regulator.
+        for (HeatHull.Probe probe : HeatHull.conductingProbes(relative, blocked)) {
             BlockPos neighbour = new BlockPos(probe.neighbour().x(), probe.neighbour().y(), probe.neighbour().z());
             Direction outward = directionOf(probe.dx(), probe.dy(), probe.dz());
             IHeatExchangerLogic other = level.getCapability(
@@ -1711,6 +1719,23 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
                 hullExtras.add(other);
             }
         }
+        Set<HeatHull.Face> scanned = new HashSet<>();
+        for (Direction face : airFaces()) {
+            scanned.add(new HeatHull.Face(face.getStepX(), face.getStepY(), face.getStepZ()));
+        }
+        // Lava, ice and furnaces on casing faces need their own initializeAsHull; the
+        // controller call would wipe behaviours already registered on the air faces.
+        hullFaceHeat.rebuild(level, heat, HeatHull.groupByCell(
+                HeatHull.auxiliaryBehaviourProbes(relative, controller, scanned, blocked)));
+    }
+
+    /** The isolated back face of a column or regulator, or null when every face may conduct heat. */
+    private HeatHull.Probe isolatedBackProbe(HeatHull.Cell controller) {
+        if (!isolatedBack()) {
+            return null;
+        }
+        Direction back = facing().getOpposite();
+        return new HeatHull.Probe(controller, back.getStepX(), back.getStepY(), back.getStepZ());
     }
 
     private static Direction directionOf(int dx, int dy, int dz) {

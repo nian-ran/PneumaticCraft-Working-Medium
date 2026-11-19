@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_part_airlock": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:part_airlock"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:clean_room"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_part_airlock"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:clean_room"
+    ]
+  }
+}

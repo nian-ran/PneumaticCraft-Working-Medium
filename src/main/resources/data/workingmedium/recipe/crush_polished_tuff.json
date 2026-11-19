@@ -1,0 +1,21 @@
+{
+  "type": "workingmedium:window",
+  "machine": "impact_crusher",
+  "pressure_min": 2.0,
+  "pressure_max": 8.0,
+  "temp_min": 0,
+  "temp_max": 80,
+  "air": 20,
+  "time": 40,
+  "items": [
+    {
+      "item": "minecraft:polished_tuff"
+    }
+  ],
+  "item_outputs": [
+    {
+      "item": "workingmedium:stone_dust",
+      "count": 2
+    }
+  ]
+}

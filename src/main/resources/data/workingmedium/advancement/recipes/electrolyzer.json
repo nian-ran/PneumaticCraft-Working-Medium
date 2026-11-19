@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_electrode": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:electrode"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:electrolyzer"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_electrode"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:electrolyzer"
+    ]
+  }
+}

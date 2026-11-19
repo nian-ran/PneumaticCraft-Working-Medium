@@ -222,4 +222,21 @@ class ByproductRecipesTest {
     private static Path recipe(String name) {
         return Path.of("src/main/resources/data/workingmedium/recipe").resolve(name);
     }
+
+    @Test
+    void buildingBlockProcessingFrom0268IsShipped() throws Exception {
+        assertRecipe("crush_ice.json", "impact_crusher", "minecraft:ice", "minecraft:snowball", "\"count\": 4");
+        assertRecipe("crush_tuff_bricks.json", "impact_crusher", "minecraft:tuff_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_polished_andesite.json", "impact_crusher", "minecraft:polished_andesite", "workingmedium:stone_dust");
+        assertRecipe("crush_deepslate_bricks.json", "impact_crusher", "minecraft:deepslate_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_prismarine_bricks.json", "impact_crusher", "minecraft:prismarine_bricks", "minecraft:prismarine_shard");
+        assertRecipe("crush_quartz_bricks.json", "impact_crusher", "minecraft:quartz_bricks", "minecraft:quartz");
+        assertRecipe("crush_terracotta.json", "impact_crusher", "minecraft:terracotta", "minecraft:clay_ball");
+        assertRecipe("crush_concrete_white.json", "impact_crusher", "minecraft:white_concrete", "minecraft:white_concrete_powder");
+        assertRecipe("kiln_glazed_white.json", "residue_kiln", "minecraft:white_terracotta", "minecraft:white_glazed_terracotta", "\"count\": 3");
+        assertRecipe("kiln_glazed_black.json", "residue_kiln", "minecraft:black_terracotta", "minecraft:black_glazed_terracotta", "\"count\": 3");
+        assertRecipe("crush_red_nether_bricks.json", "impact_crusher", "minecraft:red_nether_bricks", "minecraft:nether_brick");
+        assertRecipe("crush_end_stone_bricks.json", "impact_crusher", "minecraft:end_stone_bricks", "workingmedium:stone_dust");
+    }
+
 }

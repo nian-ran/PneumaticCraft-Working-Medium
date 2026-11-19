@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_g5_gripper": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:g5_gripper"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:valve_g5"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_g5_gripper"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:valve_g5"
+    ]
+  }
+}

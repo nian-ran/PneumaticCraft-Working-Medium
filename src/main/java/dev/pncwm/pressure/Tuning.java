@@ -32,6 +32,15 @@ public final class Tuning {
         return Math.max(1, Math.min(15, scaled));
     }
 
+    /**
+     * Whether a recipe machine should still report batch progress. Mid-batch stalls
+     * (no air, clogged, off-window, paused, no lubricant, ...) keep the progress signal
+     * so automation does not treat them as idle.
+     */
+    public static boolean progressActive(boolean runningNow, int progress, int time) {
+        return time > 0 && (runningNow || progress > 0);
+    }
+
     /** Fresh seal life for a seal of the given grade index. G2 lasts 1000 ticks of running, each grade above adds 500. */
     public static int sealLife(int gradeIndex) {
         int clamped = Math.max(2, Math.min(5, gradeIndex));
@@ -270,6 +279,11 @@ public final class Tuning {
             name = name.substring(colon + 1);
         }
         return name.startsWith("flowing_") ? name.substring("flowing_".length()) : name;
+    }
+
+    /** Still or flowing lubricant, including PneumaticCraft's lubricant fluid. */
+    public static boolean isLubricant(String path) {
+        return "lubricant".equals(fluidName(path));
     }
 
     /**

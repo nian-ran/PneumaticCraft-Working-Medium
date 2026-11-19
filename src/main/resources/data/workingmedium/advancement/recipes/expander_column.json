@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_part_stage": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:part_stage"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:expander_column"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_part_stage"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:expander_column"
+    ]
+  }
+}

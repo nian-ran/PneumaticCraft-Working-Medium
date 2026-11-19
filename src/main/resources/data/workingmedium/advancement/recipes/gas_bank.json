@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_casing_g0": {
+      "conditions": {
+        "items": [
+          {
+            "items": "workingmedium:casing_g0"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "workingmedium:gas_bank"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_casing_g0"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "workingmedium:gas_bank"
+    ]
+  }
+}
