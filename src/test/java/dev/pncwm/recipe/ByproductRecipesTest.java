@@ -239,4 +239,37 @@ class ByproductRecipesTest {
         assertRecipe("crush_end_stone_bricks.json", "impact_crusher", "minecraft:end_stone_bricks", "workingmedium:stone_dust");
     }
 
+    @Test
+    void leftoverStoneFamilyCrushingFrom02610IsShipped() throws Exception {
+        assertRecipe("crush_snow_block.json", "impact_crusher", "minecraft:snow_block", "minecraft:snowball", "\"count\": 4");
+        for (String color : new String[] {"white", "light_gray", "gray", "black", "brown", "red", "orange", "yellow",
+                "lime", "green", "cyan", "light_blue", "blue", "purple", "magenta", "pink"}) {
+            assertRecipe("crush_terracotta_" + color + ".json", "impact_crusher",
+                    "minecraft:" + color + "_terracotta", "minecraft:clay_ball", "\"count\": 4");
+        }
+        assertRecipe("crush_smooth_stone.json", "impact_crusher", "minecraft:smooth_stone", "workingmedium:stone_dust");
+        assertRecipe("crush_smooth_basalt.json", "impact_crusher", "minecraft:smooth_basalt", "workingmedium:stone_dust");
+        assertRecipe("crush_polished_blackstone_bricks.json", "impact_crusher", "minecraft:polished_blackstone_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_cracked_polished_blackstone_bricks.json", "impact_crusher", "minecraft:cracked_polished_blackstone_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_chiseled_polished_blackstone.json", "impact_crusher", "minecraft:chiseled_polished_blackstone", "workingmedium:stone_dust");
+        assertRecipe("crush_cracked_deepslate_bricks.json", "impact_crusher", "minecraft:cracked_deepslate_bricks", "workingmedium:stone_dust");
+        assertRecipe("crush_cracked_deepslate_tiles.json", "impact_crusher", "minecraft:cracked_deepslate_tiles", "workingmedium:stone_dust");
+        assertRecipe("crush_cracked_nether_bricks.json", "impact_crusher", "minecraft:cracked_nether_bricks", "minecraft:nether_brick", "\"count\": 4");
+        assertRecipe("crush_chiseled_nether_bricks.json", "impact_crusher", "minecraft:chiseled_nether_bricks", "minecraft:nether_brick");
+    }
+
+    @Test
+    void leftoverFamilyRecipesFrom02611AreShipped() throws Exception {
+        for (String color : new String[] {"white", "light_gray", "gray", "black", "brown", "red", "orange", "yellow",
+                "lime", "green", "cyan", "light_blue", "blue", "purple", "magenta", "pink"}) {
+            assertRecipe("crush_glazed_terracotta_" + color + ".json", "impact_crusher",
+                    "minecraft:" + color + "_glazed_terracotta", "minecraft:clay_ball", "\"count\": 4");
+        }
+        assertRecipe("crush_gilded_blackstone.json", "impact_crusher", "minecraft:gilded_blackstone",
+                "workingmedium:stone_dust", "minecraft:gold_nugget");
+        assertRecipe("wash_grass_block.json", "washer_tower", "minecraft:grass_block", "minecraft:mud");
+        assertRecipe("wash_podzol.json", "washer_tower", "minecraft:podzol", "minecraft:mud");
+        assertRecipe("wash_mycelium.json", "washer_tower", "minecraft:mycelium", "minecraft:mud");
+    }
+
 }

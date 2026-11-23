@@ -20,6 +20,6 @@ public record StoredPneumatics(int air, int secondAir, double temperature) {
     }
 
     public boolean isEmpty(double ambientKelvin) {
-        return air <= 0 && secondAir <= 0 && Math.abs(temperature - ambientKelvin) < 0.5;
+        return air == 0 && secondAir == 0 && Math.abs(temperature - ambientKelvin) < 0.5;
     }
 }

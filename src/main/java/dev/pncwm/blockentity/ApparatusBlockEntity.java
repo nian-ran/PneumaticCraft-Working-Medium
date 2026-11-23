@@ -1625,7 +1625,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         setChanged();
     }
 
-    /** Write hull air (including air still waiting for the shell to form) and heat onto the controller item. */
+    /** Write hull air (including vacuum, and air still waiting for the shell to form) and heat onto the controller item. */
     public void savePneumaticsToItem(ItemStack stack) {
         if (air == null || heat == null) {
             openAir();
@@ -1642,7 +1642,7 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     }
 
     /**
-     * Keep saved air pending until the shell forms so it is not dumped into the unformed volume.
+     * Keep saved air or vacuum pending until the shell forms so it is not dumped into the unformed volume.
      * Temperature is applied immediately.
      */
     public void loadPneumaticsFromItem(ItemStack stack) {

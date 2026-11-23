@@ -21,6 +21,10 @@ class StoredPneumaticsTest {
         assertFalse(StoredPneumatics.of(0, 310.0).isEmpty());
         assertFalse(StoredPneumatics.of(0, 250.0).isEmpty(300.0));
         assertTrue(StoredPneumatics.of(0, 290.0).isEmpty(290.0));
+        // Vacuum is still a stored amount, even at ambient temperature.
+        assertFalse(StoredPneumatics.of(-500, StoredPneumatics.AMBIENT_KELVIN).isEmpty());
+        assertFalse(StoredPneumatics.transfer(0, -8, StoredPneumatics.AMBIENT_KELVIN).isEmpty());
+        assertFalse(StoredPneumatics.of(-500, 250.0).isEmpty(300.0));
     }
 
     @Test

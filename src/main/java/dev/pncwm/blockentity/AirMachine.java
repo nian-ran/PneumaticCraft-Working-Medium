@@ -163,7 +163,7 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
         }
     }
 
-    /** Write leftover air and heat onto a dropped or middle-clicked part. Ambient heat with no air is omitted. */
+    /** Write leftover air (including vacuum) and heat onto a dropped or middle-clicked part. Ambient heat with no air is omitted. */
     public void savePneumaticsToItem(ItemStack stack) {
         if (air == null || heat == null) {
             openAir();

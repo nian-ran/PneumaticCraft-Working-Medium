@@ -31,16 +31,34 @@ class PendingPneumaticsTest {
     }
 
     @Test
-    void negativeOrZeroAirIsIgnoredAndReloadRestoresTheHeldAmount() {
+    void zeroAirClearsAndReloadRestoresTheHeldAmount() {
         PendingPneumatics pending = new PendingPneumatics();
-        pending.holdFromItem(-20);
-        assertTrue(pending.isEmpty());
         pending.holdFromHandler(0);
-        pending.holdFromHandler(-8);
         assertTrue(pending.isEmpty());
         pending.load(12_000);
         assertEquals(12_000, pending.air());
-        pending.load(-1);
+        pending.holdFromItem(0);
+        assertTrue(pending.isEmpty());
+        pending.load(0);
+        assertTrue(pending.isEmpty());
+    }
+
+    @Test
+    void vacuumIsHeldUntilTheShellFormsAndIsWrittenOntoTheItem() {
+        PendingPneumatics pending = new PendingPneumatics();
+        pending.holdFromItem(-20_000);
+        assertEquals(-20_000, pending.air());
+        assertEquals(-20_000, pending.itemAir(0));
+        assertEquals(-20_000, pending.releaseOnForm());
+        assertTrue(pending.isEmpty());
+        pending.holdFromHandler(-8_000);
+        pending.holdFromHandler(-100);
+        assertEquals(-8_100, pending.itemAir(0));
+        // A later fill or further vacuum on the unformed handler is added on pickup, not dropped.
+        assertEquals(-8_150, pending.itemAir(-50));
+        pending.load(-12_000);
+        assertEquals(-12_000, pending.air());
+        assertEquals(-12_000, pending.releaseOnForm());
         assertTrue(pending.isEmpty());
     }
 
