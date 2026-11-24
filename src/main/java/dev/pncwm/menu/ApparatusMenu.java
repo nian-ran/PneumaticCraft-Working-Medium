@@ -19,8 +19,8 @@ import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 public class ApparatusMenu extends AbstractContainerMenu {
-    /** progress, status, seal, size, bar*100, celsius, work time, then the active window: low/high bar*100, low/high C, known flag. */
-    public static final int FIELDS = 12;
+    /** progress, status, seal, size, bar*100, celsius, work time, then the active window: low/high bar*100, low/high C, known flag, pending air. */
+    public static final int FIELDS = 13;
     public final ApparatusBlockEntity apparatus;
     private final ContainerData data;
 
@@ -46,6 +46,7 @@ public class ApparatusMenu extends AbstractContainerMenu {
                         case 9 -> apparatus.windowField(2);
                         case 10 -> apparatus.windowField(3);
                         case 11 -> apparatus.windowField(4);
+                        case 12 -> apparatus.pendingAir();
                         default -> 0;
                     };
                 }

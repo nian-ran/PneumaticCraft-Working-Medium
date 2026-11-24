@@ -5,6 +5,7 @@ import java.util.List;
 
 import dev.pncwm.WorkingMedium;
 import dev.pncwm.blockentity.MachineIo;
+import dev.pncwm.item.StoredPneumatics;
 import dev.pncwm.menu.ApparatusMenu;
 import dev.pncwm.pressure.MachineStatus;
 import net.minecraft.ChatFormatting;
@@ -99,7 +100,13 @@ public class ApparatusScreen extends AbstractContainerScreen<ApparatusMenu> {
                 break;
             }
         }
-        graphics.drawString(font, Component.translatable("tooltip.workingmedium.pressure_short", menu.data(4) / 100f), 86, 44, 0xFFD0C8BE, false);
+        int pendingAir = menu.data(12);
+        String pendingKey = StoredPneumatics.pendingGuiTooltipKey(menu.data(3) > 0, pendingAir);
+        if (pendingKey != null) {
+            graphics.drawString(font, Component.translatable(pendingKey, StoredPneumatics.displayAmount(pendingAir)), 86, 44, 0xFFD0C8BE, false);
+        } else {
+            graphics.drawString(font, Component.translatable("tooltip.workingmedium.pressure_short", menu.data(4) / 100f), 86, 44, 0xFFD0C8BE, false);
+        }
         graphics.drawString(font, Component.translatable("tooltip.workingmedium.temperature_short", menu.data(5)), 86, 52, 0xFFD0C8BE, false);
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFFB7A99A, false);
         Component sizeSeal = Component.translatable("tooltip.workingmedium.size_seal", menu.data(3), menu.data(2));

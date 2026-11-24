@@ -95,7 +95,8 @@ public abstract class AirMachine extends BlockEntity implements IManoMeasurable 
             heat.deserializeNBT(savedHeat);
             savedHeat = null;
         }
-        if (kept > 0) {
+        // Vacuum must be copied too. A positive-only check dropped it when the pressure tier changed.
+        if (StoredPneumatics.hasCarriedAir(kept)) {
             air.addAir(kept);
         }
         hullReady = false;

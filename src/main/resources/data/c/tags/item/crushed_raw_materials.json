@@ -2,6 +2,7 @@
   "values": [
     "#c:crushed_raw_materials/iron",
     "#c:crushed_raw_materials/copper",
-    "#c:crushed_raw_materials/gold"
+    "#c:crushed_raw_materials/gold",
+    "#c:crushed_raw_materials/netherite"
   ]
 }

@@ -1,0 +1,29 @@
+{
+  "type": "workingmedium:window",
+  "machine": "washer_tower",
+  "items": [
+    {
+      "item": "minecraft:waxed_oxidized_copper"
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "item_outputs": [
+    {
+      "item": "minecraft:oxidized_copper",
+      "count": 1
+    }
+  ],
+  "pressure_min": 8.0,
+  "pressure_max": 18.0,
+  "temp_min": 20,
+  "temp_max": 90,
+  "air": 40,
+  "time": 80,
+  "lube": 2,
+  "min_size": 6
+}

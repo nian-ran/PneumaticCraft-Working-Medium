@@ -236,6 +236,11 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
         return progress;
     }
 
+    /** Air still waiting for the shell to form, including a held vacuum. Zero when nothing is pending. */
+    public int pendingAir() {
+        return pending.air();
+    }
+
     public int workTime() {
         return workTime;
     }
@@ -1761,7 +1766,8 @@ public class ApparatusBlockEntity extends AirMachine implements MenuProvider {
     public void printManometerMessage(Player player, List<Component> curInfo) {
         super.printManometerMessage(player, curInfo);
         if (!formed.formed() && !pending.isEmpty()) {
-            curInfo.add(Component.translatable("tooltip.workingmedium.pending_air", pending.air()));
+            curInfo.add(Component.translatable(StoredPneumatics.pendingAirTooltipKey(pending.air()),
+                    StoredPneumatics.displayAmount(pending.air())));
         }
     }
 

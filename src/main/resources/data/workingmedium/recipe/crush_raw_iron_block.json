@@ -1,0 +1,22 @@
+{
+  "type": "workingmedium:window",
+  "machine": "impact_crusher",
+  "items": [
+    {
+      "item": "minecraft:raw_iron_block"
+    }
+  ],
+  "item_outputs": [
+    {
+      "item": "workingmedium:crushed_iron",
+      "count": 9
+    }
+  ],
+  "pressure_min": 3.0,
+  "pressure_max": 6.5,
+  "temp_min": 0,
+  "temp_max": 120,
+  "air": 240,
+  "time": 160,
+  "heat": 6.0
+}

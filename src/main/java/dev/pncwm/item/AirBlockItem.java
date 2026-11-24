@@ -29,17 +29,26 @@ public class AirBlockItem extends BlockItem {
         }
         Block block = getBlock();
         if (block instanceof TransferBlock) {
-            tooltip.add(Component.translatable("tooltip.workingmedium.stored_transfer",
-                    stored.air(), bar(stored.air(), 4000),
-                    stored.secondAir(), bar(stored.secondAir(), 4000)).withStyle(ChatFormatting.GRAY));
+            String key = StoredPneumatics.transferTooltipKey(stored.air(), stored.secondAir());
+            boolean vacuumOnly = "tooltip.workingmedium.stored_transfer_vacuum".equals(key);
+            tooltip.add(Component.translatable(key,
+                    vacuumOnly ? StoredPneumatics.displayAmount(stored.air()) : stored.air(),
+                    vacuumOnly ? StoredPneumatics.displayBar(stored.air(), 4000) : StoredPneumatics.signedBar(stored.air(), 4000),
+                    vacuumOnly ? StoredPneumatics.displayAmount(stored.secondAir()) : stored.secondAir(),
+                    vacuumOnly ? StoredPneumatics.displayBar(stored.secondAir(), 4000) : StoredPneumatics.signedBar(stored.secondAir(), 4000))
+                    .withStyle(ChatFormatting.GRAY));
         } else {
             int volume = volumeOf(block);
-            if (volume > 0) {
-                tooltip.add(Component.translatable("tooltip.workingmedium.stored_air",
-                        stored.air(), bar(stored.air(), volume)).withStyle(ChatFormatting.GRAY));
-            } else {
-                tooltip.add(Component.translatable("tooltip.workingmedium.stored_air_amount", stored.air())
-                        .withStyle(ChatFormatting.GRAY));
+            String key = StoredPneumatics.storedAirTooltipKey(stored.air(), volume > 0);
+            if (key != null) {
+                if (volume > 0) {
+                    tooltip.add(Component.translatable(key,
+                            StoredPneumatics.displayAmount(stored.air()),
+                            StoredPneumatics.displayBar(stored.air(), volume)).withStyle(ChatFormatting.GRAY));
+                } else {
+                    tooltip.add(Component.translatable(key, StoredPneumatics.displayAmount(stored.air()))
+                            .withStyle(ChatFormatting.GRAY));
+                }
             }
         }
         if (Math.abs(stored.temperature() - StoredPneumatics.AMBIENT_KELVIN) >= 0.5) {
@@ -48,12 +57,6 @@ public class AirBlockItem extends BlockItem {
         }
     }
 
-    private static String bar(int air, int volume) {
-        if (volume <= 0) {
-            return "0.00";
-        }
-        return String.format("%.2f", air / (float) volume);
-    }
 
     private static int volumeOf(Block block) {
         if (block instanceof GradeTubeBlock) {

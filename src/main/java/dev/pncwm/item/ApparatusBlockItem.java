@@ -45,9 +45,10 @@ public class ApparatusBlockItem extends BlockItem {
         if (pneumatics == null || pneumatics.isEmpty()) {
             return;
         }
-        if (pneumatics.air() > 0) {
+        String airKey = StoredPneumatics.controllerAirTooltipKey(pneumatics.air());
+        if (airKey != null) {
             // Do not convert air into a pressure: the unformed brick does not yet have the hull volume.
-            tooltip.add(Component.translatable("tooltip.workingmedium.stored_controller_air", pneumatics.air())
+            tooltip.add(Component.translatable(airKey, StoredPneumatics.displayAmount(pneumatics.air()))
                     .withStyle(ChatFormatting.GRAY));
         }
         if (Math.abs(pneumatics.temperature() - StoredPneumatics.AMBIENT_KELVIN) >= 0.5) {

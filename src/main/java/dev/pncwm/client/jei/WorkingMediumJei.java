@@ -165,6 +165,8 @@ public class WorkingMediumJei implements IModPlugin {
                 Component.translatable("jei.workingmedium.info.redstone_pause"));
         registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMItems.STONE_DUST.get()), VanillaTypes.ITEM_STACK,
                 Component.translatable("jei.workingmedium.info.stone_dust"));
+        registration.addIngredientInfo(new ItemStack(dev.pncwm.registry.WMBlocks.CONTROLLERS.get(ApparatusKind.WASHER_TOWER).get()), VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.workingmedium.info.washer"));
     }
 
     /**

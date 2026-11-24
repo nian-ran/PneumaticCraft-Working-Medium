@@ -196,7 +196,8 @@ class ByproductRecipesTest {
                 "jei.workingmedium.info.scald_fluid", "jei.workingmedium.info.flammable_fluid",
                 "jei.workingmedium.info.oxidizer_fluid", "jei.workingmedium.info.probe",
                 "tooltip.workingmedium.probe", "message.workingmedium.rotate_formed",
-                "message.workingmedium.probe_unbound"}) {
+                "message.workingmedium.probe_unbound",
+                "tooltip.workingmedium.pending_air_short", "tooltip.workingmedium.pending_vacuum_short"}) {
             assertTrue(en.contains(key), key);
         }
     }
@@ -272,4 +273,44 @@ class ByproductRecipesTest {
         assertRecipe("wash_mycelium.json", "washer_tower", "minecraft:mycelium", "minecraft:mud");
     }
 
+
+    @Test
+    void leftoverFamilyRecipesFrom02612AreShipped() throws Exception {
+        assertRecipe("wash_mossy_cobblestone.json", "washer_tower", "minecraft:mossy_cobblestone",
+                "minecraft:cobblestone", "minecraft:vine");
+        assertRecipe("wash_mossy_stone_bricks.json", "washer_tower", "minecraft:mossy_stone_bricks",
+                "minecraft:stone_bricks", "minecraft:vine");
+        assertRecipe("wash_crimson_nylium.json", "washer_tower", "minecraft:crimson_nylium", "minecraft:netherrack");
+        assertRecipe("wash_warped_nylium.json", "washer_tower", "minecraft:warped_nylium", "minecraft:netherrack");
+        assertRecipe("wash_waxed_copper_block.json", "washer_tower", "minecraft:waxed_copper_block", "minecraft:copper_block");
+        assertRecipe("wash_waxed_oxidized_copper.json", "washer_tower", "minecraft:waxed_oxidized_copper", "minecraft:oxidized_copper");
+        assertRecipe("wash_exposed_copper.json", "washer_tower", "minecraft:exposed_copper", "minecraft:copper_block");
+        assertRecipe("wash_weathered_cut_copper.json", "washer_tower", "minecraft:weathered_cut_copper", "minecraft:exposed_cut_copper");
+        assertRecipe("wash_oxidized_chiseled_copper.json", "washer_tower", "minecraft:oxidized_chiseled_copper", "minecraft:weathered_chiseled_copper");
+        assertRecipe("wash_waxed_exposed_copper_grate.json", "washer_tower", "minecraft:waxed_exposed_copper_grate", "minecraft:exposed_copper_grate");
+        assertRecipe("wash_oxidized_copper_bulb.json", "washer_tower", "minecraft:oxidized_copper_bulb", "minecraft:weathered_copper_bulb");
+        assertRecipe("wash_waxed_copper_door.json", "washer_tower", "minecraft:waxed_copper_door", "minecraft:copper_door");
+        assertRecipe("wash_exposed_copper_trapdoor.json", "washer_tower", "minecraft:exposed_copper_trapdoor", "minecraft:copper_trapdoor");
+        assertRecipe("crush_sea_lantern.json", "impact_crusher", "minecraft:sea_lantern",
+                "minecraft:prismarine_crystal", "\"count\": 5", "minecraft:prismarine_shard", "\"count\": 4");
+        assertRecipe("crush_purpur_block.json", "impact_crusher", "minecraft:purpur_block",
+                "minecraft:popped_chorus_fruit", "\"count\": 4");
+        assertRecipe("crush_purpur_pillar.json", "impact_crusher", "minecraft:purpur_pillar",
+                "minecraft:popped_chorus_fruit", "\"count\": 4");
+        assertRecipe("crush_magma_block.json", "impact_crusher", "minecraft:magma_block",
+                "minecraft:magma_cream", "\"count\": 4");
+        assertRecipe("crush_packed_mud.json", "impact_crusher", "minecraft:packed_mud", "minecraft:mud");
+        assertRecipe("crush_mud_bricks.json", "impact_crusher", "minecraft:mud_bricks",
+                "minecraft:packed_mud", "\"count\": 4");
+    }
+
+    @Test
+    void leftoverFamilyRecipesFrom02613AreShipped() throws Exception {
+        assertRecipe("crush_raw_iron_block.json", "impact_crusher", "minecraft:raw_iron_block",
+                "workingmedium:crushed_iron", "\"count\": 9");
+        assertRecipe("crush_raw_copper_block.json", "impact_crusher", "minecraft:raw_copper_block",
+                "workingmedium:crushed_copper", "\"count\": 9");
+        assertRecipe("crush_raw_gold_block.json", "impact_crusher", "minecraft:raw_gold_block",
+                "workingmedium:crushed_gold", "\"count\": 9");
+    }
 }
