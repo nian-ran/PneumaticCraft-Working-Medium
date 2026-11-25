@@ -313,4 +313,47 @@ class ByproductRecipesTest {
         assertRecipe("crush_raw_gold_block.json", "impact_crusher", "minecraft:raw_gold_block",
                 "workingmedium:crushed_gold", "\"count\": 9");
     }
+
+    @Test
+    void leftoverFamilyRecipesFrom02614AreShipped() throws Exception {
+        String[][] copper = {
+                {"wash_waxed_cut_copper_stairs.json", "minecraft:waxed_cut_copper_stairs", "minecraft:cut_copper_stairs"},
+                {"wash_waxed_cut_copper_slab.json", "minecraft:waxed_cut_copper_slab", "minecraft:cut_copper_slab"},
+                {"wash_waxed_exposed_cut_copper_stairs.json", "minecraft:waxed_exposed_cut_copper_stairs", "minecraft:exposed_cut_copper_stairs"},
+                {"wash_waxed_exposed_cut_copper_slab.json", "minecraft:waxed_exposed_cut_copper_slab", "minecraft:exposed_cut_copper_slab"},
+                {"wash_waxed_weathered_cut_copper_stairs.json", "minecraft:waxed_weathered_cut_copper_stairs", "minecraft:weathered_cut_copper_stairs"},
+                {"wash_waxed_weathered_cut_copper_slab.json", "minecraft:waxed_weathered_cut_copper_slab", "minecraft:weathered_cut_copper_slab"},
+                {"wash_waxed_oxidized_cut_copper_stairs.json", "minecraft:waxed_oxidized_cut_copper_stairs", "minecraft:oxidized_cut_copper_stairs"},
+                {"wash_waxed_oxidized_cut_copper_slab.json", "minecraft:waxed_oxidized_cut_copper_slab", "minecraft:oxidized_cut_copper_slab"},
+                {"wash_exposed_cut_copper_stairs.json", "minecraft:exposed_cut_copper_stairs", "minecraft:cut_copper_stairs"},
+                {"wash_exposed_cut_copper_slab.json", "minecraft:exposed_cut_copper_slab", "minecraft:cut_copper_slab"},
+                {"wash_weathered_cut_copper_stairs.json", "minecraft:weathered_cut_copper_stairs", "minecraft:exposed_cut_copper_stairs"},
+                {"wash_weathered_cut_copper_slab.json", "minecraft:weathered_cut_copper_slab", "minecraft:exposed_cut_copper_slab"},
+                {"wash_oxidized_cut_copper_stairs.json", "minecraft:oxidized_cut_copper_stairs", "minecraft:weathered_cut_copper_stairs"},
+                {"wash_oxidized_cut_copper_slab.json", "minecraft:oxidized_cut_copper_slab", "minecraft:weathered_cut_copper_slab"}
+        };
+        for (String[] row : copper) {
+            assertRecipe(row[0], "washer_tower", row[1], row[2]);
+        }
+        assertRecipe("wash_mossy_cobblestone_stairs.json", "washer_tower", "minecraft:mossy_cobblestone_stairs",
+                "minecraft:cobblestone_stairs", "minecraft:vine");
+        assertRecipe("wash_mossy_cobblestone_slab.json", "washer_tower", "minecraft:mossy_cobblestone_slab",
+                "minecraft:cobblestone_slab", "minecraft:vine");
+        assertRecipe("wash_mossy_cobblestone_wall.json", "washer_tower", "minecraft:mossy_cobblestone_wall",
+                "minecraft:cobblestone_wall", "minecraft:vine");
+        assertRecipe("wash_mossy_stone_brick_stairs.json", "washer_tower", "minecraft:mossy_stone_brick_stairs",
+                "minecraft:stone_brick_stairs", "minecraft:vine");
+        assertRecipe("wash_mossy_stone_brick_slab.json", "washer_tower", "minecraft:mossy_stone_brick_slab",
+                "minecraft:stone_brick_slab", "minecraft:vine");
+        assertRecipe("wash_mossy_stone_brick_wall.json", "washer_tower", "minecraft:mossy_stone_brick_wall",
+                "minecraft:stone_brick_wall", "minecraft:vine");
+    }
+
+    @Test
+    void leftoverFamilyRecipesFrom02615AreShipped() throws Exception {
+        assertRecipe("crush_honeycomb_block.json", "impact_crusher", "minecraft:honeycomb_block",
+                "minecraft:honeycomb", "\"count\": 4");
+        assertRecipe("kiln_chorus_fruit.json", "residue_kiln", "minecraft:chorus_fruit",
+                "\"item_counts\": [2]", "minecraft:popped_chorus_fruit", "\"count\": 3");
+    }
 }

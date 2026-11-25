@@ -11,10 +11,15 @@ class TuningTest {
     @Test
     void pressureSignalSpansZeroToFifteen() {
         assertEquals(0, Tuning.pressureSignal(0f, 20f));
+        assertEquals(0, Tuning.pressureSignal(-0.005f, 20f));
         assertEquals(1, Tuning.pressureSignal(0.1f, 20f));
+        assertEquals(1, Tuning.pressureSignal(-0.1f, 20f));
         assertEquals(8, Tuning.pressureSignal(10f, 20f));
+        assertEquals(8, Tuning.pressureSignal(-10f, 20f));
         assertEquals(15, Tuning.pressureSignal(20f, 20f));
+        assertEquals(15, Tuning.pressureSignal(-20f, 20f));
         assertEquals(15, Tuning.pressureSignal(30f, 20f));
+        assertEquals(15, Tuning.pressureSignal(-30f, 20f));
         assertEquals(0, Tuning.pressureSignal(5f, 0f));
     }
 

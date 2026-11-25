@@ -60,7 +60,7 @@ public class GaugeBlockEntity extends AirMachine {
         }
     }
 
-    /** Comparator output: 0 when empty, 15 at (or above) the safe pressure of the grade being judged. */
+    /** Comparator output: 0 when empty, 15 at (or above) the judged grade's safe pressure, or a vacuum of the same depth. */
     public int signal() {
         return signal;
     }

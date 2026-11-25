@@ -14,12 +14,16 @@ public final class Tuning {
     private Tuning() {
     }
 
-    /** Comparator strength 0-15 for a pressure judged against a safe pressure. Any positive pressure gives at least 1. */
+    /**
+     * Comparator strength 0-15 for a pressure judged against a safe pressure.
+     * Vacuum uses the same scale as an equal positive pressure, so a vacuum line is not treated as empty.
+     * Any non-zero air or vacuum gives at least 1.
+     */
     public static int pressureSignal(float pressure, float safeBar) {
-        if (pressure <= 0.01f || safeBar <= 0f) {
+        if (Math.abs(pressure) <= 0.01f || safeBar <= 0f) {
             return 0;
         }
-        float ratio = Math.min(1f, pressure / safeBar);
+        float ratio = Math.min(1f, Math.abs(pressure) / safeBar);
         return Math.min(15, 1 + (int) Math.floor(ratio * 14f));
     }
 
