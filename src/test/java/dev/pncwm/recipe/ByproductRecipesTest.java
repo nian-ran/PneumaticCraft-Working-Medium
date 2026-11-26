@@ -356,4 +356,78 @@ class ByproductRecipesTest {
         assertRecipe("kiln_chorus_fruit.json", "residue_kiln", "minecraft:chorus_fruit",
                 "\"item_counts\": [2]", "minecraft:popped_chorus_fruit", "\"count\": 3");
     }
+
+    @Test
+    void leftoverFamilyRecipesFrom02616AreShipped() throws Exception {
+        assertRecipe("crush_amethyst_cluster.json", "impact_crusher", "minecraft:amethyst_cluster",
+                "minecraft:amethyst_shard", "\"count\": 4");
+        assertRecipe("crush_large_amethyst_bud.json", "impact_crusher", "minecraft:large_amethyst_bud",
+                "minecraft:amethyst_shard", "\"count\": 2");
+        assertRecipe("crush_medium_amethyst_bud.json", "impact_crusher", "minecraft:medium_amethyst_bud",
+                "minecraft:amethyst_shard", "\"count\": 1");
+        assertRecipe("crush_small_amethyst_bud.json", "impact_crusher", "minecraft:small_amethyst_bud",
+                "minecraft:amethyst_shard", "\"count\": 1");
+        assertRecipe("crush_cobweb.json", "impact_crusher", "minecraft:cobweb",
+                "minecraft:string", "\"count\": 2");
+        assertRecipe("kiln_kelp.json", "residue_kiln", "minecraft:kelp",
+                "\"item_counts\": [2]", "minecraft:dried_kelp", "\"count\": 3");
+        assertRecipe("kiln_cactus.json", "residue_kiln", "minecraft:cactus",
+                "\"item_counts\": [2]", "minecraft:green_dye", "\"count\": 3");
+        assertRecipe("kiln_sea_pickle.json", "residue_kiln", "minecraft:sea_pickle",
+                "\"item_counts\": [2]", "minecraft:lime_dye", "\"count\": 3");
+        String[] colors = {
+                "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+                "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"
+        };
+        for (String color : colors) {
+            assertRecipe("wash_wool_" + color + ".json", "washer_tower",
+                    "minecraft:" + color + "_wool", "minecraft:white_wool");
+            assertRecipe("wash_carpet_" + color + ".json", "washer_tower",
+                    "minecraft:" + color + "_carpet", "minecraft:white_carpet");
+        }
+    }
+
+    @Test
+    void leftoverFamilyRecipesFrom02617AreShipped() throws Exception {
+        assertTrue(Files.notExists(recipe("cycle.json")), "stale diesel duplicate cycle.json must be gone");
+        assertRecipe("cycle_diesel.json", "cycle_island", "pneumaticcraft:diesel",
+                "workingmedium:flue_gas", "\"amount\": 90");
+        int dieselOnly = 0;
+        try (var paths = Files.list(Path.of("src/main/resources/data/workingmedium/recipe"))) {
+            for (Path path : paths.toList()) {
+                if (!path.getFileName().toString().endsWith(".json")) {
+                    continue;
+                }
+                String body = Files.readString(path);
+                if (!body.contains("\"machine\": \"cycle_island\"") || !body.contains("pneumaticcraft:diesel")) {
+                    continue;
+                }
+                if (body.contains("workingmedium:oxygen")) {
+                    continue;
+                }
+                dieselOnly++;
+            }
+        }
+        assertEquals(1, dieselOnly);
+
+        String[] colors = {
+                "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+                "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"
+        };
+        for (String color : colors) {
+            assertRecipe("wash_bed_" + color + ".json", "washer_tower",
+                    "minecraft:" + color + "_bed", "minecraft:white_bed");
+            assertRecipe("wash_candle_" + color + ".json", "washer_tower",
+                    "minecraft:" + color + "_candle", "minecraft:candle");
+        }
+        assertRecipe("wash_candle_white.json", "washer_tower",
+                "minecraft:white_candle", "minecraft:candle");
+
+        String zhStone = Files.readString(Path.of("src/main/resources/assets/workingmedium/lang/zh_cn.json"));
+        String enStone = Files.readString(Path.of("src/main/resources/assets/workingmedium/lang/en_us.json"));
+        assertTrue(zhStone.contains("一整块粗铁、粗铜或粗金能打成九份破碎矿"), zhStone);
+        assertTrue(enStone.contains("A raw iron, copper or gold block crushes into nine crushed ore"), enStone);
+        assertTrue(zhStone.contains("\"manual.workingmedium.page.37\""), zhStone);
+        assertTrue(enStone.contains("\"manual.workingmedium.page.37\""), enStone);
+    }
 }
